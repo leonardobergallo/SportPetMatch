@@ -1,0 +1,35 @@
+{
+  "name": "sportpetmatch",
+  "version": "1.0.0",
+  "description": "Aplicación móvil para unir personas y mascotas en eventos deportivos",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test"
+  },
+  "keywords": [
+    "mobile",
+    "pets",
+    "sports",
+    "events",
+    "matching",
+    "react-native",
+    "expo"
+  ],
+  "author": "SportPetMatch Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
