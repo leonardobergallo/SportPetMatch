@@ -1,0 +1,347 @@
+// Esquema de base de datos para SportPetMatch
+// Configurado para usar PostgreSQL con Neon
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuarios - Tabla principal de usuarios de la aplicación
+model Usuario {
+  id                String    @id @default(cuid()) // ID único del usuario
+  email             String    @unique // Email único para autenticación
+  password          String? // Contraseña hasheada (opcional si usa OAuth)
+  nombre            String // Nombre completo del usuario
+  fechaNacimiento   DateTime? // Fecha de nacimiento para validaciones
+  telefono          String? // Teléfono de contacto
+  avatar            String? // URL de la imagen de perfil
+  biografia         String? // Descripción personal del usuario
+  ubicacionLat      Float? // Latitud de ubicación actual
+  ubicacionLng      Float? // Longitud de ubicación actual
+  ubicacionCiudad   String? // Ciudad actual del usuario
+  ubicacionPais     String? // País actual del usuario
+  nivelDeporte      Int      @default(1) // Nivel deportivo (1-5)
+  intereses         String[] // Array de intereses deportivos
+  esPremium         Boolean  @default(false) // Estado de suscripción premium
+  isActive          Boolean  @default(true) // Usuario activo/inactivo
+  emailVerificado   Boolean  @default(false) // Email verificado
+  googleId          String?  @unique // ID de Google OAuth
+  createdAt         DateTime @default(now()) // Fecha de creación
+  updatedAt         DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Un usuario puede tener múltiples mascotas, eventos, etc.
+  mascotas          Mascota[]
+  eventosCreados    Evento[] @relation("EventoOrganizador")
+  eventosParticipantes EventoParticipante[]
+  matches           Match[] @relation("UsuarioMatches")
+  matchesRecibidos  Match[] @relation("MatchRecibido")
+  mensajes          Mensaje[]
+  notificaciones    Notificacion[]
+  logrosUsuarios    LogroUsuario[]
+  desafiosUsuarios  DesafioUsuario[]
+  compras           Compra[]
+  suscripciones     Suscripcion[]
+  reportesEnviados  Reporte[] @relation("ReporteEnviado")
+  reportesRecibidos Reporte[] @relation("ReporteRecibido")
+
+  @@map("usuarios") // Mapea a la tabla 'usuarios' en la base de datos
+}
+
+// Modelo de Mascotas - Perfiles de mascotas de los usuarios
+model Mascota {
+  id              String    @id @default(cuid()) // ID único de la mascota
+  nombre          String // Nombre de la mascota
+  tipo            String // Tipo de animal (perro, gato, etc.)
+  raza            String? // Raza específica
+  edad            Int? // Edad en años
+  peso            Float? // Peso en kg
+  altura          Float? // Altura en cm
+  color           String? // Color principal
+  genero          String? // Género (macho/hembra)
+  esterilizado    Boolean? // Si está esterilizado
+  vacunas         String[] // Array de vacunas aplicadas
+  alergias        String[] // Array de alergias conocidas
+  personalidad    String[] // Array de características de personalidad
+  nivelActividad  Int      @default(3) // Nivel de actividad (1-5)
+  intereses       String[] // Array de intereses deportivos
+  fotos           String[] // Array de URLs de fotos
+  salud           String? // Notas sobre salud
+  veterinario     String? // Información del veterinario
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Una mascota pertenece a un usuario
+  usuarioId       String // ID del usuario propietario
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("mascotas") // Mapea a la tabla 'mascotas' en la base de datos
+}
+
+// Modelo de Eventos - Eventos deportivos organizados por usuarios
+model Evento {
+  id              String    @id @default(cuid()) // ID único del evento
+  titulo          String // Título del evento
+  descripcion     String // Descripción detallada
+  tipo            String // Tipo de evento (carrera, caminata, etc.)
+  nivelDificultad Int      @default(1) // Nivel de dificultad (1-5)
+  fechaInicio     DateTime // Fecha y hora de inicio
+  fechaFin        DateTime? // Fecha y hora de fin (opcional)
+  duracion        Int? // Duración en minutos
+  maxParticipantes Int? // Límite de participantes
+  precio          Float? // Precio del evento (opcional)
+  esPetFriendly   Boolean  @default(true) // Si permite mascotas
+  esPremium       Boolean  @default(false) // Si es evento premium
+  isActive        Boolean  @default(true) // Evento activo/cancelado
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Un evento pertenece a un organizador y puede tener múltiples participantes
+  organizadorId   String // ID del usuario organizador
+  organizador     Usuario @relation("EventoOrganizador", fields: [organizadorId], references: [id])
+  participantes   EventoParticipante[]
+  ubicaciones     UbicacionEvento[]
+
+  @@map("eventos") // Mapea a la tabla 'eventos' en la base de datos
+}
+
+// Modelo de Participantes de Eventos - Relación muchos a muchos entre usuarios y eventos
+model EventoParticipante {
+  id              String    @id @default(cuid()) // ID único de la participación
+  fechaInscripcion DateTime @default(now()) // Fecha de inscripción
+  estado          String    @default("confirmado") // Estado: confirmado, cancelado, etc.
+  calificacion    Int? // Calificación del evento (1-5)
+  comentario      String? // Comentario sobre el evento
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Una participación conecta un usuario con un evento
+  usuarioId       String // ID del usuario participante
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  eventoId        String // ID del evento
+  evento          Evento @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, eventoId]) // Un usuario no puede inscribirse dos veces al mismo evento
+  @@map("eventos_participantes") // Mapea a la tabla 'eventos_participantes'
+}
+
+// Modelo de Matches - Conexiones entre usuarios
+model Match {
+  id              String    @id @default(cuid()) // ID único del match
+  estado          String    @default("pendiente") // Estado: pendiente, aceptado, rechazado
+  fechaMatch      DateTime  @default(now()) // Fecha del match
+  mensajeInicial  String? // Mensaje inicial del match
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Un match conecta dos usuarios
+  usuarioId       String // ID del usuario que inicia el match
+  usuario         Usuario @relation("UsuarioMatches", fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioMatchId  String // ID del usuario que recibe el match
+  usuarioMatch    Usuario @relation("MatchRecibido", fields: [usuarioMatchId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, usuarioMatchId]) // Un usuario no puede hacer match con el mismo usuario dos veces
+  @@map("matches") // Mapea a la tabla 'matches'
+}
+
+// Modelo de Mensajes - Chat entre usuarios que hicieron match
+model Mensaje {
+  id              String    @id @default(cuid()) // ID único del mensaje
+  contenido       String // Contenido del mensaje
+  tipo            String    @default("texto") // Tipo: texto, imagen, audio, etc.
+  urlArchivo      String? // URL del archivo adjunto
+  isLeido         Boolean   @default(false) // Si el mensaje fue leído
+  createdAt       DateTime @default(now()) // Fecha de creación
+
+  // Relaciones - Un mensaje pertenece a un usuario
+  usuarioId       String // ID del usuario que envía el mensaje
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("mensajes") // Mapea a la tabla 'mensajes'
+}
+
+// Modelo de Desafíos - Desafíos deportivos para gamificación
+model Desafio {
+  id              String    @id @default(cuid()) // ID único del desafío
+  titulo          String // Título del desafío
+  descripcion     String // Descripción del desafío
+  tipo            String // Tipo de desafío
+  objetivo        String // Objetivo a cumplir
+  puntos          Int      @default(10) // Puntos que otorga
+  duracion        Int? // Duración en días
+  isActive        Boolean  @default(true) // Desafío activo/inactivo
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Un desafío puede ser completado por múltiples usuarios
+  usuarios        DesafioUsuario[]
+
+  @@map("desafios") // Mapea a la tabla 'desafios'
+}
+
+// Modelo de Desafíos de Usuarios - Relación entre usuarios y desafíos completados
+model DesafioUsuario {
+  id              String    @id @default(cuid()) // ID único de la participación
+  fechaInicio     DateTime  @default(now()) // Fecha de inicio del desafío
+  fechaCompletado DateTime? // Fecha de completado (null si no está completado)
+  progreso        Int       @default(0) // Progreso actual (0-100)
+  puntosObtenidos Int       @default(0) // Puntos obtenidos
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Una participación conecta un usuario con un desafío
+  usuarioId       String // ID del usuario
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  desafioId       String // ID del desafío
+  desafio         Desafio @relation(fields: [desafioId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, desafioId]) // Un usuario no puede hacer el mismo desafío dos veces
+  @@map("desafios_usuarios") // Mapea a la tabla 'desafios_usuarios'
+}
+
+// Modelo de Logros - Logros desbloqueables
+model Logro {
+  id              String    @id @default(cuid()) // ID único del logro
+  nombre          String // Nombre del logro
+  descripcion     String // Descripción del logro
+  icono           String? // URL del icono
+  puntos          Int      @default(0) // Puntos que otorga
+  categoria       String? // Categoría del logro
+  isActive        Boolean  @default(true) // Logro activo/inactivo
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Un logro puede ser obtenido por múltiples usuarios
+  usuarios        LogroUsuario[]
+
+  @@map("logros") // Mapea a la tabla 'logros'
+}
+
+// Modelo de Logros de Usuarios - Relación entre usuarios y logros obtenidos
+model LogroUsuario {
+  id              String    @id @default(cuid()) // ID único de la obtención
+  fechaObtenido   DateTime  @default(now()) // Fecha de obtención del logro
+  createdAt       DateTime @default(now()) // Fecha de creación
+
+  // Relaciones - Una obtención conecta un usuario con un logro
+  usuarioId       String // ID del usuario
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  logroId         String // ID del logro
+  logro           Logro @relation(fields: [logroId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, logroId]) // Un usuario no puede obtener el mismo logro dos veces
+  @@map("logros_usuarios") // Mapea a la tabla 'logros_usuarios'
+}
+
+// Modelo de Notificaciones - Notificaciones para usuarios
+model Notificacion {
+  id              String    @id @default(cuid()) // ID único de la notificación
+  titulo          String // Título de la notificación
+  mensaje         String // Mensaje de la notificación
+  tipo            String // Tipo: match, evento, logro, etc.
+  isLeida         Boolean   @default(false) // Si la notificación fue leída
+  urlAccion       String? // URL de acción (opcional)
+  createdAt       DateTime @default(now()) // Fecha de creación
+
+  // Relaciones - Una notificación pertenece a un usuario
+  usuarioId       String // ID del usuario destinatario
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("notificaciones") // Mapea a la tabla 'notificaciones'
+}
+
+// Modelo de Ubicaciones - Ubicaciones de eventos
+model Ubicacion {
+  id              String    @id @default(cuid()) // ID único de la ubicación
+  nombre          String // Nombre de la ubicación
+  direccion       String // Dirección completa
+  ciudad          String // Ciudad
+  pais            String // País
+  latitud         Float // Latitud
+  longitud        Float // Longitud
+  tipo            String? // Tipo de ubicación (parque, gimnasio, etc.)
+  isActive        Boolean  @default(true) // Ubicación activa/inactiva
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Una ubicación puede ser usada por múltiples eventos
+  eventos         UbicacionEvento[]
+
+  @@map("ubicaciones") // Mapea a la tabla 'ubicaciones'
+}
+
+// Modelo de Ubicaciones de Eventos - Relación entre eventos y ubicaciones
+model UbicacionEvento {
+  id              String    @id @default(cuid()) // ID único de la relación
+  createdAt       DateTime @default(now()) // Fecha de creación
+
+  // Relaciones - Una relación conecta un evento con una ubicación
+  eventoId        String // ID del evento
+  evento          Evento @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  ubicacionId     String // ID de la ubicación
+  ubicacion       Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+
+  @@unique([eventoId, ubicacionId]) // Un evento no puede tener la misma ubicación dos veces
+  @@map("ubicaciones_eventos") // Mapea a la tabla 'ubicaciones_eventos'
+}
+
+// Modelo de Compras - Compras in-app y suscripciones
+model Compra {
+  id              String    @id @default(cuid()) // ID único de la compra
+  tipo            String // Tipo: suscripcion, monedas, evento, etc.
+  monto           Float // Monto de la compra
+  moneda          String    @default("ARS") // Moneda de la compra
+  estado          String    @default("pendiente") // Estado: pendiente, completada, cancelada
+  metodoPago      String? // Método de pago usado
+  transaccionId   String? // ID de la transacción externa
+  fechaCompra     DateTime  @default(now()) // Fecha de la compra
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Una compra pertenece a un usuario
+  usuarioId       String // ID del usuario que realizó la compra
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("compras") // Mapea a la tabla 'compras'
+}
+
+// Modelo de Suscripciones - Suscripciones premium de usuarios
+model Suscripcion {
+  id              String    @id @default(cuid()) // ID único de la suscripción
+  tipo            String // Tipo: mensual, anual, etc.
+  estado          String    @default("activa") // Estado: activa, cancelada, expirada
+  fechaInicio     DateTime  @default(now()) // Fecha de inicio
+  fechaFin        DateTime // Fecha de fin
+  precio          Float // Precio de la suscripción
+  moneda          String    @default("ARS") // Moneda
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Una suscripción pertenece a un usuario
+  usuarioId       String // ID del usuario
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("suscripciones") // Mapea a la tabla 'suscripciones'
+}
+
+// Modelo de Reportes - Reportes de usuarios o contenido
+model Reporte {
+  id              String    @id @default(cuid()) // ID único del reporte
+  tipo            String // Tipo: usuario, evento, mensaje, etc.
+  motivo          String // Motivo del reporte
+  descripcion     String? // Descripción adicional
+  estado          String    @default("pendiente") // Estado: pendiente, revisado, resuelto
+  createdAt       DateTime @default(now()) // Fecha de creación
+  updatedAt       DateTime @updatedAt // Fecha de última actualización
+
+  // Relaciones - Un reporte es enviado por un usuario y puede ser sobre otro usuario
+  usuarioId       String // ID del usuario que envía el reporte
+  usuario         Usuario @relation("ReporteEnviado", fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioReportadoId String? // ID del usuario reportado (opcional)
+  usuarioReportado Usuario? @relation("ReporteRecibido", fields: [usuarioReportadoId], references: [id], onDelete: Cascade)
+
+  @@map("reportes") // Mapea a la tabla 'reportes'
+}
