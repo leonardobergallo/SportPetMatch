@@ -4,7 +4,10 @@
     "strict": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "react-native",
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "moduleResolution": "node",
     "noEmit": true,
     "skipLibCheck": true,
@@ -15,23 +18,41 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"],
-      "@/componentes/*": ["src/componentes/*"],
-      "@/pantallas/*": ["src/pantallas/*"],
-      "@/navegacion/*": ["src/navegacion/*"],
-      "@/servicios/*": ["src/servicios/*"],
-      "@/almacen/*": ["src/almacen/*"],
-      "@/hooks/*": ["src/hooks/*"],
-      "@/utilidades/*": ["src/utilidades/*"],
-      "@/tipos/*": ["src/tipos/*"],
-      "@/constantes/*": ["src/constantes/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@/componentes/*": [
+        "src/componentes/*"
+      ],
+      "@/pantallas/*": [
+        "src/pantallas/*"
+      ],
+      "@/navegacion/*": [
+        "src/navegacion/*"
+      ],
+      "@/servicios/*": [
+        "src/servicios/*"
+      ],
+      "@/almacen/*": [
+        "src/almacen/*"
+      ],
+      "@/hooks/*": [
+        "src/hooks/*"
+      ],
+      "@/utilidades/*": [
+        "src/utilidades/*"
+      ],
+      "@/tipos/*": [
+        "src/tipos/*"
+      ],
+      "@/constantes/*": [
+        "src/constantes/*"
+      ]
     }
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.tsx"
   ],
   "exclude": [
     "node_modules"
