@@ -9,11 +9,8 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
-// Importar rutas (cuando las creemos)
-// import rutasUsuarios from './rutas/usuarios';
-// import rutasMascotas from './rutas/mascotas';
-// import rutasEventos from './rutas/eventos';
-// import rutasAuth from './rutas/autenticacion';
+// Importar rutas
+import rutasAuth from './rutas/auth';
 
 // Importar middleware personalizado
 // import { middlewareAutenticacion } from './middleware/autenticacion';
@@ -103,11 +100,8 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Configurar rutas de la API (cuando las creemos)
-// app.use('/api/auth', rutasAuth);
-// app.use('/api/usuarios', middlewareAutenticacion, rutasUsuarios);
-// app.use('/api/mascotas', middlewareAutenticacion, rutasMascotas);
-// app.use('/api/eventos', middlewareAutenticacion, rutasEventos);
+// Configurar rutas de la API
+app.use('/api/auth', rutasAuth);
 
 // Middleware para rutas no encontradas (404)
 app.use('*', (req, res) => {
