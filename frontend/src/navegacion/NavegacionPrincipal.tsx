@@ -181,7 +181,7 @@ function NavegadorTabs(): JSX.Element {
 function NavegadorPrincipal(): JSX.Element {
   // TODO: Aquí deberíamos verificar si el usuario está autenticado
   // Por ahora mostramos siempre la pantalla de login
-  const usuarioAutenticado = true;
+  const usuarioAutenticado = false;
 
   return (
     <Stack.Navigator

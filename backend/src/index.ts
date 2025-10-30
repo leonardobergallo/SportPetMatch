@@ -158,7 +158,7 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
   }
   
   // Error genérico del servidor
-  return res.status(500).json({
+  res.status(500).json({
     error: 'Error interno del servidor',
     mensaje: process.env.NODE_ENV === 'development' ? error.message : 'Algo salió mal',
     codigo: 'ERROR_SERVIDOR'

@@ -2,9 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "lib": [
-      "ES2020"
-    ],
+    "lib": ["ES2020"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -25,30 +23,14 @@
     "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@/controllers/*": [
-        "src/controllers/*"
-      ],
-      "@/models/*": [
-        "src/models/*"
-      ],
-      "@/routes/*": [
-        "src/routes/*"
-      ],
-      "@/middleware/*": [
-        "src/middleware/*"
-      ],
-      "@/services/*": [
-        "src/services/*"
-      ],
-      "@/utils/*": [
-        "src/utils/*"
-      ],
-      "@/types/*": [
-        "src/types/*"
-      ]
+      "@/*": ["src/*"],
+      "@/controllers/*": ["src/controllers/*"],
+      "@/models/*": ["src/models/*"],
+      "@/routes/*": ["src/routes/*"],
+      "@/middleware/*": ["src/middleware/*"],
+      "@/services/*": ["src/services/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/types/*": ["src/types/*"]
     },
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
@@ -62,6 +44,5 @@
     "node_modules",
     "dist",
     "tests"
-  ],
-  "extends": "expo/tsconfig.base"
+  ]
 }

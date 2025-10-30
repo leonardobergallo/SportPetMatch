@@ -2,9 +2,9 @@
   "name": "sportpetmatch",
   "version": "1.0.0",
   "description": "Aplicación móvil para unir personas y mascotas en eventos deportivos",
+  "main": "index.js",
   "scripts": {
-    "predev": "node scripts/clean-ports.js",
-    "dev": "npx --yes concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm start",
     "build": "npm run build:backend && npm run build:frontend",
@@ -26,15 +26,10 @@
   "author": "SportPetMatch Team",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "kill-port": "^2.0.1"
+    "concurrently": "^8.2.2"
   },
   "workspaces": [
     "backend",
     "frontend"
-  ],
-  "overrides": {
-    "expo-font": "11.10.3",
-    "expo-modules-core": "1.10.0"
-  }
+  ]
 }
