@@ -1,7 +1,7 @@
 // Pantalla de Inicio de SportPetMatch
 // Pantalla principal con feed de actividades y resumen
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -37,20 +37,46 @@ import { temaApp, espaciado, sombras } from '../constantes/tema';
  */
 export default function PantallaInicio(): JSX.Element {
   // Estado para controlar el refresh
-  const [refrescando, setRefrescando] = React.useState(false);
+  const [refrescando, setRefrescando] = useState(false);
+  
+  // Estado para datos del dashboard
+  const [datos, setDatos] = useState<any>(null);
+  const [cargando, setCargando] = useState(true);
+
+  // Cargar datos al iniciar la pantalla
+  useEffect(() => {
+    cargarDatos();
+  }, []);
+
+  /**
+   * Función para cargar datos del backend
+   */
+  const cargarDatos = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/dashboard');
+      const result = await response.json();
+      
+      if (result.success) {
+        setDatos(result.data);
+      }
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+    } finally {
+      setCargando(false);
+    }
+  };
 
   /**
    * Función para manejar el refresh de la pantalla
-   * Simula una carga de datos desde el servidor
+   * Carga datos desde el servidor
    */
   const manejarRefresh = React.useCallback(() => {
     setRefrescando(true);
     
-    // Simular carga de datos
-    setTimeout(() => {
+    // Cargar datos reales desde la API
+    cargarDatos().finally(() => {
       setRefrescando(false);
-      // Aquí se cargarían los datos reales desde la API
-    }, 2000);
+    });
   }, []);
 
   /**
@@ -107,17 +133,39 @@ export default function PantallaInicio(): JSX.Element {
             <View style={estilos.headerBienvenida}>
               <View style={estilos.textoBienvenida}>
                 <Text variant="headlineSmall" style={estilos.tituloBienvenida}>
-                  ¡Hola! 👋
+                  ¡Hola {datos?.usuario?.nombre || 'Usuario'}! 👋
                 </Text>
                 <Text variant="bodyLarge" style={estilos.subtituloBienvenida}>
                   ¿Listo para una nueva aventura deportiva con tu mascota?
                 </Text>
               </View>
-              <Avatar.Icon 
-                size={60} 
-                icon="paw" 
-                style={estilos.avatarBienvenida}
-              />
+              <View style={estilos.avatarContainer}>
+                <Avatar.Image 
+                  size={60} 
+                  source={{ uri: datos?.usuario?.avatar || 'https://via.placeholder.com/60' }}
+                  style={estilos.avatarBienvenida}
+                />
+                <Button
+                  mode="text"
+                  onPress={() => {
+                    Alert.alert(
+                      'Cerrar Sesión',
+                      '¿Estás seguro que quieres cerrar sesión?',
+                      [
+                        { text: 'Cancelar', style: 'cancel' },
+                        { text: 'Cerrar Sesión', onPress: () => {
+                          // TODO: Implementar logout
+                          console.log('Logout');
+                        }}
+                      ]
+                    );
+                  }}
+                  style={estilos.botonLogout}
+                  textColor="#fff"
+                >
+                  Salir
+                </Button>
+              </View>
             </View>
           </Card.Content>
         </Card>
@@ -161,45 +209,36 @@ export default function PantallaInicio(): JSX.Element {
                 compact
                 textStyle={estilos.textoChip}
               >
-                3 eventos
+                {datos?.eventosRecientes?.length || 0} eventos
               </Chip>
             </View>
             
-            {/* Lista de eventos (simulada) */}
+            {/* Lista de eventos del backend */}
             <View style={estilos.listaEventos}>
-              <View style={estilos.itemEvento}>
-                <View style={estilos.infoEvento}>
-                  <Text variant="titleSmall">Caminata Matutina</Text>
-                  <Text variant="bodySmall" style={estilos.textoSecundario}>
-                    Parque Central • Mañana 8:00 AM
-                  </Text>
+              {datos?.eventosRecientes?.map((evento: any, index: number) => (
+                <View key={evento.id || index}>
+                  <View style={estilos.itemEvento}>
+                    <View style={estilos.infoEvento}>
+                      <Text variant="titleSmall">{evento.nombre || evento.titulo}</Text>
+                      <Text variant="bodySmall" style={estilos.textoSecundario}>
+                        📍 {evento.ubicacion || 'Por definir'} • 👥 {evento.participantes} participantes
+                      </Text>
+                    </View>
+                    <Chip 
+                      mode="outlined" 
+                      compact
+                      style={estilos.chipTipo}
+                    >
+                      Evento
+                    </Chip>
+                  </View>
+                  {index < (datos?.eventosRecientes?.length - 1) && <Divider style={estilos.divisor} />}
                 </View>
-                <Chip 
-                  mode="outlined" 
-                  compact
-                  style={estilos.chipTipo}
-                >
-                  Caminata
-                </Chip>
-              </View>
-              
-              <Divider style={estilos.divisor} />
-              
-              <View style={estilos.itemEvento}>
-                <View style={estilos.infoEvento}>
-                  <Text variant="titleSmall">Carrera Canina</Text>
-                  <Text variant="bodySmall" style={estilos.textoSecundario}>
-                    Estadio Municipal • Sábado 10:00 AM
-                  </Text>
-                </View>
-                <Chip 
-                  mode="outlined" 
-                  compact
-                  style={estilos.chipTipo}
-                >
-                  Carrera
-                </Chip>
-              </View>
+              )) || (
+                <Text variant="bodyMedium" style={estilos.textoSecundario}>
+                  No hay eventos próximos
+                </Text>
+              )}
             </View>
           </Card.Content>
         </Card>
@@ -343,6 +382,12 @@ const estilos = StyleSheet.create({
   },
   avatarBienvenida: {
     backgroundColor: temaApp.colors.primary,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+  },
+  botonLogout: {
+    marginTop: 4,
   },
   tituloSeccion: {
     fontWeight: '600',

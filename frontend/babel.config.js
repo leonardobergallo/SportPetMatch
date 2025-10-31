@@ -10,9 +10,6 @@ module.exports = function (api) {
       'babel-preset-expo',
     ],
     plugins: [
-      // Plugin para React Native Reanimated (debe ser el último)
-      'react-native-reanimated/plugin',
-      
       // Plugin para importaciones con alias
       [
         'module-resolver',
@@ -32,6 +29,9 @@ module.exports = function (api) {
           },
         },
       ],
+      
+      // Plugin para React Native Reanimated (debe ser el último)
+      'react-native-reanimated/plugin',
     ],
   };
 };

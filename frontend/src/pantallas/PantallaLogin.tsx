@@ -2,6 +2,8 @@
 // Pantalla de autenticación para usuarios existentes
 
 import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { 
   View, 
   StyleSheet, 
@@ -20,8 +22,12 @@ import {
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 
-// Importar tema y constantes
+// Importar tema, contexto y constantes
 import { temaApp, espaciado, sombras } from '../constantes/tema';
+import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
+import { useAuth, Usuario } from '../contextos/ContextoAuth';
+
+type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 /**
  * Pantalla de Login - Autenticación de usuarios
@@ -35,6 +41,9 @@ import { temaApp, espaciado, sombras } from '../constantes/tema';
  * @returns JSX.Element - La pantalla de login renderizada
  */
 export default function PantallaLogin(): JSX.Element {
+  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const { iniciarSesion } = useAuth();
+  
   // Estados para el formulario
   const [email, setEmail] = useState('');
   const [contraseña, setContraseña] = useState('');
@@ -61,21 +70,68 @@ export default function PantallaLogin(): JSX.Element {
     setCargando(true);
 
     try {
-      // TODO: Implementar llamada real a la API
-      // Simular llamada a la API
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Intentar llamada real a la API de login
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password: contraseña,
+        }),
+      });
+
+      const resultado = await response.json();
       
-      // Simular respuesta exitosa
-      Alert.alert(
-        '¡Bienvenido!', 
-        'Has iniciado sesión correctamente',
-        [{ text: 'Continuar', onPress: () => {
-          // TODO: Navegar a la pantalla principal
-          console.log('Navegar a pantalla principal');
-        }}]
-      );
+      if (resultado.success) {
+        // Login exitoso con la API
+        const usuario: Usuario = resultado.data.usuario;
+        const token = resultado.data.token;
+        
+        await iniciarSesion(usuario, token);
+        
+        Alert.alert(
+          '¡Bienvenido!', 
+          `Hola ${usuario.nombre}!`,
+          [{ text: 'Continuar' }]
+        );
+      } else {
+        Alert.alert('Error', resultado.message || 'Credenciales incorrectas');
+      }
     } catch (error) {
-      Alert.alert('Error', 'No se pudo iniciar sesión. Intenta de nuevo.');
+      // Si no se puede conectar con el servidor, usar datos mock
+      console.log('API no disponible, usando datos mock');
+      
+      // Verificar credenciales mock
+      if (email === 'test@example.com' && contraseña === 'password') {
+        // Usuario mock para pruebas
+        const usuarioMock: Usuario = {
+          id: '1',
+          nombre: 'Usuario',
+          apellido: 'Prueba',
+          email: 'test@example.com',
+          fechaNacimiento: '1990-01-01',
+          genero: 'otro',
+          ciudad: 'Buenos Aires',
+          provincia: 'Buenos Aires',
+          pais: 'Argentina',
+          biografia: 'Usuario de prueba para SportPetMatch',
+          deportesFavoritos: ['running', 'football'],
+          nivelActividad: 'intermedio',
+          disponibilidadSemanal: ['lunes', 'miercoles', 'viernes']
+        };
+        
+        await iniciarSesion(usuarioMock, 'mock-token-123');
+        
+        Alert.alert(
+          '¡Bienvenido!', 
+          `Hola ${usuarioMock.nombre}! (Modo demo)`,
+          [{ text: 'Continuar' }]
+        );
+      } else {
+        Alert.alert('Error', 'Credenciales incorrectas\n\nPara probar usa:\nEmail: test@example.com\nContraseña: password');
+      }
     } finally {
       setCargando(false);
     }

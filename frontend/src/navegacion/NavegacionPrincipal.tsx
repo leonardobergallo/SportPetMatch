@@ -7,18 +7,23 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { MaterialIcons } from '@expo/vector-icons';
+import { ActivityIndicator, View } from 'react-native';
 
-// Importar pantallas (cuando las creemos)
+// Importar pantallas
 import PantallaInicio from '../pantallas/PantallaInicio';
 import PantallaEventos from '../pantallas/PantallaEventos';
 import PantallaMascotas from '../pantallas/PantallaMascotas';
 import PantallaMatches from '../pantallas/PantallaMatches';
+import PantallaMatching from '../pantallas/PantallaMatching';
 import PantallaPerfil from '../pantallas/PantallaPerfil';
 import PantallaLogin from '../pantallas/PantallaLogin';
 import PantallaRegistro from '../pantallas/PantallaRegistro';
+import PantallaDashboard from '../pantallas/PantallaDashboard';
+import PantallaMapaWebCompatible from '../pantallas/PantallaMapaWebCompatible';
 
-// Importar tema
+// Importar tema y contexto de autenticación
 import { temaApp } from '../constantes/tema';
+import { useAuth } from '../contextos/ContextoAuth';
 
 // Tipos para la navegación
 export type RootStackParamList = {
@@ -43,7 +48,10 @@ export type RootStackParamList = {
 };
 
 export type TabParamList = {
+  Dashboard: undefined;
   Inicio: undefined;
+  Matching: undefined;
+  Mapa: undefined;
   Eventos: undefined;
   Mascotas: undefined;
   Matches: undefined;
@@ -69,17 +77,26 @@ function NavegadorTabs(): JSX.Element {
 
           // Asignar iconos según la ruta
           switch (route.name) {
+            case 'Dashboard':
+              iconName = focused ? 'dashboard' : 'dashboard';
+              break;
             case 'Inicio':
-              iconName = focused ? 'home' : 'home-outlined';
+              iconName = focused ? 'home' : 'home';
+              break;
+            case 'Matching':
+              iconName = focused ? 'favorite' : 'favorite-border';
+              break;
+            case 'Mapa':
+              iconName = focused ? 'map' : 'map';
               break;
             case 'Eventos':
-              iconName = focused ? 'event' : 'event-outlined';
+              iconName = focused ? 'event' : 'event';
               break;
             case 'Mascotas':
-              iconName = focused ? 'pets' : 'pets-outlined';
+              iconName = focused ? 'pets' : 'pets';
               break;
             case 'Matches':
-              iconName = focused ? 'favorite' : 'favorite-outline';
+              iconName = focused ? 'message' : 'message';
               break;
             case 'Perfil':
               iconName = focused ? 'person' : 'person-outline';
@@ -131,6 +148,26 @@ function NavegadorTabs(): JSX.Element {
         }}
       />
       
+      {/* Tab de Matching - Pantalla estilo Tinder para encontrar conexiones */}
+      <Tab.Screen 
+        name="Matching" 
+        component={PantallaMatching}
+        options={{
+          title: 'Matching',
+          headerTitle: 'Encuentra Conexiones',
+        }}
+      />
+      
+      {/* Tab de Mapa - Mapa con usuarios y eventos cercanos */}
+      <Tab.Screen 
+        name="Mapa" 
+        component={PantallaMapaWebCompatible}
+        options={{
+          title: 'Mapa',
+          headerTitle: 'Mapa de SportPetMatch',
+        }}
+      />
+      
       {/* Tab de Eventos - Lista de eventos deportivos */}
       <Tab.Screen 
         name="Eventos" 
@@ -156,8 +193,8 @@ function NavegadorTabs(): JSX.Element {
         name="Matches" 
         component={PantallaMatches}
         options={{
-          title: 'Matches',
-          headerTitle: 'Conexiones',
+          title: 'Chats',
+          headerTitle: 'Conversaciones',
         }}
       />
       
@@ -179,9 +216,16 @@ function NavegadorTabs(): JSX.Element {
  * Maneja la navegación entre pantallas de autenticación y la app principal
  */
 function NavegadorPrincipal(): JSX.Element {
-  // TODO: Aquí deberíamos verificar si el usuario está autenticado
-  // Por ahora mostramos siempre la pantalla de login
-  const usuarioAutenticado = false;
+  const { estaAutenticado, cargandoAuth } = useAuth();
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (cargandoAuth) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: temaApp.colors.background }}>
+        <ActivityIndicator size="large" color={temaApp.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <Stack.Navigator
@@ -203,7 +247,7 @@ function NavegadorPrincipal(): JSX.Element {
         },
       }}
     >
-      {usuarioAutenticado ? (
+      {estaAutenticado ? (
         // Usuario autenticado - mostrar app principal
         <>
           <Stack.Screen 

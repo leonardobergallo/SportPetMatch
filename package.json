@@ -2,7 +2,7 @@
   "name": "sportpetmatch",
   "version": "1.0.0",
   "description": "Aplicación móvil para unir personas y mascotas en eventos deportivos",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
@@ -31,5 +31,9 @@
   "workspaces": [
     "backend",
     "frontend"
-  ]
+  ],
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.2"
+  }
 }
