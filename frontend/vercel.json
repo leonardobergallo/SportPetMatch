@@ -15,9 +15,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "buildCommand": "npx expo export --platform web",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "framework": "expo"
+  ]
 }
