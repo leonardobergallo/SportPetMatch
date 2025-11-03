@@ -21,6 +21,8 @@ export interface Usuario {
   deportesFavoritos: string[];
   nivelActividad: string;
   disponibilidadSemanal: string[];
+  tipoUsuario?: string;
+  onboardingCompletado?: boolean;
 }
 
 // Tipo para el contexto de autenticación

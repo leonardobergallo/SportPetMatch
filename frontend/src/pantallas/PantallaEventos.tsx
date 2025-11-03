@@ -1,20 +1,273 @@
 // Pantalla de Eventos de SportPetMatch
-// Lista de eventos deportivos disponibles
+// Adaptada con nuevos componentes y servicios API
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, Card } from 'react-native-paper';
-import { temaApp, espaciado, sombras } from '../constantes/tema';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { Text } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
+// Importar componentes UI
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+
+// Importar servicios y tema
+import { obtenerEventos, Evento, participarEnEvento } from '@/servicios/servicioEventos';
+import { temaApp, espaciado, sombras } from '@/constantes/tema';
+import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
+import { useAuth } from '@/contextos/ContextoAuth';
+
+type EventosScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
+// Imágenes de eventos
+const imagenesEventos: Record<string, any> = {
+  futbol: require('../../assets/soccer-tournament-park.jpg'),
+  carrera: require('../../assets/5k-running-race-beach.jpg'),
+  tenis: require('../../assets/tennis-group-game.jpg'),
+  default: require('../../assets/placeholder.jpg'),
+};
+
+/**
+ * Pantalla de Eventos - Lista de eventos deportivos
+ */
 export default function PantallaEventos(): JSX.Element {
+  const navigation = useNavigation<EventosScreenNavigationProp>();
+  const { estaAutenticado } = useAuth();
+
+  const [eventos, setEventos] = useState<Evento[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [refrescando, setRefrescando] = useState(false);
+  const [filtroTipo, setFiltroTipo] = useState<string | null>(null);
+
+  useEffect(() => {
+    cargarEventos();
+  }, [filtroTipo]);
+
+  /**
+   * Cargar eventos desde la API
+   */
+  const cargarEventos = async () => {
+    try {
+      setCargando(true);
+      const datosEventos = await obtenerEventos(
+        filtroTipo ? { tipo: filtroTipo } : undefined
+      );
+      setEventos(datosEventos);
+    } catch (error: any) {
+      console.error('Error cargando eventos:', error);
+    } finally {
+      setCargando(false);
+      setRefrescando(false);
+    }
+  };
+
+  /**
+   * Manejar refresh
+   */
+  const manejarRefresh = () => {
+    setRefrescando(true);
+    cargarEventos();
+  };
+
+  /**
+   * Obtener imagen del evento según su tipo
+   */
+  const obtenerImagenEvento = (tipo: string): any => {
+    const tipoLower = tipo.toLowerCase();
+    if (tipoLower.includes('futbol') || tipoLower.includes('fútbol')) {
+      return imagenesEventos.futbol;
+    }
+    if (tipoLower.includes('carrera') || tipoLower.includes('running')) {
+      return imagenesEventos.carrera;
+    }
+    if (tipoLower.includes('tenis')) {
+      return imagenesEventos.tenis;
+    }
+    return imagenesEventos.default;
+  };
+
+  /**
+   * Formatear fecha
+   */
+  const formatearFecha = (fecha: string): string => {
+    const date = new Date(fecha);
+    const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return `${dias[date.getDay()]}, ${date.getDate()} ${meses[date.getMonth()]}`;
+  };
+
+  /**
+   * Manejar participación en evento
+   */
+  const manejarParticipar = async (eventoId: string) => {
+    if (!estaAutenticado) {
+      Alert.alert('Autenticación requerida', 'Debes iniciar sesión para participar en eventos');
+      return;
+    }
+
+    try {
+      await participarEnEvento(eventoId);
+      Alert.alert('¡Éxito!', 'Te has unido al evento exitosamente');
+      cargarEventos(); // Recargar eventos
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'No se pudo unir al evento');
+    }
+  };
+
+  /**
+   * Navegar a detalle de evento
+   */
+  const navegarADetalle = (eventoId: string) => {
+    // TODO: Navegar a pantalla de detalle
+    console.log('Navegar a detalle de evento:', eventoId);
+  };
+
+  /**
+   * Navegar a crear evento
+   */
+  const navegarACrearEvento = () => {
+    // TODO: Navegar a pantalla de crear evento
+    console.log('Navegar a crear evento');
+  };
+
+  if (cargando && eventos.length === 0) {
+    return (
+      <View style={estilos.centrado}>
+        <Text>Cargando eventos...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={estilos.contenedor}>
-      <Card style={estilos.tarjeta}>
-        <Card.Content>
-          <Text variant="headlineSmall">Eventos</Text>
-          <Text variant="bodyMedium">Lista de eventos en desarrollo...</Text>
-        </Card.Content>
+      {/* Header con filtros y botón crear */}
+      <View style={estilos.header}>
+        <View style={estilos.filtrosContainer}>
+          <TouchableOpacity
+            style={[estilos.filtroChip, !filtroTipo && estilos.filtroChipActivo]}
+            onPress={() => setFiltroTipo(null)}
+          >
+            <Text style={[estilos.filtroTexto, !filtroTipo && estilos.filtroTextoActivo]}>
+              Todos
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[estilos.filtroChip, filtroTipo === 'carrera' && estilos.filtroChipActivo]}
+            onPress={() => setFiltroTipo('carrera')}
+          >
+            <Text style={[estilos.filtroTexto, filtroTipo === 'carrera' && estilos.filtroTextoActivo]}>
+              Carreras
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[estilos.filtroChip, filtroTipo === 'futbol' && estilos.filtroChipActivo]}
+            onPress={() => setFiltroTipo('futbol')}
+          >
+            <Text style={[estilos.filtroTexto, filtroTipo === 'futbol' && estilos.filtroTextoActivo]}>
+              Fútbol
+            </Text>
+          </TouchableOpacity>
+        </View>
+        {estaAutenticado && (
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="add"
+            onPress={navegarACrearEvento}
+          >
+            Crear
+          </Button>
+        )}
+      </View>
+
+      {/* Lista de eventos */}
+      <ScrollView
+        style={estilos.scrollView}
+        contentContainerStyle={estilos.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refrescando}
+            onRefresh={manejarRefresh}
+            colors={[temaApp.colors.primary]}
+          />
+        }
+      >
+        {eventos.length === 0 ? (
+          <View style={estilos.vacio}>
+            <MaterialIcons name="event-busy" size={60} color={temaApp.colors.onSurfaceVariant} />
+            <Text style={estilos.textoVacio}>No hay eventos disponibles</Text>
+            <Text style={estilos.subtextoVacio}>
+              {filtroTipo ? 'Intenta cambiar el filtro' : 'Crea el primer evento!'}
+            </Text>
+          </View>
+        ) : (
+          eventos.map((evento) => (
+            <TouchableOpacity
+              key={evento.id}
+              onPress={() => navegarADetalle(evento.id)}
+              activeOpacity={0.7}
+            >
+              <Card style={estilos.cardEvento}>
+                <View style={estilos.imagenContainer}>
+                  <Image
+                    source={obtenerImagenEvento(evento.tipo)}
+                    style={estilos.imagenEvento}
+                    resizeMode="cover"
+                  />
+                  {evento.esPremium && (
+                    <View style={estilos.badgePremium}>
+                      <MaterialIcons name="star" size={14} color="#FFD700" />
+                      <Text style={estilos.badgePremiumTexto}>Premium</Text>
+                    </View>
+                  )}
+                  {evento.esPetFriendly && (
+                    <View style={estilos.badgePet}>
+                      <Text style={estilos.badgePetTexto}>🐾 Pet Friendly</Text>
+                    </View>
+                  )}
+                </View>
+                <CardContent>
+                  <Text style={estilos.tituloEvento}>{evento.titulo}</Text>
+                  <Text style={estilos.descripcionEvento} numberOfLines={2}>
+                    {evento.descripcion}
+                  </Text>
+                  <View style={estilos.infoEvento}>
+                    <View style={estilos.infoItem}>
+                      <MaterialIcons name="event" size={16} color={temaApp.colors.primary} />
+                      <Text style={estilos.infoTexto}>{formatearFecha(evento.fechaInicio)}</Text>
+                    </View>
+                    <View style={estilos.infoItem}>
+                      <MaterialIcons name="people" size={16} color={temaApp.colors.primary} />
+                      <Text style={estilos.infoTexto}>
+                        {evento.participantesCount || 0} participantes
+                      </Text>
+                    </View>
+                  </View>
+                  {estaAutenticado && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onPress={() => manejarParticipar(evento.id)}
+                      style={estilos.botonParticipar}
+                    >
+                      Unirse
+                    </Button>
+                  )}
+                </CardContent>
       </Card>
+            </TouchableOpacity>
+          ))
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -23,9 +276,141 @@ const estilos = StyleSheet.create({
   contenedor: {
     flex: 1,
     backgroundColor: temaApp.colors.background,
-    padding: espaciado.lg,
   },
-  tarjeta: {
+  centrado: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: espaciado.md,
+    backgroundColor: temaApp.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: temaApp.colors.border,
+  },
+  filtrosContainer: {
+    flexDirection: 'row',
+    gap: espaciado.sm,
+    flex: 1,
+  },
+  filtroChip: {
+    paddingHorizontal: espaciado.md,
+    paddingVertical: espaciado.sm,
+    borderRadius: 20,
+    backgroundColor: temaApp.colors.muted || '#EDEDED',
+    borderWidth: 1,
+    borderColor: temaApp.colors.border,
+  },
+  filtroChipActivo: {
+    backgroundColor: temaApp.colors.primary,
+    borderColor: temaApp.colors.primary,
+  },
+  filtroTexto: {
+    fontSize: 14,
+    color: temaApp.colors.onSurface,
+  },
+  filtroTextoActivo: {
+    color: temaApp.colors.onPrimary,
+    fontWeight: '600',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: espaciado.md,
+    paddingBottom: 100,
+  },
+  cardEvento: {
+    marginBottom: espaciado.md,
+    overflow: 'hidden',
     ...sombras.media,
+  },
+  imagenContainer: {
+    height: 200,
+    position: 'relative',
+  },
+  imagenEvento: {
+    width: '100%',
+    height: '100%',
+  },
+  badgePremium: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgePremiumTexto: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  badgePet: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: temaApp.colors.secondary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgePetTexto: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tituloEvento: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: temaApp.colors.onSurface,
+    marginBottom: espaciado.xs,
+  },
+  descripcionEvento: {
+    fontSize: 14,
+    color: temaApp.colors.onSurfaceVariant,
+    marginBottom: espaciado.md,
+  },
+  infoEvento: {
+    flexDirection: 'row',
+    gap: espaciado.md,
+    marginBottom: espaciado.md,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  infoTexto: {
+    fontSize: 12,
+    color: temaApp.colors.onSurfaceVariant,
+  },
+  botonParticipar: {
+    marginTop: espaciado.sm,
+  },
+  vacio: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: espaciado.xl,
+  },
+  textoVacio: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: temaApp.colors.onSurface,
+    marginTop: espaciado.md,
+  },
+  subtextoVacio: {
+    fontSize: 14,
+    color: temaApp.colors.onSurfaceVariant,
+    marginTop: espaciado.sm,
+    textAlign: 'center',
   },
 });

@@ -18,8 +18,10 @@ import PantallaMatching from '../pantallas/PantallaMatching';
 import PantallaPerfil from '../pantallas/PantallaPerfil';
 import PantallaLogin from '../pantallas/PantallaLogin';
 import PantallaRegistro from '../pantallas/PantallaRegistro';
+import PantallaOnboarding from '../pantallas/PantallaOnboarding';
 import PantallaDashboard from '../pantallas/PantallaDashboard';
 import PantallaMapaWebCompatible from '../pantallas/PantallaMapaWebCompatible';
+import PantallaMapa from '../pantallas/PantallaMapa';
 
 // Importar tema y contexto de autenticación
 import { temaApp } from '../constantes/tema';
@@ -30,6 +32,7 @@ export type RootStackParamList = {
   // Pantallas de autenticación
   Login: undefined;
   Registro: undefined;
+  Onboarding: undefined;
   
   // Pantalla principal con tabs
   Principal: undefined;
@@ -154,14 +157,14 @@ function NavegadorTabs(): JSX.Element {
         component={PantallaMatching}
         options={{
           title: 'Matching',
-          headerTitle: 'Encuentra Conexiones',
+          headerTitle: 'Descubre Conexiones',
         }}
       />
       
       {/* Tab de Mapa - Mapa con usuarios y eventos cercanos */}
       <Tab.Screen 
         name="Mapa" 
-        component={PantallaMapaWebCompatible}
+        component={PantallaMapa}
         options={{
           title: 'Mapa',
           headerTitle: 'Mapa de SportPetMatch',
@@ -216,7 +219,8 @@ function NavegadorTabs(): JSX.Element {
  * Maneja la navegación entre pantallas de autenticación y la app principal
  */
 function NavegadorPrincipal(): JSX.Element {
-  const { estaAutenticado, cargandoAuth } = useAuth();
+  const { estaAutenticado, cargandoAuth, usuario } = useAuth();
+  const necesitaOnboarding = estaAutenticado && !usuario?.onboardingCompletado;
 
   // Mostrar loading mientras se verifica la autenticación
   if (cargandoAuth) {
@@ -247,8 +251,21 @@ function NavegadorPrincipal(): JSX.Element {
         },
       }}
     >
-      {estaAutenticado ? (
-        // Usuario autenticado - mostrar app principal
+      {necesitaOnboarding ? (
+        // Usuario autenticado pero sin completar onboarding
+        <>
+          <Stack.Screen 
+            name="Onboarding" 
+            component={PantallaOnboarding}
+            options={{ 
+              title: 'Configuración',
+              headerShown: false,
+              gestureEnabled: false, // No permitir volver atrás
+            }}
+          />
+        </>
+      ) : estaAutenticado ? (
+        // Usuario autenticado con onboarding completo - mostrar app principal
         <>
           <Stack.Screen 
             name="Principal" 

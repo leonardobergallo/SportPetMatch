@@ -1,0 +1,75 @@
+### Archivo de prueba para la API - SportPetMatch
+### Puedes usar esto en VS Code con la extensión REST Client
+
+@baseUrl = http://localhost:3000/api
+@token = tu_token_aqui
+
+### 1. Verificar salud del servidor
+GET {{baseUrl}}/salud
+
+### 2. Registro de nuevo usuario
+POST {{baseUrl}}/auth/registro
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "nombre": "Usuario Prueba",
+  "telefono": "+5493412345678"
+}
+
+### 3. Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### 4. Dashboard (requiere token)
+GET {{baseUrl}}/auth/dashboard
+Authorization: Bearer {{token}}
+
+### 5. Obtener mi perfil (requiere token)
+GET {{baseUrl}}/usuarios/mi-perfil
+Authorization: Bearer {{token}}
+
+### 6. Obtener eventos
+GET {{baseUrl}}/eventos
+
+### 7. Obtener evento por ID
+GET {{baseUrl}}/eventos/:id
+
+### 8. Crear evento (requiere token)
+POST {{baseUrl}}/eventos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titulo": "Carrera Matutina con Mascotas",
+  "descripcion": "Carrera de 5km en el parque central",
+  "tipo": "carrera",
+  "fechaInicio": "2025-11-15T08:00:00Z",
+  "maxParticipantes": 20,
+  "esPetFriendly": true
+}
+
+### 9. Obtener mis mascotas (requiere token)
+GET {{baseUrl}}/mascotas
+Authorization: Bearer {{token}}
+
+### 10. Crear mascota (requiere token)
+POST {{baseUrl}}/mascotas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Max",
+  "tipo": "Perro",
+  "raza": "Golden Retriever",
+  "edad": 3,
+  "nivelActividad": 4,
+  "intereses": ["correr", "jugar"]
+}
+

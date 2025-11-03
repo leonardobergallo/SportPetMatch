@@ -24,6 +24,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 // Importar tema y contexto de ubicación
 import { temaApp } from '../constantes/tema';
 import { useUbicacion, formatearDistancia, Coordenadas } from '../contextos/ContextoUbicacion';
+import { obtenerRecomendaciones, UsuarioRecomendado } from '../servicios/servicioMatches';
 
 // Tipos para usuarios potenciales
 interface UsuarioPotencial {
@@ -44,6 +45,8 @@ interface UsuarioPotencial {
     foto: string;
   }[];
   esPremium: boolean;
+  score?: number;
+  interesesComunes?: number;
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -87,22 +90,45 @@ export default function PantallaMatching(): JSX.Element {
     try {
       setCargando(true);
       
-      // Verificar permisos de ubicación si no los tenemos
-      if (!permisoUbicacion) {
-        const permisosConcedidos = await solicitarPermisos();
-        if (!permisosConcedidos) {
-          Alert.alert(
-            'Ubicación requerida',
-            'Para encontrar personas cerca de ti, necesitamos acceso a tu ubicación.',
-            [{ text: 'OK' }]
-          );
+      // Intentar cargar de la API
+      try {
+        const recomendaciones = await obtenerRecomendaciones();
+        
+        if (recomendaciones && recomendaciones.length > 0) {
+          // Convertir UsuarioRecomendado a UsuarioPotencial
+          const usuariosConvertidos = recomendaciones.map(usuario => ({
+            id: usuario.id,
+            nombre: usuario.nombre,
+            edad: 25, // TODO: Agregar edad al backend
+            avatar: usuario.avatar || 'https://via.placeholder.com/400',
+            biografia: usuario.biografia || 'Sin biografía',
+            distancia: usuario.distancia || 0,
+            ubicacionCiudad: usuario.ubicacionCiudad || 'Desconocida',
+            coordenadas: usuario.ubicacionLat && usuario.ubicacionLng 
+              ? { latitud: usuario.ubicacionLat, longitud: usuario.ubicacionLng }
+              : { latitud: 0, longitud: 0 },
+            intereses: usuario.intereses,
+            mascotas: usuario.mascotas.map((m, idx) => ({
+              id: `m${idx}`,
+              nombre: m.nombre,
+              tipo: m.tipo,
+              edad: 3, // TODO: Agregar edad al backend
+              foto: m.fotos && m.fotos.length > 0 ? m.fotos[0] : 'https://via.placeholder.com/300'
+            })),
+            esPremium: false,
+            score: usuario.score,
+            interesesComunes: usuario.interesesComunes,
+          }));
+          
+          setUsuarios(usuariosConvertidos);
           setCargando(false);
           return;
         }
+      } catch (error) {
+        console.log('Error cargando recomendaciones de API, usando datos mock:', error);
       }
       
-      // TODO: Conectar con API real del backend
-      // Por ahora usamos datos mock con geolocalización
+      // Fallback: usar datos mock con geolocalización
       let usuariosMock: UsuarioPotencial[] = [
         {
           id: '1',
@@ -400,16 +426,24 @@ export default function PantallaMatching(): JSX.Element {
             {/* Header con nombre y premium */}
             <View style={estilos.headerCard}>
               <View style={estilos.nombreContainer}>
-                <Text variant="headlineSmall" style={estilos.nombre}>
-                  {usuario.nombre}, {usuario.edad}
+                <MaterialIcons name="pets" size={20} color={temaApp.colors.primary} />
+                <Text variant="bodySmall" style={estilos.mascotaCount}>
+                  {usuario.mascotas.length} {usuario.mascotas.length === 1 ? 'mascota' : 'mascotas'}
                 </Text>
-                {usuario.esPremium && (
-                  <MaterialIcons name="star" size={20} color="#FFD700" />
-                )}
               </View>
               <Chip mode="outlined" compact style={estilos.distanciaChip}>
-                📍 {usuario.distancia} km
+                📍 {usuario.distancia.toFixed(1)} km
               </Chip>
+            </View>
+            
+            {/* Nombre y edad */}
+            <View style={estilos.nombreEdadContainer}>
+              <Text variant="headlineSmall" style={estilos.nombre}>
+                {usuario.nombre}, {usuario.edad}
+              </Text>
+              {usuario.esPremium && (
+                <MaterialIcons name="star" size={20} color="#FFD700" />
+              )}
             </View>
             
             {/* Biografía */}
@@ -513,27 +547,26 @@ export default function PantallaMatching(): JSX.Element {
       
       {/* Botones de acción */}
       <View style={estilos.botonesContainer}>
-        <IconButton
-          icon="close"
-          size={30}
-          iconColor="#fff"
-          style={[estilos.botonAccion, estilos.botonPass]}
+        <Button
+          mode="outlined"
           onPress={() => handleSwipe('left')}
-        />
-        <IconButton
-          icon="refresh"
-          size={25}
-          iconColor="#fff"
-          style={[estilos.botonAccion, estilos.botonRecargar]}
-          onPress={cargarUsuariosPotenciales}
-        />
-        <IconButton
-          icon="favorite"
-          size={30}
-          iconColor="#fff"
-          style={[estilos.botonAccion, estilos.botonLike]}
+          style={estilos.botonPass}
+          icon="close"
+          textColor="#E64A19"
+          buttonColor="#fff"
+        >
+          Pasar
+        </Button>
+        <Button
+          mode="contained"
           onPress={() => handleSwipe('right')}
-        />
+          style={estilos.botonLike}
+          icon="favorite"
+          textColor="#fff"
+          buttonColor="#E64A19"
+        >
+          Match
+        </Button>
       </View>
       
       {/* Contador de usuarios */}
@@ -685,6 +718,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 30,
     paddingHorizontal: 40,
+    gap: 20,
   },
   botonAccion: {
     elevation: 4,
@@ -694,14 +728,31 @@ const estilos = StyleSheet.create({
     shadowRadius: 4,
     marginHorizontal: 10,
   },
+  nombreEdadContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  mascotaCount: {
+    marginLeft: 6,
+    color: temaApp.colors.primary,
+    fontWeight: '600',
+  },
   botonPass: {
-    backgroundColor: '#FF5722',
+    borderColor: '#E64A19',
+    borderWidth: 2,
+    borderRadius: 30,
+    paddingHorizontal: 30,
+    paddingVertical: 10,
   },
   botonRecargar: {
     backgroundColor: '#9E9E9E',
   },
   botonLike: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#E64A19',
+    borderRadius: 30,
+    paddingHorizontal: 30,
+    paddingVertical: 10,
   },
   contadorContainer: {
     position: 'absolute',

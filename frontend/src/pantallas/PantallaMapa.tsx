@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { 
   Surface, 
   Appbar, 
@@ -18,6 +18,9 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useUbicacion } from '../contextos/ContextoUbicacion';
+
+// Clave de Google Maps
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCeUPMP3dmgyP_yJZLZjsCZPmZUrU5lFPg';
 
 // Tipos para los datos del mapa
 interface UsuarioMapa {
@@ -49,6 +52,116 @@ const VistaMapa = ({ coordenadas, usuarios, eventos, onItemPress }: {
   onItemPress: (tipo: 'usuario' | 'evento', item: any) => void;
 }) => {
   
+  console.log('Platform.OS:', Platform.OS);
+  
+  // SIEMPRE usar Google Maps embebido (forzar mapa)
+  // if (Platform.OS === 'web') {
+  if (true) {
+    // Generar marcadores para Google Maps
+    const marcadores = [
+      {
+        id: 'current',
+        lat: coordenadas.latitud,
+        lng: coordenadas.longitud,
+        label: 'Tú',
+        icon: 'blue'
+      },
+      ...usuarios.map((u, idx) => ({
+        id: `usuario-${u.id}`,
+        lat: u.ubicacionLat,
+        lng: u.ubicacionLng,
+        label: u.nombre,
+        icon: 'green'
+      })),
+      ...eventos.map((e, idx) => ({
+        id: `evento-${e.id}`,
+        lat: e.ubicacionLat,
+        lng: e.ubicacionLng,
+        label: e.titulo,
+        icon: 'red'
+      }))
+    ];
+
+    // Generar HTML para Google Maps
+    const markersStr = marcadores.map(m => 
+      `&markers=color:${m.icon}|label:${m.label.charAt(0)}|${m.lat},${m.lng}`
+    ).join('');
+
+    const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${coordenadas.latitud},${coordenadas.longitud}&zoom=13&size=600x400&key=${GOOGLE_MAPS_API_KEY}${markersStr}`;
+    console.log('Google Maps URL:', mapUrl);
+
+    return (
+      <View style={styles.mapaContainer}>
+        <View style={styles.mapaSimulado}>
+          <Image 
+            source={{ uri: mapUrl }} 
+            style={styles.mapaImagen} 
+            resizeMode="cover"
+          />
+        </View>
+        
+        <ScrollView style={styles.listaContainer}>
+          <Text variant="titleMedium" style={styles.seccionTitulo}>
+            👥 Usuarios Cercanos ({usuarios.length})
+          </Text>
+          
+          {usuarios.map((usuario) => (
+            <TouchableOpacity
+              key={usuario.id}
+              onPress={() => onItemPress('usuario', usuario)}
+            >
+              <List.Item
+                title={usuario.nombre}
+                description={`${usuario.edad} años - ${usuario.ubicacionCiudad}`}
+                left={(props) => <List.Icon {...props} icon="account" />}
+                right={(props) => (
+                  <View style={styles.distanciaContainer}>
+                    <Text variant="bodySmall">
+                      {calcularDistanciaDisplay(coordenadas, usuario)}
+                    </Text>
+                    <MaterialIcons name="place" size={16} color="#666" />
+                  </View>
+                )}
+                style={styles.listItem}
+              />
+            </TouchableOpacity>
+          ))}
+          
+          <Divider style={styles.divider} />
+          
+          <Text variant="titleMedium" style={styles.seccionTitulo}>
+            🏃‍♂️ Eventos Deportivos ({eventos.length})
+          </Text>
+          
+          {eventos.map((evento) => (
+            <TouchableOpacity
+              key={evento.id}
+              onPress={() => onItemPress('evento', evento)}
+            >
+              <List.Item
+                title={evento.titulo}
+                description={`${evento.tipo} - ${new Date(evento.fechaInicio).toLocaleDateString('es-AR')}`}
+                left={(props) => <List.Icon {...props} icon="calendar" />}
+                right={(props) => (
+                  <View style={styles.distanciaContainer}>
+                    <Text variant="bodySmall">
+                      {calcularDistanciaDisplay(coordenadas, evento)}
+                    </Text>
+                    <Text variant="bodySmall">
+                      {evento.participantes}/{evento.maxParticipantes}
+                    </Text>
+                  </View>
+                )}
+                style={styles.listItem}
+              />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  }
+  
+  // Para móvil, usar vista simplificada
   return (
     <View style={styles.mapaSimulado}>
       <View style={styles.ubicacionActual}>
@@ -141,6 +254,9 @@ const calcularDistanciaDisplay = (coordenadas: any, item: any) => {
 export default function PantallaMapa() {
   const navigation = useNavigation();
   const { ubicacionActual, coordenadas, calcularDistancia } = useUbicacion();
+  
+  console.log('PantallaMapa - Platform:', Platform.OS);
+  console.log('PantallaMapa - coordenadas:', coordenadas);
   
   // Estados para datos del mapa
   const [usuarios, setUsuarios] = useState<UsuarioMapa[]>([]);
@@ -426,9 +542,13 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   mapaSimulado: {
-    flex: 1,
     backgroundColor: '#f5f5f5',
     padding: 16,
+  },
+  mapaImagen: {
+    width: '100%',
+    height: 300,
+    borderRadius: 8,
   },
   ubicacionActual: {
     backgroundColor: 'white',

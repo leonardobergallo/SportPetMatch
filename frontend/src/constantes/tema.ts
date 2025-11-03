@@ -4,14 +4,18 @@
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
 // Colores principales de la marca SportPetMatch
+// Adaptados de la estructura con oklch colors
 const coloresMarca = {
   // Colores primarios - Inspirados en la naturaleza y el deporte
+  // primary: oklch(0.4 0.15 136) - Green #2E7D32
   primario: '#2E7D32', // Verde bosque - representa naturaleza y vida
   primarioVariant: '#1B5E20', // Verde más oscuro para variantes
+  // secondary: oklch(0.55 0.22 42) - Orange #FF6F00
   secundario: '#FF6F00', // Naranja vibrante - energía y actividad
   secundarioVariant: '#E65100', // Naranja más oscuro
   
   // Colores de acento
+  // accent: oklch(0.75 0.18 60) - Gold #FFD700
   acento: '#FFD700', // Dorado - logros y premios
   acentoSuave: '#FFF9C4', // Dorado claro
   
@@ -21,14 +25,21 @@ const coloresMarca = {
   error: '#F44336', // Rojo para errores
   info: '#2196F3', // Azul para información
   
-  // Colores neutros
+  // Colores neutros - Adaptados de la estructura
+  // background: oklch(0.98 0.01 70) - Muy claro
   fondo: '#FAFAFA', // Fondo principal claro
+  // card: oklch(1 0 0) - Blanco puro
   superficie: '#FFFFFF', // Superficie de tarjetas
   superficieVariant: '#F5F5F5', // Superficie alternativa
-  borde: '#E0E0E0', // Bordes sutiles
+  // border: oklch(0.92 0.01 70) - Gris muy claro
+  borde: '#E8E8E8', // Bordes sutiles
+  // foreground: oklch(0.15 0.02 280) - Casi negro
   texto: '#212121', // Texto principal
+  // muted-foreground: oklch(0.5 0.02 280) - Gris medio
   textoSecundario: '#757575', // Texto secundario
   textoDeshabilitado: '#BDBDBD', // Texto deshabilitado
+  // muted: oklch(0.93 0.01 70) - Gris muy claro
+  muted: '#EDEDED', // Fondo muted
   
   // Colores para mascotas
   perro: '#8D6E63', // Marrón para perros
@@ -74,6 +85,8 @@ export const temaApp = {
     accentLight: coloresMarca.acentoSuave,
     border: coloresMarca.borde,
     disabled: coloresMarca.textoDeshabilitado,
+    muted: coloresMarca.muted,
+    textoSecundario: coloresMarca.textoSecundario,
     
     // Colores específicos para mascotas
     petDog: coloresMarca.perro,

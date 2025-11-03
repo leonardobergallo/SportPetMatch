@@ -11,6 +11,10 @@ import dotenv from 'dotenv';
 
 // Importar rutas
 import rutasAuth from './rutas/auth';
+import rutasUsuarios from './rutas/usuarios';
+import rutasMascotas from './rutas/mascotas';
+import rutasEventos from './rutas/eventos';
+import rutasMatches from './rutas/matches';
 
 // Importar middleware personalizado
 // import { middlewareAutenticacion } from './middleware/autenticacion';
@@ -18,7 +22,10 @@ import rutasAuth from './rutas/auth';
 // import { middlewareManejoErrores } from './middleware/errores';
 
 // Cargar variables de entorno
-dotenv.config({ path: '../config.env' });
+// Cargar desde la raíz del backend
+import path from 'path';
+const configPath = path.resolve(__dirname, '../config.env');
+dotenv.config({ path: configPath });
 
 // Crear aplicación Express
 const app = express();
@@ -107,6 +114,10 @@ app.get('/api', (req, res) => {
 
 // Configurar rutas de la API
 app.use('/api/auth', rutasAuth);
+app.use('/api/usuarios', rutasUsuarios);
+app.use('/api/mascotas', rutasMascotas);
+app.use('/api/eventos', rutasEventos);
+app.use('/api/matches', rutasMatches);
 
 // Middleware para rutas no encontradas (404)
 app.use('*', (req, res) => {

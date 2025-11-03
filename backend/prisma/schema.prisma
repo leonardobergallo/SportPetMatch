@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -26,9 +27,11 @@ model Usuario {
   ubicacionPais     String? // País actual del usuario
   nivelDeporte      Int      @default(1) // Nivel deportivo (1-5)
   intereses         String[] // Array de intereses deportivos
+  tipoUsuario       String?  @default("solo") // Tipo de usuario: "solo", "con_mascota", "ambos"
   esPremium         Boolean  @default(false) // Estado de suscripción premium
   isActive          Boolean  @default(true) // Usuario activo/inactivo
   emailVerificado   Boolean  @default(false) // Email verificado
+  onboardingCompletado Boolean @default(false) // Si completó el onboarding
   googleId          String?  @unique // ID de Google OAuth
   createdAt         DateTime @default(now()) // Fecha de creación
   updatedAt         DateTime @updatedAt // Fecha de última actualización
@@ -104,6 +107,7 @@ model Evento {
   organizador     Usuario @relation("EventoOrganizador", fields: [organizadorId], references: [id])
   participantes   EventoParticipante[]
   ubicaciones     UbicacionEvento[]
+  matchesPropuestos Match[] // Matches que han propuesto este evento
 
   @@map("eventos") // Mapea a la tabla 'eventos' en la base de datos
 }
@@ -134,6 +138,7 @@ model Match {
   estado          String    @default("pendiente") // Estado: pendiente, aceptado, rechazado
   fechaMatch      DateTime  @default(now()) // Fecha del match
   mensajeInicial  String? // Mensaje inicial del match
+  eventoPropuestoId String? // ID del evento propuesto en este match
   createdAt       DateTime @default(now()) // Fecha de creación
   updatedAt       DateTime @updatedAt // Fecha de última actualización
 
@@ -142,6 +147,9 @@ model Match {
   usuario         Usuario @relation("UsuarioMatches", fields: [usuarioId], references: [id], onDelete: Cascade)
   usuarioMatchId  String // ID del usuario que recibe el match
   usuarioMatch    Usuario @relation("MatchRecibido", fields: [usuarioMatchId], references: [id], onDelete: Cascade)
+  
+  // Relación con evento propuesto (opcional)
+  eventoPropuesto Evento? @relation(fields: [eventoPropuestoId], references: [id], onDelete: SetNull)
 
   @@unique([usuarioId, usuarioMatchId]) // Un usuario no puede hacer match con el mismo usuario dos veces
   @@map("matches") // Mapea a la tabla 'matches'

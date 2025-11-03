@@ -26,6 +26,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { useAuth, Usuario } from '../contextos/ContextoAuth';
+import { iniciarSesion as servicioIniciarSesion } from '../servicios/servicioAuth';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -70,24 +71,35 @@ export default function PantallaLogin(): JSX.Element {
     setCargando(true);
 
     try {
-      // Intentar llamada real a la API de login
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password: contraseña,
-        }),
+      // Usar servicio de autenticación
+      const resultado = await servicioIniciarSesion({
+        email: email.trim(),
+        password: contraseña,
       });
-
-      const resultado = await response.json();
       
-      if (resultado.success) {
+      if (resultado.success && resultado.data) {
         // Login exitoso con la API
-        const usuario: Usuario = resultado.data.usuario;
+        const usuarioBackend = resultado.data.usuario;
         const token = resultado.data.token;
+        
+        // Convertir usuario del backend al formato del contexto
+        const usuario: Usuario = {
+          id: usuarioBackend.id,
+          nombre: usuarioBackend.nombre.split(' ')[0] || usuarioBackend.nombre,
+          apellido: usuarioBackend.nombre.split(' ').slice(1).join(' ') || '',
+          email: usuarioBackend.email,
+          fechaNacimiento: '',
+          genero: 'otro',
+          ciudad: '',
+          provincia: '',
+          pais: '',
+          deportesFavoritos: usuarioBackend.intereses || [],
+          nivelActividad: 'intermedio',
+          disponibilidadSemanal: [],
+          foto: usuarioBackend.avatar || undefined,
+          tipoUsuario: usuarioBackend.tipoUsuario || undefined,
+          onboardingCompletado: usuarioBackend.onboardingCompletado || false,
+        };
         
         await iniciarSesion(usuario, token);
         
@@ -96,42 +108,9 @@ export default function PantallaLogin(): JSX.Element {
           `Hola ${usuario.nombre}!`,
           [{ text: 'Continuar' }]
         );
-      } else {
-        Alert.alert('Error', resultado.message || 'Credenciales incorrectas');
       }
-    } catch (error) {
-      // Si no se puede conectar con el servidor, usar datos mock
-      console.log('API no disponible, usando datos mock');
-      
-      // Verificar credenciales mock
-      if (email === 'test@example.com' && contraseña === 'password') {
-        // Usuario mock para pruebas
-        const usuarioMock: Usuario = {
-          id: '1',
-          nombre: 'Usuario',
-          apellido: 'Prueba',
-          email: 'test@example.com',
-          fechaNacimiento: '1990-01-01',
-          genero: 'otro',
-          ciudad: 'Buenos Aires',
-          provincia: 'Buenos Aires',
-          pais: 'Argentina',
-          biografia: 'Usuario de prueba para SportPetMatch',
-          deportesFavoritos: ['running', 'football'],
-          nivelActividad: 'intermedio',
-          disponibilidadSemanal: ['lunes', 'miercoles', 'viernes']
-        };
-        
-        await iniciarSesion(usuarioMock, 'mock-token-123');
-        
-        Alert.alert(
-          '¡Bienvenido!', 
-          `Hola ${usuarioMock.nombre}! (Modo demo)`,
-          [{ text: 'Continuar' }]
-        );
-      } else {
-        Alert.alert('Error', 'Credenciales incorrectas\n\nPara probar usa:\nEmail: test@example.com\nContraseña: password');
-      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Credenciales incorrectas');
     } finally {
       setCargando(false);
     }
@@ -189,8 +168,7 @@ export default function PantallaLogin(): JSX.Element {
    * Función para navegar a la pantalla de registro
    */
   const navegarARegistro = () => {
-    // TODO: Navegar a pantalla de registro
-    console.log('Navegar a pantalla de registro');
+    navigation.navigate('Registro');
   };
 
   return (

@@ -1,5 +1,5 @@
 // Pantalla de Inicio de SportPetMatch
-// Pantalla principal con feed de actividades y resumen
+// Adaptada de la estructura con nuevos componentes y estilos
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -7,116 +7,184 @@ import {
   StyleSheet, 
   ScrollView, 
   RefreshControl,
-  Alert 
+  Image,
+  TextInput,
+  TouchableOpacity
 } from 'react-native';
-import { 
-  Text, 
-  Card, 
-  Button, 
-  FAB,
-  Chip,
-  Avatar,
-  Divider 
-} from 'react-native-paper';
+import { Text, Avatar, Menu, Divider } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 
+// Importar nuevos componentes UI
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+
+// Importar servicios
+import { obtenerDashboard } from '@/servicios/servicioAuth';
+
 // Importar tema y constantes
-import { temaApp, espaciado, sombras } from '../constantes/tema';
+import { temaApp, espaciado, sombras } from '@/constantes/tema';
+import { useAuth } from '@/contextos/ContextoAuth';
+
+// Rutas a imágenes
+const images = {
+  soccer: require('../../assets/soccer-tournament-park.jpg'),
+  running: require('../../assets/5k-running-race-beach.jpg'),
+  tennis: require('../../assets/tennis-group-game.jpg'),
+  golden: require('../../assets/golden-retriever-playing.png'),
+  husky: require('../../assets/husky-running-mountain.jpg'),
+  labrador: require('../../assets/labrador-playing-tennis.jpg'),
+  placeholder: require('../../assets/placeholder.jpg'),
+};
 
 /**
  * Pantalla de Inicio - Feed principal de la aplicación
- * 
- * Esta pantalla muestra:
- * - Resumen de actividades recientes
- * - Eventos próximos
- * - Matches recientes
- * - Desafíos activos
- * - Acceso rápido a funciones principales
- * 
- * @returns JSX.Element - La pantalla de inicio renderizada
+ * Adaptada de la estructura con el diseño moderno
  */
 export default function PantallaInicio(): JSX.Element {
-  // Estado para controlar el refresh
+  const { usuario, cerrarSesion } = useAuth();
   const [refrescando, setRefrescando] = useState(false);
-  
-  // Estado para datos del dashboard
   const [datos, setDatos] = useState<any>(null);
   const [cargando, setCargando] = useState(true);
+  const [searchText, setSearchText] = useState('');
+  const [mostrarMenu, setMostrarMenu] = useState(false);
 
-  // Cargar datos al iniciar la pantalla
+  // Datos mockados basados en la estructura
+  const events = [
+    {
+      id: 'event1',
+      title: 'Torneo de Fútbol',
+      location: 'Parque Central',
+      date: 'Sáb, 15 Nov',
+      distance: '2.5 km',
+      pets: 12,
+      image: images.soccer,
+      matched: true,
+    },
+    {
+      id: 'event2',
+      title: 'Carrera 5K',
+      location: 'Playa Negra',
+      date: 'Dom, 16 Nov',
+      distance: '5.2 km',
+      pets: 8,
+      image: images.running,
+      matched: false,
+    },
+    {
+      id: 'event3',
+      title: 'Tenis en Grupo',
+      location: 'Club Deportivo',
+      date: 'Mié, 20 Nov',
+      distance: '3.1 km',
+      pets: 6,
+      image: images.tennis,
+      matched: false,
+    },
+  ];
+
+  const matches = [
+    {
+      id: 'match1',
+      name: 'María González',
+      pet: 'Golden Retriever',
+      matchDate: 'Hace 2 horas',
+      image: images.golden,
+    },
+    {
+      id: 'match2',
+      name: 'Carlos Ruiz',
+      pet: 'Senderismo',
+      matchDate: 'Hace 4 horas',
+      image: images.husky,
+    },
+  ];
+
   useEffect(() => {
     cargarDatos();
   }, []);
 
-  /**
-   * Función para cargar datos del backend
-   */
   const cargarDatos = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/dashboard');
-      const result = await response.json();
-      
-      if (result.success) {
-        setDatos(result.data);
-      }
-    } catch (error) {
+      // Usar servicio de autenticación
+      const dashboardData = await obtenerDashboard();
+      setDatos(dashboardData);
+    } catch (error: any) {
       console.error('Error cargando datos:', error);
+      // Si hay error de autenticación, los datos serán null
     } finally {
       setCargando(false);
     }
   };
 
-  /**
-   * Función para manejar el refresh de la pantalla
-   * Carga datos desde el servidor
-   */
   const manejarRefresh = React.useCallback(() => {
     setRefrescando(true);
-    
-    // Cargar datos reales desde la API
     cargarDatos().finally(() => {
       setRefrescando(false);
     });
   }, []);
 
-  /**
-   * Función para manejar la creación de un nuevo evento
-   */
   const manejarCrearEvento = () => {
-    Alert.alert(
-      'Crear Evento',
-      '¿Te gustaría crear un nuevo evento deportivo?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Crear', onPress: () => {
-          // TODO: Navegar a pantalla de crear evento
-          console.log('Navegar a crear evento');
-        }}
-      ]
-    );
-  };
-
-  /**
-   * Función para manejar la búsqueda de eventos cercanos
-   */
-  const manejarBuscarEventos = () => {
-    Alert.alert(
-      'Buscar Eventos',
-      '¿Te gustaría buscar eventos cerca de tu ubicación?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Buscar', onPress: () => {
-          // TODO: Navegar a pantalla de búsqueda de eventos
-          console.log('Navegar a buscar eventos');
-        }}
-      ]
-    );
+    console.log('Crear evento');
   };
 
   return (
     <View style={estilos.contenedor}>
+      {/* Header */}
+      <View style={estilos.header}>
+        <View style={estilos.headerContent}>
+          <View style={estilos.logoContainer}>
+            <View style={estilos.logo}>
+              <Text style={estilos.logoEmoji}>🐾</Text>
+            </View>
+            <Text style={estilos.titulo}>SportPetMatch</Text>
+          </View>
+          <Menu
+            visible={mostrarMenu}
+            onDismiss={() => setMostrarMenu(false)}
+            anchor={
+              <TouchableOpacity onPress={() => setMostrarMenu(true)} style={estilos.avatarContainer}>
+                {usuario?.foto ? (
+                  <Avatar.Image size={40} source={{ uri: usuario.foto }} />
+                ) : (
+                  <Avatar.Text size={40} label={usuario?.nombre?.charAt(0).toUpperCase() || 'U'} />
+                )}
+              </TouchableOpacity>
+            }
+          >
+            <Menu.Item 
+              onPress={() => {
+                setMostrarMenu(false);
+                console.log('Ver perfil');
+              }} 
+              title="Mi Perfil" 
+              leadingIcon="account"
+            />
+            <Menu.Item 
+              onPress={() => {
+                setMostrarMenu(false);
+                console.log('Ver configuración');
+              }} 
+              title="Configuración" 
+              leadingIcon="cog"
+            />
+            <Divider />
+            <Menu.Item 
+              onPress={async () => {
+                setMostrarMenu(false);
+                await cerrarSesion();
+              }} 
+              title="Cerrar Sesión" 
+              leadingIcon="logout"
+              titleStyle={{ color: temaApp.colors.error }}
+            />
+          </Menu>
+        </View>
+      </View>
+
+      {/* Content */}
       <ScrollView
         style={estilos.scrollView}
+        contentContainerStyle={estilos.contentContainer}
         refreshControl={
           <RefreshControl
             refreshing={refrescando}
@@ -125,351 +193,323 @@ export default function PantallaInicio(): JSX.Element {
             tintColor={temaApp.colors.primary}
           />
         }
-        showsVerticalScrollIndicator={false}
       >
-        {/* Header de bienvenida */}
-        <Card style={[estilos.tarjeta, estilos.tarjetaBienvenida]}>
-          <Card.Content>
-            <View style={estilos.headerBienvenida}>
-              <View style={estilos.textoBienvenida}>
-                <Text variant="headlineSmall" style={estilos.tituloBienvenida}>
-                  ¡Hola {datos?.usuario?.nombre || 'Usuario'}! 👋
-                </Text>
-                <Text variant="bodyLarge" style={estilos.subtituloBienvenida}>
-                  ¿Listo para una nueva aventura deportiva con tu mascota?
-                </Text>
-              </View>
-              <View style={estilos.avatarContainer}>
-                <Avatar.Image 
-                  size={60} 
-                  source={{ uri: datos?.usuario?.avatar || 'https://via.placeholder.com/60' }}
-                  style={estilos.avatarBienvenida}
-                />
-                <Button
-                  mode="text"
-                  onPress={() => {
-                    Alert.alert(
-                      'Cerrar Sesión',
-                      '¿Estás seguro que quieres cerrar sesión?',
-                      [
-                        { text: 'Cancelar', style: 'cancel' },
-                        { text: 'Cerrar Sesión', onPress: () => {
-                          // TODO: Implementar logout
-                          console.log('Logout');
-                        }}
-                      ]
-                    );
-                  }}
-                  style={estilos.botonLogout}
-                  textColor="#fff"
-                >
-                  Salir
-                </Button>
-              </View>
+        {/* Quick Actions */}
+        <View style={estilos.seccion}>
+          <Text style={estilos.tituloSeccion}>Acciones Rápidas</Text>
+          <View style={estilos.accionesRapidas}>
+            <Button
+              variant="secondary"
+              size="lg"
+              onPress={manejarCrearEvento}
+              icon="add"
+              style={estilos.botonAccion}
+            >
+              Crear Evento
+            </Button>
+            <View style={estilos.buscador}>
+              <MaterialIcons name="search" size={20} color={temaApp.colors.onSurfaceVariant} />
+              <TextInput
+                placeholder="Buscar..."
+                placeholderTextColor={temaApp.colors.onSurfaceVariant}
+                value={searchText}
+                onChangeText={setSearchText}
+                style={estilos.inputBuscar}
+              />
             </View>
-          </Card.Content>
-        </Card>
+          </View>
+        </View>
 
-        {/* Acciones rápidas */}
-        <Card style={estilos.tarjeta}>
-          <Card.Content>
-            <Text variant="titleMedium" style={estilos.tituloSeccion}>
-              Acciones Rápidas
-            </Text>
-            <View style={estilos.contenedorAcciones}>
-              <Button
-                mode="contained"
-                onPress={manejarCrearEvento}
-                style={estilos.botonAccion}
-                icon="plus"
-              >
-                Crear Evento
-              </Button>
-              <Button
-                mode="outlined"
-                onPress={manejarBuscarEventos}
-                style={estilos.botonAccion}
-                icon="magnify"
-              >
-                Buscar Eventos
-              </Button>
+        {/* Upcoming Events */}
+        <View style={estilos.seccion}>
+          <View style={estilos.headerSeccion}>
+            <Text style={estilos.tituloSeccion}>Eventos Próximos</Text>
+            <View style={estilos.badge}>
+              <Text style={estilos.badgeTexto}>{events.length} eventos</Text>
             </View>
-          </Card.Content>
-        </Card>
-
-        {/* Eventos próximos */}
-        <Card style={estilos.tarjeta}>
-          <Card.Content>
-            <View style={estilos.headerSeccion}>
-              <Text variant="titleMedium" style={estilos.tituloSeccion}>
-                Eventos Próximos
-              </Text>
-              <Chip 
-                mode="outlined" 
-                compact
-                textStyle={estilos.textoChip}
-              >
-                {datos?.eventosRecientes?.length || 0} eventos
-              </Chip>
-            </View>
-            
-            {/* Lista de eventos del backend */}
-            <View style={estilos.listaEventos}>
-              {datos?.eventosRecientes?.map((evento: any, index: number) => (
-                <View key={evento.id || index}>
-                  <View style={estilos.itemEvento}>
-                    <View style={estilos.infoEvento}>
-                      <Text variant="titleSmall">{evento.nombre || evento.titulo}</Text>
-                      <Text variant="bodySmall" style={estilos.textoSecundario}>
-                        📍 {evento.ubicacion || 'Por definir'} • 👥 {evento.participantes} participantes
-                      </Text>
+          </View>
+          <View style={estilos.listaEventos}>
+            {events.map((event) => (
+              <Card key={event.id} style={estilos.cardEvento}>
+                <View style={estilos.imagenContainer}>
+                  <Image source={event.image} style={estilos.imagenEvento} resizeMode="cover" />
+                  {event.matched && (
+                    <View style={estilos.badgeMatch}>
+                      <MaterialIcons name="local-fire-department" size={14} color="#FFFFFF" />
+                      <Text style={estilos.badgeMatchTexto}>¡Match!</Text>
                     </View>
-                    <Chip 
-                      mode="outlined" 
-                      compact
-                      style={estilos.chipTipo}
-                    >
-                      Evento
-                    </Chip>
+                  )}
+                  <View style={estilos.overlayImagen}>
+                    <Text style={estilos.tituloImagen}>{event.title}</Text>
                   </View>
-                  {index < (datos?.eventosRecientes?.length - 1) && <Divider style={estilos.divisor} />}
                 </View>
-              )) || (
-                <Text variant="bodyMedium" style={estilos.textoSecundario}>
-                  No hay eventos próximos
-                </Text>
-              )}
-            </View>
-          </Card.Content>
-        </Card>
+                <CardContent>
+                  <View style={estilos.infoEvento}>
+                    <View style={estilos.filaEvento}>
+                      <View style={estilos.infoItem}>
+                        <MaterialIcons name="place" size={14} color={temaApp.colors.primary} />
+                        <Text style={estilos.textoInfo}>{event.location}</Text>
+                      </View>
+                      <View style={estilos.badgeDistancia}>
+                        <Text style={estilos.badgeDistanciaTexto}>{event.distance}</Text>
+                      </View>
+                    </View>
+                    <View style={estilos.filaEvento}>
+                      <View style={estilos.infoItem}>
+                        <MaterialIcons name="event" size={14} color={temaApp.colors.primary} />
+                        <Text style={estilos.textoInfo}>{event.date}</Text>
+                      </View>
+                      <View style={estilos.infoItem}>
+                        <MaterialIcons name="people" size={14} color={temaApp.colors.primary} />
+                        <Text style={estilos.textoInfo}>{event.pets} mascotas</Text>
+                      </View>
+                    </View>
+                  </View>
+                </CardContent>
+              </Card>
+            ))}
+          </View>
+        </View>
 
-        {/* Matches recientes */}
-        <Card style={estilos.tarjeta}>
-          <Card.Content>
-            <View style={estilos.headerSeccion}>
-              <Text variant="titleMedium" style={estilos.tituloSeccion}>
-                Matches Recientes
-              </Text>
-              <Chip 
-                mode="outlined" 
-                compact
-                textStyle={estilos.textoChip}
-              >
-                2 nuevos
-              </Chip>
+        {/* Recent Matches */}
+        <View style={estilos.seccion}>
+          <View style={estilos.headerSeccion}>
+            <Text style={estilos.tituloSeccion}>Matches Recientes</Text>
+            <View style={estilos.badge}>
+              <Text style={estilos.badgeTexto}>{matches.length} nuevos</Text>
             </View>
-            
-            {/* Lista de matches (simulada) */}
-            <View style={estilos.listaMatches}>
-              <View style={estilos.itemMatch}>
-                <Avatar.Text 
-                  size={40} 
-                  label="M" 
-                  style={estilos.avatarMatch}
-                />
-                <View style={estilos.infoMatch}>
-                  <Text variant="titleSmall">María González</Text>
-                  <Text variant="bodySmall" style={estilos.textoSecundario}>
-                    Tiene un Golden Retriever
-                  </Text>
-                </View>
-                <MaterialIcons 
-                  name="favorite" 
-                  size={24} 
-                  color={temaApp.colors.primary} 
-                />
-              </View>
-              
-              <Divider style={estilos.divisor} />
-              
-              <View style={estilos.itemMatch}>
-                <Avatar.Text 
-                  size={40} 
-                  label="C" 
-                  style={estilos.avatarMatch}
-                />
-                <View style={estilos.infoMatch}>
-                  <Text variant="titleSmall">Carlos Ruiz</Text>
-                  <Text variant="bodySmall" style={estilos.textoSecundario}>
-                    Interesado en senderismo
-                  </Text>
-                </View>
-                <MaterialIcons 
-                  name="favorite" 
-                  size={24} 
-                  color={temaApp.colors.primary} 
-                />
-              </View>
-            </View>
-          </Card.Content>
-        </Card>
-
-        {/* Desafíos activos */}
-        <Card style={estilos.tarjeta}>
-          <Card.Content>
-            <Text variant="titleMedium" style={estilos.tituloSeccion}>
-              Desafíos Activos
-            </Text>
-            
-            <View style={estilos.listaDesafios}>
-              <View style={estilos.itemDesafio}>
-                <View style={estilos.infoDesafio}>
-                  <Text variant="titleSmall">Caminar 10km</Text>
-                  <Text variant="bodySmall" style={estilos.textoSecundario}>
-                    Progreso: 7/10 km
-                  </Text>
-                </View>
-                <Chip 
-                  mode="outlined" 
-                  compact
-                  style={estilos.chipProgreso}
-                >
-                  70%
-                </Chip>
-              </View>
-            </View>
-          </Card.Content>
-        </Card>
-
-        {/* Espacio para el FAB */}
-        <View style={estilos.espacioFAB} />
+          </View>
+          <View style={estilos.listaMatches}>
+            {matches.map((match) => (
+              <Card key={match.id} style={estilos.cardMatch}>
+                <CardContent>
+                  <View style={estilos.matchItem}>
+                    <Image source={match.image} style={estilos.avatarMatch} />
+                    <View style={estilos.matchInfo}>
+                      <Text style={estilos.matchNombre}>{match.name}</Text>
+                      <Text style={estilos.matchPet}>{match.pet}</Text>
+                      <Text style={estilos.matchFecha}>{match.matchDate}</Text>
+                    </View>
+                    <MaterialIcons name="favorite" size={20} color={temaApp.colors.secondary} />
+                  </View>
+                </CardContent>
+              </Card>
+            ))}
+          </View>
+        </View>
       </ScrollView>
-
-      {/* Botón flotante para crear evento */}
-      <FAB
-        icon="plus"
-        style={estilos.fab}
-        onPress={manejarCrearEvento}
-        label="Crear Evento"
-      />
     </View>
   );
 }
 
-// Estilos de la pantalla
+// Estilos adaptados de la estructura
 const estilos = StyleSheet.create({
   contenedor: {
     flex: 1,
     backgroundColor: temaApp.colors.background,
   },
-  scrollView: {
-    flex: 1,
-  },
-  tarjeta: {
-    margin: espaciado.md,
-    marginBottom: espaciado.sm,
+  header: {
+    backgroundColor: temaApp.colors.primary,
+    paddingTop: 40,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
     ...sombras.media,
   },
-  tarjetaBienvenida: {
-    backgroundColor: temaApp.colors.primaryContainer,
-  },
-  headerBienvenida: {
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  textoBienvenida: {
-    flex: 1,
-    marginRight: espaciado.md,
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  tituloBienvenida: {
-    color: temaApp.colors.onPrimaryContainer,
+  logo: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: temaApp.colors.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...sombras.media,
+  },
+  logoEmoji: {
+    fontSize: 20,
+  },
+  titulo: {
+    fontSize: 20,
     fontWeight: 'bold',
-  },
-  subtituloBienvenida: {
-    color: temaApp.colors.onPrimaryContainer,
-    marginTop: espaciado.xs,
-  },
-  avatarBienvenida: {
-    backgroundColor: temaApp.colors.primary,
+    color: temaApp.colors.onPrimary,
   },
   avatarContainer: {
-    alignItems: 'center',
+    width: 40,
+    height: 40,
   },
-  botonLogout: {
-    marginTop: 4,
+  scrollView: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 100,
+  },
+  seccion: {
+    marginBottom: 24,
   },
   tituloSeccion: {
-    fontWeight: '600',
-    marginBottom: espaciado.md,
+    fontSize: 18,
+    fontWeight: 'bold',
     color: temaApp.colors.onSurface,
-  },
-  contenedorAcciones: {
-    flexDirection: 'row',
-    gap: espaciado.md,
-  },
-  botonAccion: {
-    flex: 1,
+    marginBottom: 12,
   },
   headerSeccion: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: espaciado.md,
+    marginBottom: 12,
   },
-  textoChip: {
-    fontSize: 12,
+  accionesRapidas: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  botonAccion: {
+    flex: 1,
+    minHeight: 56,
+  },
+  buscador: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDEDED',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: temaApp.colors.border,
+    gap: 8,
+  },
+  inputBuscar: {
+    flex: 1,
+    fontSize: 14,
+    color: temaApp.colors.onSurface,
+    paddingVertical: 12,
   },
   listaEventos: {
-    gap: espaciado.sm,
+    gap: 12,
   },
-  itemEvento: {
+  cardEvento: {
+    overflow: 'hidden',
+  },
+  imagenContainer: {
+    height: 192,
+    backgroundColor: '#EDEDED',
+    position: 'relative',
+  },
+  imagenEvento: {
+    width: '100%',
+    height: '100%',
+  },
+  overlayImagen: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 12,
+  },
+  tituloImagen: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  badgeMatch: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: temaApp.colors.secondary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  badgeMatchTexto: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  infoEvento: {
+    gap: 8,
+  },
+  filaEvento: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: espaciado.sm,
   },
-  infoEvento: {
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  textoInfo: {
+    fontSize: 12,
+    color: temaApp.colors.onSurfaceVariant,
+  },
+  badgeDistancia: {
+    backgroundColor: `${temaApp.colors.primary}1A`,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgeDistanciaTexto: {
+    color: temaApp.colors.primary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  badge: {
+    backgroundColor: `${temaApp.colors.accent}33`,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgeTexto: {
+    color: temaApp.colors.accent,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  listaMatches: {
+    gap: 8,
+  },
+  cardMatch: {
+    // Estilos del card
+  },
+  matchItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatarMatch: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#EDEDED',
+  },
+  matchInfo: {
     flex: 1,
   },
-  textoSecundario: {
+  matchNombre: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: temaApp.colors.onSurface,
+  },
+  matchPet: {
+    fontSize: 12,
     color: temaApp.colors.onSurfaceVariant,
     marginTop: 2,
   },
-  chipTipo: {
-    marginLeft: espaciado.md,
-  },
-  divisor: {
-    marginVertical: espaciado.xs,
-  },
-  listaMatches: {
-    gap: espaciado.sm,
-  },
-  itemMatch: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: espaciado.sm,
-  },
-  avatarMatch: {
-    backgroundColor: temaApp.colors.primary,
-    marginRight: espaciado.md,
-  },
-  infoMatch: {
-    flex: 1,
-  },
-  listaDesafios: {
-    gap: espaciado.sm,
-  },
-  itemDesafio: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: espaciado.sm,
-  },
-  infoDesafio: {
-    flex: 1,
-  },
-  chipProgreso: {
-    backgroundColor: temaApp.colors.primaryContainer,
-  },
-  espacioFAB: {
-    height: 100, // Espacio para el FAB
-  },
-  fab: {
-    position: 'absolute',
-    margin: espaciado.md,
-    right: 0,
-    bottom: 0,
-    backgroundColor: temaApp.colors.primary,
+  matchFecha: {
+    fontSize: 12,
+    color: temaApp.colors.onSurfaceVariant,
+    marginTop: 2,
   },
 });
