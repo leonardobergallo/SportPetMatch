@@ -13,6 +13,9 @@ import {
 } from 'react-native';
 import { Text, Avatar, Menu, Divider } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 
 // Importar nuevos componentes UI
 import { Button } from '@/components/ui/button';
@@ -36,12 +39,15 @@ const images = {
   placeholder: require('../../assets/placeholder.jpg'),
 };
 
+type InicioScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
 /**
  * Pantalla de Inicio - Feed principal de la aplicación
  * Adaptada de la estructura con el diseño moderno
  */
 export default function PantallaInicio(): JSX.Element {
-  const { usuario, cerrarSesion } = useAuth();
+  const navigation = useNavigation<InicioScreenNavigationProp>();
+  const { usuario, cerrarSesion, estaAutenticado } = useAuth();
   const [refrescando, setRefrescando] = useState(false);
   const [datos, setDatos] = useState<any>(null);
   const [cargando, setCargando] = useState(true);
@@ -124,7 +130,13 @@ export default function PantallaInicio(): JSX.Element {
   }, []);
 
   const manejarCrearEvento = () => {
-    console.log('Crear evento');
+    if (!estaAutenticado) {
+      // Si no está autenticado, navegar a login
+      navigation.navigate('Login');
+      return;
+    }
+    // Navegar a la pantalla de crear evento
+    navigation.navigate('CrearEvento');
   };
 
   return (

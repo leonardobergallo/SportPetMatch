@@ -127,16 +127,18 @@ export default function PantallaEventos(): JSX.Element {
    * Navegar a detalle de evento
    */
   const navegarADetalle = (eventoId: string) => {
-    // TODO: Navegar a pantalla de detalle
-    console.log('Navegar a detalle de evento:', eventoId);
+    navigation.navigate('DetalleEvento', { eventoId });
   };
 
   /**
    * Navegar a crear evento
    */
   const navegarACrearEvento = () => {
-    // TODO: Navegar a pantalla de crear evento
-    console.log('Navegar a crear evento');
+    if (!estaAutenticado) {
+      Alert.alert('Autenticación requerida', 'Debes iniciar sesión para crear eventos');
+      return;
+    }
+    navigation.navigate('CrearEvento');
   };
 
   if (cargando && eventos.length === 0) {

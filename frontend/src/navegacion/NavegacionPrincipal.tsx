@@ -22,6 +22,7 @@ import PantallaOnboarding from '../pantallas/PantallaOnboarding';
 import PantallaDashboard from '../pantallas/PantallaDashboard';
 import PantallaMapaWebCompatible from '../pantallas/PantallaMapaWebCompatible';
 import PantallaMapa from '../pantallas/PantallaMapa';
+import PantallaCrearEvento from '../pantallas/PantallaCrearEvento';
 
 // Importar tema y contexto de autenticación
 import { temaApp } from '../constantes/tema';
@@ -319,7 +320,7 @@ function NavegadorPrincipal(): JSX.Element {
           
           <Stack.Screen 
             name="CrearEvento" 
-            component={PantallaInicio} // TODO: Crear componente real
+            component={PantallaCrearEvento}
             options={{ title: 'Crear Evento' }}
           />
         </>

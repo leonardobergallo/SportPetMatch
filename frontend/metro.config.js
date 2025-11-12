@@ -30,6 +30,17 @@ config.transformer.minifierConfig = {
   },
 };
 
+// Configuraciones para reducir uso de memoria
+config.server = {
+  ...config.server,
+  enhanceMiddleware: (middleware) => {
+    return middleware;
+  },
+};
+
+// Configuración de caché para mejor rendimiento
+config.cacheStores = [];
+
 // Configuración de resolución de archivos
 config.resolver.sourceExts = [
   'js',
