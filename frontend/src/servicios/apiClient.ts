@@ -22,11 +22,16 @@ if (__DEV__) {
   console.log('  - Port:', configInfo.port);
 }
 
+// Validar que la URL esté configurada
+if (!API_BASE_URL || API_BASE_URL === '') {
+  console.warn('⚠️ API_BASE_URL no está configurada. Las peticiones al backend fallarán.');
+}
+
 /**
  * Crear instancia de Axios con configuración
  */
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URL || 'http://localhost:3000/api', // Fallback para evitar errores
   timeout: 30000, // 30 segundos
   headers: {
     'Content-Type': 'application/json',
@@ -38,6 +43,13 @@ const apiClient: AxiosInstance = axios.create({
  */
 apiClient.interceptors.request.use(
   async (config) => {
+    // Si no hay URL configurada, rechazar la petición inmediatamente
+    if (!API_BASE_URL || API_BASE_URL === '') {
+      const error = new Error('Backend no configurado. Por favor, configura EXPO_PUBLIC_API_URL en Vercel.');
+      console.warn('⚠️', error.message);
+      return Promise.reject(error);
+    }
+    
     try {
       const token = await AsyncStorage.getItem(TOKEN_KEY);
       if (token) {
