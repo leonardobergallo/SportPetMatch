@@ -20,9 +20,20 @@ export const isWeb = Platform.OS === 'web';
  * Obtener la URL base de la API según el entorno
  */
 export function getAPIBaseURL(): string {
-  // Si hay una variable de entorno, usarla (prioridad para producción)
+  // Si hay una variable de entorno, validarla primero
   if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL.trim();
+    
+    // Validar que sea una URL HTTP/HTTPS válida (no una cadena de conexión de base de datos)
+    // Si contiene "postgresql://" o "psql", no es una URL válida del API
+    if (apiUrl.includes('postgresql://') || apiUrl.includes('psql') || !apiUrl.startsWith('http')) {
+      console.error('❌ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos, no una URL del API.');
+      console.error('❌ Debe ser algo como: https://tu-backend.render.com/api');
+      console.error('❌ No debe ser: postgresql://... o psql \'...\'');
+      return ''; // Retornar vacío para que funcione sin backend
+    }
+    
+    return apiUrl;
   }
 
   // Si estamos en web

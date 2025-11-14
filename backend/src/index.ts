@@ -228,7 +228,15 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-// Iniciar el servidor
-iniciarServidor();
+// En Vercel Serverless, no iniciamos el servidor aquí
+// Solo exportamos la app y Vercel la maneja
+// Vercel automáticamente establece VERCEL=1 en el entorno
+if (process.env.VERCEL || process.env.VERCEL_ENV) {
+  // En Vercel, solo exportar la app sin iniciar el servidor
+  // Vercel manejará el servidor automáticamente
+} else {
+  // En otros entornos (Railway, Render, local), iniciar el servidor normalmente
+  iniciarServidor();
+}
 
 export default app;
