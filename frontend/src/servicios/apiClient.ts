@@ -78,9 +78,17 @@ apiClient.interceptors.response.use(
     // Manejar errores de red
     if (!error.response) {
       const configInfo = getConfigInfo();
+      
+      // Si no hay URL configurada en producción, mostrar mensaje claro
+      if (!configInfo.apiURL || configInfo.apiURL === '') {
+        const errorMessage = 'Backend no configurado. Por favor, configura EXPO_PUBLIC_API_URL en Vercel.';
+        console.warn('⚠️', errorMessage);
+        throw new Error(errorMessage);
+      }
+      
       const errorMessage = isMobile
         ? `Error de conexión. Verifica que:\n1. El backend esté corriendo en ${configInfo.apiURL}\n2. Tu dispositivo y computadora estén en la misma red WiFi\n3. El firewall no esté bloqueando el puerto ${configInfo.port}\n4. La IP local (${configInfo.localIP}) sea correcta`
-        : `Error de conexión. Verifica que:\n1. El backend esté corriendo en ${configInfo.apiURL}\n2. Tu conexión a internet funcione`;
+        : `Error de conexión. Verifica que:\n1. El backend esté corriendo en ${configInfo.apiURL}\n2. Tu conexión a internet funcione\n3. El backend esté desplegado y accesible`;
       throw new Error(errorMessage);
     }
 

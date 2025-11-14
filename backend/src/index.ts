@@ -35,8 +35,8 @@ const app = express();
 // Convertir a número explícitamente para evitar errores de TypeScript
 const PUERTO = parseInt(process.env.PORT || '3000', 10);
 // En desarrollo, escuchar en todas las interfaces (0.0.0.0) para permitir conexiones desde Expo Go
-// En producción, usar localhost o la IP específica del servidor
-const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? 'localhost' : '0.0.0.0');
+// En producción (Railway, Render, etc.), escuchar en 0.0.0.0 para que funcione correctamente
+const HOST = process.env.HOST || '0.0.0.0';
 
 // Middleware de seguridad
 app.use(helmet({
@@ -45,27 +45,26 @@ app.use(helmet({
 
 // Configuración de CORS para permitir conexiones desde la app móvil
 // En desarrollo, permitir todas las conexiones desde Expo Go
-const corsOptions = process.env.NODE_ENV === 'production' 
-  ? {
-      origin: [
-        'http://localhost:3000',
-        'http://localhost:8081',
-        'http://192.168.0.108:8081',
-        'http://172.20.10.3:8081',
-        'exp://192.168.0.108:8081',
-        'exp://172.20.10.3:8081'
-      ],
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+// En producción, usar variable de entorno CORS_ORIGIN o permitir Vercel por defecto
+const getCorsOrigins = (): string[] | boolean => {
+  if (process.env.NODE_ENV === 'production') {
+    // Si hay una variable CORS_ORIGIN configurada, usarla
+    if (process.env.CORS_ORIGIN) {
+      return process.env.CORS_ORIGIN.split(',').map(origin => origin.trim());
     }
-  : {
-      // En desarrollo, permitir todas las conexiones (útil para Expo Go)
-      origin: true,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-    };
+    // Permitir cualquier dominio de Vercel por defecto
+    return true; // En producción también permitir todos si no está especificado (para facilidad)
+  }
+  // En desarrollo, permitir todas las conexiones
+  return true;
+};
+
+const corsOptions = {
+  origin: getCorsOrigins(),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
 
 app.use(cors(corsOptions));
 

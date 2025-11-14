@@ -36,9 +36,12 @@ export function getAPIBaseURL(): string {
                            !window.location.hostname.includes('172.');
       
       if (isProduction) {
-        // En producción, intentar usar el mismo dominio con /api
-        // O puedes configurar esto como variable de entorno en Vercel
-        return `${window.location.protocol}//${window.location.hostname}/api`;
+        // En producción, si no hay variable de entorno configurada,
+        // mostrar un mensaje de error claro en lugar de intentar conectar a un endpoint inexistente
+        // El usuario debe configurar EXPO_PUBLIC_API_URL en Vercel
+        console.warn('⚠️ EXPO_PUBLIC_API_URL no está configurada en Vercel. La app funcionará en modo offline.');
+        // Retornar null o una URL vacía para que la app maneje esto gracefully
+        return '';
       }
     }
     
