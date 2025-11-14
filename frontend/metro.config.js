@@ -30,12 +30,14 @@ config.transformer.minifierConfig = {
   },
 };
 
-// Configuraciones para reducir uso de memoria
+// Configuraciones del servidor
 config.server = {
   ...config.server,
   enhanceMiddleware: (middleware) => {
     return middleware;
   },
+  // Configurar para aceptar conexiones desde la red local
+  port: 8081,
 };
 
 // Configuración de caché para mejor rendimiento

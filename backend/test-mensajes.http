@@ -1,0 +1,81 @@
+### Pruebas de API de Mensajes - SportPetMatch
+### Usa la extensión REST Client de VS Code para ejecutar estas pruebas
+
+@baseUrl = http://localhost:3000/api
+@token = tu_token_aqui
+
+### 1. Verificar salud del servidor
+GET {{baseUrl}}/salud
+
+### 2. Registrar un nuevo usuario (si no existe)
+POST {{baseUrl}}/auth/registro
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "nombre": "Usuario Test"
+}
+
+### 3. Iniciar sesión
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### 4. Obtener mis matches (necesitas tener un match aceptado primero)
+GET {{baseUrl}}/matches
+Authorization: Bearer {{token}}
+
+### 5. Obtener mensajes de un match específico
+GET {{baseUrl}}/mensajes/REEMPLAZA_CON_MATCH_ID
+Authorization: Bearer {{token}}
+
+### 6. Enviar un mensaje
+POST {{baseUrl}}/mensajes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "matchId": "REEMPLAZA_CON_MATCH_ID",
+  "contenido": "Hola! ¿Cómo estás?",
+  "tipo": "texto"
+}
+
+### 7. Marcar mensajes como leídos
+PUT {{baseUrl}}/mensajes/leer
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "matchId": "REEMPLAZA_CON_MATCH_ID"
+}
+
+### 8. Obtener cantidad de mensajes no leídos
+GET {{baseUrl}}/mensajes/no-leidos/cantidad
+Authorization: Bearer {{token}}
+
+### 9. Crear un match (necesitas tener un usuario recomendado primero)
+POST {{baseUrl}}/matches
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "usuarioMatchId": "REEMPLAZA_CON_USUARIO_ID",
+  "mensajeInicial": "¡Hola! Me gustaría hacer match contigo",
+  "eventoPropuestoId": null
+}
+
+### 10. Aceptar un match
+PUT {{baseUrl}}/matches/REEMPLAZA_CON_MATCH_ID/respuesta
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "accion": "aceptar"
+}
+
+

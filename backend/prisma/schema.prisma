@@ -150,6 +150,9 @@ model Match {
   
   // Relación con evento propuesto (opcional)
   eventoPropuesto Evento? @relation(fields: [eventoPropuestoId], references: [id], onDelete: SetNull)
+  
+  // Relación con mensajes del chat
+  mensajes        Mensaje[]
 
   @@unique([usuarioId, usuarioMatchId]) // Un usuario no puede hacer match con el mismo usuario dos veces
   @@map("matches") // Mapea a la tabla 'matches'
@@ -164,9 +167,11 @@ model Mensaje {
   isLeido         Boolean   @default(false) // Si el mensaje fue leído
   createdAt       DateTime @default(now()) // Fecha de creación
 
-  // Relaciones - Un mensaje pertenece a un usuario
+  // Relaciones - Un mensaje pertenece a un usuario y a un match
   usuarioId       String // ID del usuario que envía el mensaje
   usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  matchId         String // ID del match/conversación
+  match           Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@map("mensajes") // Mapea a la tabla 'mensajes'
 }

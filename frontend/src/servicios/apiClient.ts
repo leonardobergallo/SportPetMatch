@@ -3,12 +3,24 @@
 
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import { getAPIBaseURL, getConfigInfo, isMobile } from '../utilidades/config';
 
-// URL base de la API
-// En Expo, las variables de entorno deben tener el prefijo EXPO_PUBLIC_
-// Si no está definida, usar localhost por defecto
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+// URL base de la API (se obtiene de la configuración centralizada)
+const API_BASE_URL = getAPIBaseURL();
 const TOKEN_KEY = '@SportPetMatch:token';
+
+// Log para debugging
+if (__DEV__) {
+  const configInfo = getConfigInfo();
+  console.log('🌐 Configuración de API:');
+  console.log('  - URL:', configInfo.apiURL);
+  console.log('  - Platform:', configInfo.platform);
+  console.log('  - Is Mobile:', configInfo.isMobile);
+  console.log('  - Is Web:', configInfo.isWeb);
+  console.log('  - Local IP:', configInfo.localIP);
+  console.log('  - Port:', configInfo.port);
+}
 
 /**
  * Crear instancia de Axios con configuración
@@ -65,7 +77,11 @@ apiClient.interceptors.response.use(
 
     // Manejar errores de red
     if (!error.response) {
-      throw new Error('Error de conexión. Verifica tu conexión a internet.');
+      const configInfo = getConfigInfo();
+      const errorMessage = isMobile
+        ? `Error de conexión. Verifica que:\n1. El backend esté corriendo en ${configInfo.apiURL}\n2. Tu dispositivo y computadora estén en la misma red WiFi\n3. El firewall no esté bloqueando el puerto ${configInfo.port}\n4. La IP local (${configInfo.localIP}) sea correcta`
+        : `Error de conexión. Verifica que:\n1. El backend esté corriendo en ${configInfo.apiURL}\n2. Tu conexión a internet funcione`;
+      throw new Error(errorMessage);
     }
 
     // Retornar error con mensaje del servidor
@@ -79,4 +95,3 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-

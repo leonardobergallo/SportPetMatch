@@ -1,162 +1,207 @@
 // Pantalla de Matches de SportPetMatch
 // Conversaciones con usuarios que han hecho match
 
-import React, { useState } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  FlatList, 
-  TouchableOpacity, 
-  Image, 
-  Alert 
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { 
-  Text, 
-  Card, 
-  Avatar, 
+import {
+  Text,
+  Card,
+  Avatar,
   Badge,
   Searchbar,
-  FAB
+  FAB,
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
+import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
+import { useAuth } from '../contextos/ContextoAuth';
+import { obtenerMisMatches, Match } from '../servicios/servicioMatches';
+import {
+  obtenerMensajes,
+  obtenerMensajesNoLeidos,
+  Mensaje,
+  MensajesNoLeidos,
+} from '../servicios/servicioMensajes';
 
-// Tipo para la conversación
+type MatchesScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
+// Tipo para la conversación con información completa
 interface Conversacion {
-  id: string;
-  usuario: {
+  match: Match;
+  otroUsuario: {
     id: string;
     nombre: string;
-    apellido: string;
-    foto?: string;
-    edad: number;
-    ciudad: string;
+    avatar: string | null;
   };
-  ultimoMensaje: {
-    texto: string;
-    fecha: Date;
-    leido: boolean;
-  };
+  ultimoMensaje: Mensaje | null;
+  noLeidos: number;
   esNuevoMatch: boolean;
-  mascota?: {
-    nombre: string;
-    raza: string;
-    foto?: string;
-  };
-  distancia: number;
 }
 
-// Datos mock de conversaciones
-const conversacionesMock: Conversacion[] = [
-  {
-    id: '1',
-    usuario: {
-      id: 'u1',
-      nombre: 'Ana',
-      apellido: 'García',
-      foto: 'https://images.unsplash.com/photo-1494790108755-2616b612b1a?w=150&h=150&fit=crop&crop=face',
-      edad: 28,
-      ciudad: 'Palermo'
-    },
-    ultimoMensaje: {
-      texto: '¡Hola! Me encanta tu golden retriever 🐕',
-      fecha: new Date('2024-01-15T10:30:00'),
-      leido: false
-    },
-    esNuevoMatch: true,
-    mascota: {
-      nombre: 'Luna',
-      raza: 'Labrador',
-      foto: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=150&h=150&fit=crop'
-    },
-    distancia: 1.2
-  },
-  {
-    id: '2',
-    usuario: {
-      id: 'u2',
-      nombre: 'Carlos',
-      apellido: 'Mendoza',
-      foto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-      edad: 32,
-      ciudad: 'Belgrano'
-    },
-    ultimoMensaje: {
-      texto: '¿Vamos al parque mañana?',
-      fecha: new Date('2024-01-15T09:15:00'),
-      leido: true
-    },
-    esNuevoMatch: false,
-    mascota: {
-      nombre: 'Max',
-      raza: 'Border Collie',
-      foto: 'https://images.unsplash.com/photo-1551717743-49959800b1f6?w=150&h=150&fit=crop'
-    },
-    distancia: 2.8
-  },
-  {
-    id: '3',
-    usuario: {
-      id: 'u3',
-      nombre: 'María',
-      apellido: 'López',
-      foto: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-      edad: 25,
-      ciudad: 'Recoleta'
-    },
-    ultimoMensaje: {
-      texto: 'Perfecto! Nos vemos en el evento de running',
-      fecha: new Date('2024-01-14T18:45:00'),
-      leido: true
-    },
-    esNuevoMatch: false,
-    mascota: {
-      nombre: 'Bella',
-      raza: 'Beagle',
-      foto: 'https://images.unsplash.com/photo-1544717302-de2939b7ef71?w=150&h=150&fit=crop'
-    },
-    distancia: 0.8
-  },
-  {
-    id: '4',
-    usuario: {
-      id: 'u4',
-      nombre: 'Diego',
-      apellido: 'Fernández',
-      foto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-      edad: 30,
-      ciudad: 'San Telmo'
-    },
-    ultimoMensaje: {
-      texto: '¡Nuevo match! 🎉',
-      fecha: new Date('2024-01-15T11:00:00'),
-      leido: false
-    },
-    esNuevoMatch: true,
-    mascota: {
-      nombre: 'Rocky',
-      raza: 'Bulldog Francés',
-      foto: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=150&h=150&fit=crop'
-    },
-    distancia: 3.5
-  }
-];
-
 export default function PantallaMatches(): JSX.Element {
-  const [conversaciones, setConversaciones] = useState<Conversacion[]>(conversacionesMock);
-  const [busqueda, setBusqueda] = useState('');
+  const navigation = useNavigation<MatchesScreenNavigationProp>();
+  const { usuario } = useAuth();
 
-  // Filtrar conversaciones por búsqueda
-  const conversacionesFiltradas = conversaciones.filter(conv =>
-    conv.usuario.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    conv.usuario.apellido.toLowerCase().includes(busqueda.toLowerCase()) ||
-    conv.mascota?.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [cargando, setCargando] = useState(true);
+  const [refrescando, setRefrescando] = useState(false);
+  const [mensajesNoLeidos, setMensajesNoLeidos] = useState<MensajesNoLeidos[]>([]);
+
+  useEffect(() => {
+    cargarDatos();
+  }, []);
+
+  // Auto-refrescar cada 10 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!cargando && !refrescando) {
+        cargarDatos();
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [cargando, refrescando]);
+
+  /**
+   * Cargar datos de matches y mensajes
+   */
+  const cargarDatos = async () => {
+    try {
+      setCargando(true);
+      await Promise.all([cargarMatches(), cargarMensajesNoLeidos()]);
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+      Alert.alert('Error', 'No se pudieron cargar las conversaciones');
+    } finally {
+      setCargando(false);
+      setRefrescando(false);
+    }
+  };
+
+  /**
+   * Cargar matches y construir conversaciones
+   */
+  const cargarMatches = async () => {
+    try {
+      const matches = await obtenerMisMatches();
+
+      // Construir conversaciones con información del otro usuario y último mensaje
+      const conversacionesData = await Promise.all(
+        matches.map(async (match) => {
+          // Determinar quién es el otro usuario
+          const otroUsuario =
+            match.usuarioId === usuario?.id
+              ? match.usuarioMatch
+              : match.usuario;
+
+          // Obtener último mensaje del match
+          let ultimoMensaje: Mensaje | null = null;
+          try {
+            const mensajes = await obtenerMensajes(match.id);
+            if (mensajes.length > 0) {
+              ultimoMensaje = mensajes[mensajes.length - 1];
+            }
+          } catch (error) {
+            console.error('Error obteniendo mensajes:', error);
+          }
+
+          // Determinar si es un match nuevo (creado en las últimas 24 horas)
+          const fechaMatch = new Date(match.fechaMatch);
+          const ahora = new Date();
+          const horasDesdeMatch = (ahora.getTime() - fechaMatch.getTime()) / (1000 * 60 * 60);
+          const esNuevoMatch = horasDesdeMatch < 24 && match.estado === 'aceptado';
+
+          return {
+            match,
+            otroUsuario,
+            ultimoMensaje,
+            noLeidos: 0, // Se actualizará con mensajesNoLeidos
+            esNuevoMatch,
+          };
+        })
+      );
+
+      // Ordenar conversaciones: primero las que tienen mensajes no leídos, luego por fecha del último mensaje
+      conversacionesData.sort((a, b) => {
+        if (a.noLeidos > 0 && b.noLeidos === 0) return -1;
+        if (a.noLeidos === 0 && b.noLeidos > 0) return 1;
+        if (a.ultimoMensaje && b.ultimoMensaje) {
+          return (
+            new Date(b.ultimoMensaje.createdAt).getTime() -
+            new Date(a.ultimoMensaje.createdAt).getTime()
+          );
+        }
+        if (a.ultimoMensaje) return -1;
+        if (b.ultimoMensaje) return 1;
+        return (
+          new Date(b.match.fechaMatch).getTime() -
+          new Date(a.match.fechaMatch).getTime()
+        );
+      });
+
+      setConversaciones(conversacionesData);
+    } catch (error) {
+      console.error('Error cargando matches:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Cargar mensajes no leídos
+   */
+  const cargarMensajesNoLeidos = async () => {
+    try {
+      const noLeidos = await obtenerMensajesNoLeidos();
+      setMensajesNoLeidos(noLeidos);
+
+      // Actualizar conversaciones con cantidad de mensajes no leídos
+      setConversaciones((prev) =>
+        prev.map((conv) => {
+          const noLeidosMatch = noLeidos.find((n) => n.matchId === conv.match.id);
+          return {
+            ...conv,
+            noLeidos: noLeidosMatch?.noLeidos || 0,
+          };
+        })
+      );
+    } catch (error) {
+      console.error('Error cargando mensajes no leídos:', error);
+    }
+  };
+
+  /**
+   * Manejar refresh manual
+   */
+  const manejarRefresh = () => {
+    setRefrescando(true);
+    cargarDatos();
+  };
+
+  /**
+   * Filtrar conversaciones por búsqueda
+   */
+  const conversacionesFiltradas = conversaciones.filter((conv) =>
+    conv.otroUsuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  // Formatear tiempo relativo
-  const formatearTiempo = (fecha: Date): string => {
+  /**
+   * Formatear tiempo relativo
+   */
+  const formatearTiempo = (fecha: string | Date): string => {
+    const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
     const ahora = new Date();
-    const diferencia = ahora.getTime() - fecha.getTime();
+    const diferencia = ahora.getTime() - fechaObj.getTime();
     const minutos = Math.floor(diferencia / (1000 * 60));
     const horas = Math.floor(diferencia / (1000 * 60 * 60));
     const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
@@ -164,45 +209,63 @@ export default function PantallaMatches(): JSX.Element {
     if (minutos < 1) return 'Ahora';
     if (minutos < 60) return `${minutos}m`;
     if (horas < 24) return `${horas}h`;
-    return `${dias}d`;
+    if (dias < 7) return `${dias}d`;
+    return fechaObj.toLocaleDateString('es-AR', {
+      day: 'numeric',
+      month: 'short',
+    });
   };
 
-  // Abrir chat con usuario
+  /**
+   * Abrir chat con usuario
+   */
   const abrirChat = (conversacion: Conversacion) => {
-    Alert.alert(
-      'Chat',
-      `Abriendo conversación con ${conversacion.usuario.nombre}`,
-      [{ text: 'OK' }]
-    );
+    navigation.navigate('Chat', { matchId: conversacion.match.id });
   };
 
-  // Renderizar elemento de conversación
+  /**
+   * Ir a pantalla de matching
+   */
+  const irAMatching = () => {
+    // Navegar a la pantalla de matching
+    // TODO: Implementar navegación cuando esté disponible
+    Alert.alert('Matching', 'Navegar a la pantalla de matching');
+  };
+
+  /**
+   * Renderizar elemento de conversación
+   */
   const renderizarConversacion = ({ item }: { item: Conversacion }) => (
     <TouchableOpacity
       style={estilos.conversacionItem}
       onPress={() => abrirChat(item)}
       activeOpacity={0.7}
     >
-      <Card style={[
-        estilos.tarjetaConversacion,
-        item.esNuevoMatch && estilos.nuevoMatch
-      ]}>
+      <Card
+        style={[
+          estilos.tarjetaConversacion,
+          item.esNuevoMatch && estilos.nuevoMatch,
+        ]}
+      >
         <Card.Content style={estilos.contenidoConversacion}>
           {/* Avatar del usuario */}
           <View style={estilos.avatarContainer}>
-            {item.usuario.foto ? (
-              <Avatar.Image 
-                size={60} 
-                source={{ uri: item.usuario.foto }}
+            {item.otroUsuario.avatar ? (
+              <Avatar.Image
+                size={60}
+                source={{ uri: item.otroUsuario.avatar }}
               />
             ) : (
-              <Avatar.Text 
-                size={60} 
-                label={`${item.usuario.nombre[0]}${item.usuario.apellido[0]}`}
+              <Avatar.Text
+                size={60}
+                label={item.otroUsuario.nombre.charAt(0).toUpperCase()}
               />
             )}
             {item.esNuevoMatch && (
               <Badge style={estilos.badgeNuevo}>NUEVO</Badge>
+            )}
+            {item.noLeidos > 0 && (
+              <Badge style={estilos.badgeNoLeidos}>{item.noLeidos}</Badge>
             )}
           </View>
 
@@ -210,54 +273,57 @@ export default function PantallaMatches(): JSX.Element {
           <View style={estilos.infoConversacion}>
             <View style={estilos.headerConversacion}>
               <Text variant="titleMedium" style={estilos.nombreUsuario}>
-                {item.usuario.nombre} {item.usuario.apellido}
+                {item.otroUsuario.nombre}
               </Text>
-              <Text variant="bodySmall" style={estilos.tiempo}>
-                {formatearTiempo(item.ultimoMensaje.fecha)}
-              </Text>
-            </View>
-
-            <View style={estilos.detallesUsuario}>
-              <Text variant="bodySmall" style={estilos.ubicacion}>
-                📍 {item.usuario.ciudad} • {item.distancia}km
-              </Text>
-              {item.mascota && (
-                <Text variant="bodySmall" style={estilos.mascota}>
-                  🐕 {item.mascota.nombre} ({item.mascota.raza})
+              {item.ultimoMensaje && (
+                <Text variant="bodySmall" style={estilos.tiempo}>
+                  {formatearTiempo(item.ultimoMensaje.createdAt)}
                 </Text>
               )}
             </View>
 
-            <View style={estilos.ultimoMensajeContainer}>
-              <Text 
-                variant="bodyMedium" 
-                style={[
-                  estilos.ultimoMensaje,
-                  !item.ultimoMensaje.leido && estilos.mensajeNoLeido
-                ]}
-                numberOfLines={1}
-              >
-                {item.ultimoMensaje.texto}
-              </Text>
-              {!item.ultimoMensaje.leido && (
-                <View style={estilos.indicadorNoLeido} />
-              )}
-            </View>
-          </View>
+            {item.match.eventoPropuesto && (
+              <View style={estilos.detallesUsuario}>
+                <Text variant="bodySmall" style={estilos.eventoPropuesto}>
+                  📅 {item.match.eventoPropuesto.titulo}
+                </Text>
+              </View>
+            )}
 
-          {/* Foto de la mascota */}
-          {item.mascota?.foto && (
-            <View style={estilos.fotoMascotaContainer}>
-              <Image 
-                source={{ uri: item.mascota.foto }}
-                style={estilos.fotoMascota}
-              />
-            </View>
-          )}
+            {item.ultimoMensaje ? (
+              <View style={estilos.ultimoMensajeContainer}>
+                <Text
+                  variant="bodyMedium"
+                  style={[
+                    estilos.ultimoMensaje,
+                    item.noLeidos > 0 && estilos.mensajeNoLeido,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {item.ultimoMensaje.contenido}
+                </Text>
+              </View>
+            ) : (
+              <View style={estilos.ultimoMensajeContainer}>
+                <Text variant="bodySmall" style={estilos.mensajeInicial}>
+                  {item.match.mensajeInicial || 'Match realizado'}
+                </Text>
+              </View>
+            )}
+          </View>
         </Card.Content>
       </Card>
     </TouchableOpacity>
   );
+
+  if (cargando) {
+    return (
+      <View style={estilos.contenedorCarga}>
+        <ActivityIndicator size="large" color={temaApp.colors.primary} />
+        <Text style={estilos.textoCarga}>Cargando conversaciones...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={estilos.contenedor}>
@@ -275,15 +341,22 @@ export default function PantallaMatches(): JSX.Element {
       <FlatList
         data={conversacionesFiltradas}
         renderItem={renderizarConversacion}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.match.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={estilos.listaConversaciones}
+        refreshControl={
+          <RefreshControl
+            refreshing={refrescando}
+            onRefresh={manejarRefresh}
+            colors={[temaApp.colors.primary]}
+          />
+        }
         ListEmptyComponent={
           <View style={estilos.contenedorVacio}>
-            <MaterialIcons 
-              name="chat-bubble-outline" 
-              size={80} 
-              color={temaApp.colors.onSurfaceVariant} 
+            <MaterialIcons
+              name="chat-bubble-outline"
+              size={80}
+              color={temaApp.colors.onSurfaceVariant}
             />
             <Text variant="headlineSmall" style={estilos.textoVacio}>
               Sin conversaciones
@@ -299,7 +372,7 @@ export default function PantallaMatches(): JSX.Element {
       <FAB
         icon="favorite"
         style={estilos.fab}
-        onPress={() => Alert.alert('Matching', 'Ir a la pantalla de matching')}
+        onPress={irAMatching}
         label="Encontrar matches"
       />
     </View>
@@ -310,6 +383,16 @@ const estilos = StyleSheet.create({
   contenedor: {
     flex: 1,
     backgroundColor: temaApp.colors.background,
+  },
+  contenedorCarga: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: temaApp.colors.background,
+  },
+  textoCarga: {
+    marginTop: espaciado.md,
+    color: temaApp.colors.onSurfaceVariant,
   },
   barraBusqueda: {
     margin: espaciado.md,
@@ -345,9 +428,19 @@ const estilos = StyleSheet.create({
     right: -5,
     backgroundColor: temaApp.colors.primary,
   },
+  badgeNoLeidos: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: temaApp.colors.error,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   infoConversacion: {
     flex: 1,
-    marginRight: espaciado.sm,
   },
   headerConversacion: {
     flexDirection: 'row',
@@ -365,11 +458,7 @@ const estilos = StyleSheet.create({
   detallesUsuario: {
     marginBottom: espaciado.xs,
   },
-  ubicacion: {
-    color: temaApp.colors.onSurfaceVariant,
-    marginBottom: 2,
-  },
-  mascota: {
+  eventoPropuesto: {
     color: temaApp.colors.primary,
   },
   ultimoMensajeContainer: {
@@ -384,20 +473,9 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     color: temaApp.colors.onSurface,
   },
-  indicadorNoLeido: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: temaApp.colors.primary,
-    marginLeft: espaciado.xs,
-  },
-  fotoMascotaContainer: {
-    marginLeft: espaciado.sm,
-  },
-  fotoMascota: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  mensajeInicial: {
+    color: temaApp.colors.onSurfaceVariant,
+    fontStyle: 'italic',
   },
   contenedorVacio: {
     alignItems: 'center',

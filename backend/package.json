@@ -4,7 +4,9 @@
   "description": "Backend API para SportPetMatch - Aplicación móvil para eventos deportivos con mascotas",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "node start-dev.js",
+    "dev:direct": "nodemon src/index.ts",
+    "dev:clean": "node scripts/liberar-puerto.js",
     "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "test": "jest",

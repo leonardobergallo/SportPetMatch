@@ -15,6 +15,7 @@ import rutasUsuarios from './rutas/usuarios';
 import rutasMascotas from './rutas/mascotas';
 import rutasEventos from './rutas/eventos';
 import rutasMatches from './rutas/matches';
+import rutasMensajes from './rutas/mensajes';
 
 // Importar middleware personalizado
 // import { middlewareAutenticacion } from './middleware/autenticacion';
@@ -31,8 +32,11 @@ dotenv.config({ path: configPath });
 const app = express();
 
 // Configuración del puerto
-const PUERTO = process.env.PORT || 3000;
-const HOST = process.env.HOST || 'localhost';
+// Convertir a número explícitamente para evitar errores de TypeScript
+const PUERTO = parseInt(process.env.PORT || '3000', 10);
+// En desarrollo, escuchar en todas las interfaces (0.0.0.0) para permitir conexiones desde Expo Go
+// En producción, usar localhost o la IP específica del servidor
+const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? 'localhost' : '0.0.0.0');
 
 // Middleware de seguridad
 app.use(helmet({
@@ -40,17 +44,30 @@ app.use(helmet({
 }));
 
 // Configuración de CORS para permitir conexiones desde la app móvil
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:8081',
-    'http://192.168.0.108:8081',
-    'exp://192.168.0.108:8081'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+// En desarrollo, permitir todas las conexiones desde Expo Go
+const corsOptions = process.env.NODE_ENV === 'production' 
+  ? {
+      origin: [
+        'http://localhost:3000',
+        'http://localhost:8081',
+        'http://192.168.0.108:8081',
+        'http://172.20.10.3:8081',
+        'exp://192.168.0.108:8081',
+        'exp://172.20.10.3:8081'
+      ],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    }
+  : {
+      // En desarrollo, permitir todas las conexiones (útil para Expo Go)
+      origin: true,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    };
+
+app.use(cors(corsOptions));
 
 // Middleware de compresión para optimizar respuestas
 app.use(compression());
@@ -106,6 +123,7 @@ app.get('/api', (req, res) => {
       mascotas: '/api/mascotas',
       eventos: '/api/eventos',
       matches: '/api/matches',
+      mensajes: '/api/mensajes',
       desafios: '/api/desafios',
       notificaciones: '/api/notificaciones'
     }
@@ -118,6 +136,7 @@ app.use('/api/usuarios', rutasUsuarios);
 app.use('/api/mascotas', rutasMascotas);
 app.use('/api/eventos', rutasEventos);
 app.use('/api/matches', rutasMatches);
+app.use('/api/mensajes', rutasMensajes);
 
 // Middleware para rutas no encontradas (404)
 app.use('*', (req, res) => {
@@ -181,12 +200,16 @@ const iniciarServidor = async () => {
     // Aquí podríamos conectar a la base de datos si fuera necesario
     // await conectarBaseDatos();
     
-    app.listen(PUERTO, () => {
+    app.listen(PUERTO, HOST, () => {
       console.log('🚀 Servidor SportPetMatch iniciado exitosamente!');
-      console.log(`📍 Servidor corriendo en: http://${HOST}:${PUERTO}`);
+      console.log(`📍 Servidor corriendo en: http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PUERTO}`);
       console.log(`🌍 Entorno: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`📊 API disponible en: http://${HOST}:${PUERTO}/api`);
-      console.log(`❤️  Salud del servidor: http://${HOST}:${PUERTO}/api/salud`);
+      console.log(`📊 API disponible en: http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PUERTO}/api`);
+      console.log(`❤️  Salud del servidor: http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PUERTO}/api/salud`);
+      if (HOST === '0.0.0.0') {
+        console.log(`📱 Para Expo Go, usa tu IP local: http://TU_IP_LOCAL:${PUERTO}/api`);
+        console.log(`   Ejemplo: http://172.20.10.3:${PUERTO}/api`);
+      }
       console.log('🐕‍🦺 ¡Listo para conectar personas y mascotas!');
     });
   } catch (error) {
