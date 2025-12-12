@@ -7,7 +7,9 @@ import {
   actualizarMascota,
   eliminarMascota,
 } from '../controllers/mascotaController';
+import { subirFotosMascota } from '../controllers/uploadController';
 import { middlewareAutenticacion } from '../middleware/autenticacion';
+import { uploadMultiple } from '../middleware/upload';
 
 const router = express.Router();
 
@@ -19,6 +21,7 @@ router.get('/:id', obtenerMascota);
 router.post('/', crearMascota);
 router.put('/:id', actualizarMascota);
 router.delete('/:id', eliminarMascota);
+router.post('/:id/fotos', uploadMultiple, subirFotosMascota);
 
 export default router;
 

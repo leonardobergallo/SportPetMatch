@@ -7,7 +7,7 @@ import { Platform } from 'react-native';
 // IMPORTANTE: Cambia esto por la IP local de tu computadora
 // Para encontrar tu IP: Windows: ipconfig | findstr IPv4
 //                        Mac/Linux: ifconfig | grep "inet "
-export const LOCAL_IP = '172.20.10.3';
+export const LOCAL_IP = '192.168.0.107';
 
 // Puerto del backend
 export const API_PORT = 3000;

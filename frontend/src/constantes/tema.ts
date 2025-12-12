@@ -4,42 +4,44 @@
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
 // Colores principales de la marca SportPetMatch
-// Adaptados de la estructura con oklch colors
+// Paleta moderna y vibrante mejorada
 const coloresMarca = {
-  // Colores primarios - Inspirados en la naturaleza y el deporte
-  // primary: oklch(0.4 0.15 136) - Green #2E7D32
-  primario: '#2E7D32', // Verde bosque - representa naturaleza y vida
-  primarioVariant: '#1B5E20', // Verde más oscuro para variantes
-  // secondary: oklch(0.55 0.22 42) - Orange #FF6F00
-  secundario: '#FF6F00', // Naranja vibrante - energía y actividad
-  secundarioVariant: '#E65100', // Naranja más oscuro
+  // Colores primarios - Verde moderno y vibrante
+  primario: '#10B981', // Verde esmeralda moderno - representa naturaleza y vida
+  primarioVariant: '#059669', // Verde más oscuro para variantes
+  primarioClaro: '#D1FAE5', // Verde muy claro para fondos
+  
+  // Colores secundarios - Azul vibrante
+  secundario: '#3B82F6', // Azul moderno - energía y actividad
+  secundarioVariant: '#2563EB', // Azul más oscuro
+  secundarioClaro: '#DBEAFE', // Azul muy claro
   
   // Colores de acento
-  // accent: oklch(0.75 0.18 60) - Gold #FFD700
-  acento: '#FFD700', // Dorado - logros y premios
-  acentoSuave: '#FFF9C4', // Dorado claro
+  acento: '#F59E0B', // Ámbar dorado - logros y premios
+  acentoSuave: '#FEF3C7', // Ámbar claro
   
   // Colores de estado
-  exito: '#4CAF50', // Verde para éxito
-  advertencia: '#FF9800', // Naranja para advertencias
-  error: '#F44336', // Rojo para errores
-  info: '#2196F3', // Azul para información
+  exito: '#10B981', // Verde para éxito
+  advertencia: '#F59E0B', // Ámbar para advertencias
+  error: '#EF4444', // Rojo moderno para errores
+  info: '#3B82F6', // Azul para información
   
-  // Colores neutros - Adaptados de la estructura
-  // background: oklch(0.98 0.01 70) - Muy claro
-  fondo: '#FAFAFA', // Fondo principal claro
-  // card: oklch(1 0 0) - Blanco puro
-  superficie: '#FFFFFF', // Superficie de tarjetas
-  superficieVariant: '#F5F5F5', // Superficie alternativa
-  // border: oklch(0.92 0.01 70) - Gris muy claro
-  borde: '#E8E8E8', // Bordes sutiles
-  // foreground: oklch(0.15 0.02 280) - Casi negro
-  texto: '#212121', // Texto principal
-  // muted-foreground: oklch(0.5 0.02 280) - Gris medio
-  textoSecundario: '#757575', // Texto secundario
-  textoDeshabilitado: '#BDBDBD', // Texto deshabilitado
-  // muted: oklch(0.93 0.01 70) - Gris muy claro
-  muted: '#EDEDED', // Fondo muted
+  // Colores semánticos para funcionalidades
+  like: '#EF4444', // Rojo para corazón/like
+  likeClaro: '#FEE2E2', // Rojo claro para fondos
+  match: '#059669', // Verde intenso para matches
+  matchClaro: '#D1FAE5', // Verde claro para fondos de match
+  pass: '#9CA3AF', // Gris para pass/rechazar
+  
+  // Colores neutros - Más suaves y modernos
+  fondo: '#F9FAFB', // Fondo principal muy claro (gris azulado)
+  superficie: '#FFFFFF', // Superficie de tarjetas (blanco puro)
+  superficieVariant: '#F3F4F6', // Superficie alternativa (gris muy claro)
+  borde: '#E5E7EB', // Bordes sutiles (gris claro)
+  texto: '#111827', // Texto principal (casi negro suave)
+  textoSecundario: '#6B7280', // Texto secundario (gris medio)
+  textoDeshabilitado: '#9CA3AF', // Texto deshabilitado (gris)
+  muted: '#F3F4F6', // Fondo muted (gris muy claro)
   
   // Colores para mascotas
   perro: '#8D6E63', // Marrón para perros
@@ -87,6 +89,13 @@ export const temaApp = {
     disabled: coloresMarca.textoDeshabilitado,
     muted: coloresMarca.muted,
     textoSecundario: coloresMarca.textoSecundario,
+    
+    // Colores semánticos para funcionalidades
+    like: coloresMarca.like,
+    likeLight: coloresMarca.likeClaro,
+    match: coloresMarca.match,
+    matchLight: coloresMarca.matchClaro,
+    pass: coloresMarca.pass,
     
     // Colores específicos para mascotas
     petDog: coloresMarca.perro,

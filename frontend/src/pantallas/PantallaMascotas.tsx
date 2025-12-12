@@ -132,16 +132,14 @@ export default function PantallaMascotas(): JSX.Element {
    * Navegar a agregar mascota
    */
   const navegarAAgregar = () => {
-    // TODO: Navegar a pantalla de agregar mascota
-    console.log('Navegar a agregar mascota');
+    navigation.navigate('AgregarMascota');
   };
 
   /**
    * Navegar a detalle de mascota
    */
   const navegarADetalle = (mascotaId: string) => {
-    // TODO: Navegar a pantalla de detalle de mascota
-    console.log('Navegar a detalle de mascota:', mascotaId);
+    navigation.navigate('DetalleMascota', { mascotaId });
   };
 
   if (!estaAutenticado) {

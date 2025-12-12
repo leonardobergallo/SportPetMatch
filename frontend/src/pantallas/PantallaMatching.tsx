@@ -22,9 +22,14 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Importar tema y contexto de ubicación
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { temaApp } from '../constantes/tema';
+import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { useUbicacion, formatearDistancia, Coordenadas } from '../contextos/ContextoUbicacion';
-import { obtenerRecomendaciones, UsuarioRecomendado } from '../servicios/servicioMatches';
+import { obtenerRecomendaciones, crearMatch, UsuarioRecomendado } from '../servicios/servicioMatches';
+
+type MatchingScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 // Tipos para usuarios potenciales
 interface UsuarioPotencial {
@@ -58,6 +63,7 @@ const SWIPE_THRESHOLD = 120;
  * Permite hacer swipe en usuarios para crear matches
  */
 export default function PantallaMatching(): JSX.Element {
+  const navigation = useNavigation<MatchingScreenNavigationProp>();
   const [usuarios, setUsuarios] = useState<UsuarioPotencial[]>([]);
   const [usuarioActual, setUsuarioActual] = useState(0);
   const [cargando, setCargando] = useState(true);
@@ -126,6 +132,7 @@ export default function PantallaMatching(): JSX.Element {
         }
       } catch (error) {
         console.log('Error cargando recomendaciones de API, usando datos mock:', error);
+        // Continuar con datos mock si falla la API
       }
       
       // Fallback: usar datos mock con geolocalización
@@ -325,31 +332,40 @@ export default function PantallaMatching(): JSX.Element {
    */
   const enviarLike = async (usuarioId: string) => {
     try {
-      // TODO: Conectar con API del backend
-      console.log('Like enviado a usuario:', usuarioId);
+      const match = await crearMatch({
+        usuarioMatchId: usuarioId,
+      });
       
-      // Simular respuesta del backend
-      const esMatch = Math.random() > 0.7; // 30% de probabilidad de match
-      
-      if (esMatch) {
+      // Si el match fue aceptado (ambos se gustaron), mostrar alerta
+      if (match.estado === 'aceptado') {
         Alert.alert(
           '🎉 ¡Es un Match!',
           `¡Ambos se han gustado! Ahora pueden empezar a chatear.`,
-          [{ text: 'Genial!' }]
+          [
+            { text: 'Genial!' },
+            {
+              text: 'Ir al Chat',
+              onPress: () => {
+                navigation.navigate('Chat', { matchId: match.id });
+              },
+            },
+          ]
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error enviando like:', error);
+      Alert.alert('Error', error.message || 'No se pudo enviar el like');
     }
   };
 
   /**
-   * Envía un pass al backend
+   * Envía un pass al backend (no hacer match)
    */
   const enviarPass = async (usuarioId: string) => {
     try {
-      // TODO: Conectar con API del backend
-      console.log('Pass enviado a usuario:', usuarioId);
+      // Un pass simplemente no crea un match, no necesitamos llamar a la API
+      // Solo continuamos al siguiente usuario
+      console.log('Pass para usuario:', usuarioId);
     } catch (error) {
       console.error('Error enviando pass:', error);
     }
@@ -552,7 +568,7 @@ export default function PantallaMatching(): JSX.Element {
           onPress={() => handleSwipe('left')}
           style={estilos.botonPass}
           icon="close"
-          textColor="#E64A19"
+          textColor={temaApp.colors.pass}
           buttonColor="#fff"
         >
           Pasar
@@ -563,7 +579,7 @@ export default function PantallaMatching(): JSX.Element {
           style={estilos.botonLike}
           icon="favorite"
           textColor="#fff"
-          buttonColor="#E64A19"
+          buttonColor={temaApp.colors.like}
         >
           Match
         </Button>
@@ -739,7 +755,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
   },
   botonPass: {
-    borderColor: '#E64A19',
+    borderColor: temaApp.colors.pass,
     borderWidth: 2,
     borderRadius: 30,
     paddingHorizontal: 30,
@@ -749,10 +765,15 @@ const estilos = StyleSheet.create({
     backgroundColor: '#9E9E9E',
   },
   botonLike: {
-    backgroundColor: '#E64A19',
+    backgroundColor: temaApp.colors.like,
     borderRadius: 30,
     paddingHorizontal: 30,
     paddingVertical: 10,
+    elevation: 4,
+    shadowColor: temaApp.colors.like,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   contadorContainer: {
     position: 'absolute',

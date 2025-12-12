@@ -47,29 +47,35 @@ export default function PantallaRegistro(): JSX.Element {
    * Validar formulario
    */
   const validarFormulario = (): boolean => {
-    if (!nombre.trim()) {
-      Alert.alert('Error', 'El nombre es requerido');
+    const { validarEmail, validarContraseña, validarTelefono, validarCampoRequerido, mensajesError } = require('../utilidades/validaciones');
+    
+    if (!validarCampoRequerido(nombre)) {
+      Alert.alert('Error', mensajesError.campoRequerido('El nombre'));
       return false;
     }
-    if (!email.trim()) {
-      Alert.alert('Error', 'El email es requerido');
+    if (!validarCampoRequerido(email)) {
+      Alert.alert('Error', mensajesError.campoRequerido('El email'));
       return false;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Email inválido');
+    if (!validarEmail(email)) {
+      Alert.alert('Error', mensajesError.emailInvalido);
       return false;
     }
-    if (!password) {
-      Alert.alert('Error', 'La contraseña es requerida');
+    if (!validarCampoRequerido(password)) {
+      Alert.alert('Error', mensajesError.campoRequerido('La contraseña'));
       return false;
     }
-    if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+    if (!validarContraseña(password)) {
+      Alert.alert('Error', mensajesError.contraseñaCorta);
       return false;
     }
     if (password !== confirmarPassword) {
       Alert.alert('Error', 'Las contraseñas no coinciden');
+      return false;
+    }
+    // Validar teléfono si se proporciona
+    if (telefono.trim() && !validarTelefono(telefono.trim())) {
+      Alert.alert('Error', mensajesError.telefonoInvalido);
       return false;
     }
     return true;

@@ -1,5 +1,8 @@
+// Pantalla de Mapa - SportPetMatch
+// Mapa interactivo con Google Maps (web y móvil)
+
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, Platform, ScrollView, TouchableOpacity, Linking, Dimensions } from 'react-native';
 import { 
   Surface, 
   Appbar, 
@@ -10,17 +13,20 @@ import {
   Text,
   Card,
   Chip,
-  IconButton,
   List,
-  Divider,
-  ActivityIndicator
+  ActivityIndicator,
+  Divider
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useUbicacion } from '../contextos/ContextoUbicacion';
+import { temaApp, espaciado } from '../constantes/tema';
 
-// Clave de Google Maps
-const GOOGLE_MAPS_API_KEY = 'AIzaSyCeUPMP3dmgyP_yJZLZjsCZPmZUrU5lFPg';
+// Coordenadas de Santa Fe Capital, Argentina (por defecto)
+const SANTA_FE_CAPITAL = {
+  latitud: -31.6333,
+  longitud: -60.7,
+};
 
 // Tipos para los datos del mapa
 interface UsuarioMapa {
@@ -44,219 +50,288 @@ interface EventoMapa {
   maxParticipantes: number;
 }
 
-// Componente simple de vista de mapa (sin mapa real por ahora)
-const VistaMapa = ({ coordenadas, usuarios, eventos, onItemPress }: {
-  coordenadas: any;
+// Componente de Mapa con OpenStreetMap (sin API key requerida)
+const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress }: {
+  coordenadas: { latitud: number; longitud: number };
   usuarios: UsuarioMapa[];
   eventos: EventoMapa[];
   onItemPress: (tipo: 'usuario' | 'evento', item: any) => void;
 }) => {
+  // URL de OpenStreetMap (gratis, sin API key)
   
-  console.log('Platform.OS:', Platform.OS);
-  
-  // SIEMPRE usar Google Maps embebido (forzar mapa)
-  // if (Platform.OS === 'web') {
-  if (true) {
-    // Generar marcadores para Google Maps
-    const marcadores = [
-      {
-        id: 'current',
-        lat: coordenadas.latitud,
-        lng: coordenadas.longitud,
-        label: 'Tú',
-        icon: 'blue'
-      },
-      ...usuarios.map((u, idx) => ({
-        id: `usuario-${u.id}`,
-        lat: u.ubicacionLat,
-        lng: u.ubicacionLng,
-        label: u.nombre,
-        icon: 'green'
-      })),
-      ...eventos.map((e, idx) => ({
-        id: `evento-${e.id}`,
-        lat: e.ubicacionLat,
-        lng: e.ubicacionLng,
-        label: e.titulo,
-        icon: 'red'
-      }))
+  // En web, usar OpenStreetMap con marcadores visuales
+  if (Platform.OS === 'web') {
+    // Calcular bounding box para incluir todos los puntos
+    const todasLasLatitudes = [coordenadas.latitud, ...usuarios.map(u => u.ubicacionLat), ...eventos.map(e => e.ubicacionLat)];
+    const todasLasLongitudes = [coordenadas.longitud, ...usuarios.map(u => u.ubicacionLng), ...eventos.map(e => e.ubicacionLng)];
+    
+    const minLat = Math.min(...todasLasLatitudes);
+    const maxLat = Math.max(...todasLasLatitudes);
+    const minLng = Math.min(...todasLasLongitudes);
+    const maxLng = Math.max(...todasLasLongitudes);
+    
+    // Agregar padding al bounding box
+    const latPadding = (maxLat - minLat) * 0.1 || 0.01;
+    const lngPadding = (maxLng - minLng) * 0.1 || 0.01;
+    
+    const bbox = `${minLng - lngPadding},${minLat - latPadding},${maxLng + lngPadding},${maxLat + latPadding}`;
+    const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik`;
+    
+    // URL para abrir en Google Maps con todos los marcadores
+    const todosLosPuntos = [
+      `${coordenadas.latitud},${coordenadas.longitud}`,
+      ...usuarios.map(u => `${u.ubicacionLat},${u.ubicacionLng}`),
+      ...eventos.map(e => `${e.ubicacionLat},${e.ubicacionLng}`),
     ];
-
-    // Generar HTML para Google Maps
-    const markersStr = marcadores.map(m => 
-      `&markers=color:${m.icon}|label:${m.label.charAt(0)}|${m.lat},${m.lng}`
-    ).join('');
-
-    const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${coordenadas.latitud},${coordenadas.longitud}&zoom=13&size=600x400&key=${GOOGLE_MAPS_API_KEY}${markersStr}`;
-    console.log('Google Maps URL:', mapUrl);
-
+    const googleMapsUrl = `https://www.google.com/maps/dir/${todosLosPuntos.join('/')}`;
+    
+    // Calcular posiciones relativas para los marcadores visuales
+    const { width: mapWidth, height: mapHeight } = Dimensions.get('window');
+    const mapContainerWidth = mapWidth - (espaciado.md * 2); // Ancho del contenedor del mapa
+    const mapContainerHeight = 400; // Altura del iframe
+    
+    const calcularPosicion = (lat: number, lng: number) => {
+      const latRange = maxLat - minLat + (latPadding * 2);
+      const lngRange = maxLng - minLng + (lngPadding * 2);
+      const latPercent = ((lat - (minLat - latPadding)) / latRange);
+      const lngPercent = ((lng - (minLng - lngPadding)) / lngRange);
+      
+      // Convertir porcentajes a píxeles
+      const top = (1 - latPercent) * mapContainerHeight;
+      const left = lngPercent * mapContainerWidth;
+      
+      return { top, left };
+    };
+    
     return (
       <View style={styles.mapaContainer}>
-        <View style={styles.mapaSimulado}>
-          <Image 
-            source={{ uri: mapUrl }} 
-            style={styles.mapaImagen} 
-            resizeMode="cover"
-          />
+        <View style={styles.mapaWebContainer}>
+          <TouchableOpacity
+            onPress={() => {
+              if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.open(googleMapsUrl, '_blank');
+              } else {
+                Linking.openURL(googleMapsUrl);
+              }
+            }}
+            activeOpacity={0.9}
+            style={styles.mapaClickable}
+          >
+            {/* @ts-ignore - iframe funciona en web */}
+            <iframe
+              width="100%"
+              height="400"
+              style={{ border: 0, borderRadius: 8 }}
+              loading="lazy"
+              src={mapUrl}
+              title="Mapa de SportPetMatch"
+            />
+            {/* Marcadores visuales superpuestos */}
+            <View style={styles.marcadoresOverlay}>
+              {/* Tu ubicación */}
+              <TouchableOpacity
+                style={[styles.marcadorVisual, styles.marcadorAzul, calcularPosicion(coordenadas.latitud, coordenadas.longitud)]}
+                onPress={() => onItemPress('usuario', { id: 'current', nombre: 'Tu ubicación', ubicacionLat: coordenadas.latitud, ubicacionLng: coordenadas.longitud })}
+              >
+                <MaterialIcons name="my-location" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+              
+              {/* Usuarios */}
+              {usuarios.map((usuario) => (
+                <TouchableOpacity
+                  key={usuario.id}
+                  style={[styles.marcadorVisual, styles.marcadorVerde, calcularPosicion(usuario.ubicacionLat, usuario.ubicacionLng)]}
+                  onPress={() => onItemPress('usuario', usuario)}
+                >
+                  <MaterialIcons name="person" size={16} color="#FFFFFF" />
+                </TouchableOpacity>
+              ))}
+              
+              {/* Eventos */}
+              {eventos.map((evento) => (
+                <TouchableOpacity
+                  key={evento.id}
+                  style={[styles.marcadorVisual, styles.marcadorRojo, calcularPosicion(evento.ubicacionLat, evento.ubicacionLng)]}
+                  onPress={() => onItemPress('evento', evento)}
+                >
+                  <MaterialIcons name="event" size={16} color="#FFFFFF" />
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.mapaOverlayWeb}>
+              <MaterialIcons name="open-in-new" size={20} color="#FFFFFF" />
+              <Text style={styles.mapaOverlayTextoWeb}>
+                Toca para ver en Google Maps
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
-        
+        <View style={styles.leyendaContainer}>
+          <View style={styles.leyendaItem}>
+            <View style={[styles.leyendaColor, { backgroundColor: '#2196F3' }]} />
+            <Text style={styles.leyendaTexto}>Tu ubicación</Text>
+          </View>
+          <View style={styles.leyendaItem}>
+            <View style={[styles.leyendaColor, { backgroundColor: '#4CAF50' }]} />
+            <Text style={styles.leyendaTexto}>Usuarios ({usuarios.length})</Text>
+          </View>
+          <View style={styles.leyendaItem}>
+            <View style={[styles.leyendaColor, { backgroundColor: '#F44336' }]} />
+            <Text style={styles.leyendaTexto}>Eventos ({eventos.length})</Text>
+          </View>
+        </View>
         <ScrollView style={styles.listaContainer}>
-          <Text variant="titleMedium" style={styles.seccionTitulo}>
-            👥 Usuarios Cercanos ({usuarios.length})
-          </Text>
-          
-          {usuarios.map((usuario) => (
-            <TouchableOpacity
-              key={usuario.id}
-              onPress={() => onItemPress('usuario', usuario)}
-            >
-              <List.Item
-                title={usuario.nombre}
-                description={`${usuario.edad} años - ${usuario.ubicacionCiudad}`}
-                left={(props) => <List.Icon {...props} icon="account" />}
-                right={(props) => (
-                  <View style={styles.distanciaContainer}>
-                    <Text variant="bodySmall">
-                      {calcularDistanciaDisplay(coordenadas, usuario)}
-                    </Text>
-                    <MaterialIcons name="place" size={16} color="#666" />
-                  </View>
-                )}
-                style={styles.listItem}
-              />
-            </TouchableOpacity>
-          ))}
-          
-          <Divider style={styles.divider} />
-          
-          <Text variant="titleMedium" style={styles.seccionTitulo}>
-            🏃‍♂️ Eventos Deportivos ({eventos.length})
-          </Text>
-          
-          {eventos.map((evento) => (
-            <TouchableOpacity
-              key={evento.id}
-              onPress={() => onItemPress('evento', evento)}
-            >
-              <List.Item
-                title={evento.titulo}
-                description={`${evento.tipo} - ${new Date(evento.fechaInicio).toLocaleDateString('es-AR')}`}
-                left={(props) => <List.Icon {...props} icon="calendar" />}
-                right={(props) => (
-                  <View style={styles.distanciaContainer}>
-                    <Text variant="bodySmall">
-                      {calcularDistanciaDisplay(coordenadas, evento)}
-                    </Text>
-                    <Text variant="bodySmall">
-                      {evento.participantes}/{evento.maxParticipantes}
-                    </Text>
-                  </View>
-                )}
-                style={styles.listItem}
-              />
-            </TouchableOpacity>
-          ))}
+          <ListaUsuariosYEventos
+            usuarios={usuarios}
+            eventos={eventos}
+            coordenadas={coordenadas}
+            onItemPress={onItemPress}
+          />
         </ScrollView>
       </View>
     );
   }
-  
-  // Para móvil, usar vista simplificada
+
+  // En móvil, mostrar vista con marcadores visuales y botón para abrir en Google Maps
   return (
-    <View style={styles.mapaSimulado}>
-      <View style={styles.ubicacionActual}>
-        <MaterialIcons name="my-location" size={24} color="#2196F3" />
-        <Text variant="bodyMedium" style={styles.coordenadasTexto}>
-          Tu ubicación: {coordenadas.latitud.toFixed(4)}, {coordenadas.longitud.toFixed(4)}
-        </Text>
-        <Text variant="bodySmall">Santa Fe Capital</Text>
+    <View style={styles.mapaContainer}>
+      <View style={styles.mapaPlaceholderContainer}>
+        <View style={styles.mapaPlaceholder}>
+          <MaterialIcons name="map" size={64} color={temaApp.colors.primary} />
+          <Text style={styles.mapaPlaceholderTitulo}>Mapa de SportPetMatch</Text>
+          <Text style={styles.mapaPlaceholderTexto}>
+            Ubicación: Santa Fe Capital, Argentina
+          </Text>
+          
+          {/* Mostrar marcadores visuales */}
+          <View style={styles.marcadoresContainer}>
+            <View style={styles.marcadorItem}>
+              <View style={[styles.marcadorPunto, { backgroundColor: '#2196F3' }]} />
+              <Text style={styles.marcadorTexto}>Tu ubicación</Text>
+            </View>
+            {usuarios.length > 0 && (
+              <View style={styles.marcadorItem}>
+                <View style={[styles.marcadorPunto, { backgroundColor: '#4CAF50' }]} />
+                <Text style={styles.marcadorTexto}>{usuarios.length} usuarios cercanos</Text>
+              </View>
+            )}
+            {eventos.length > 0 && (
+              <View style={styles.marcadorItem}>
+                <View style={[styles.marcadorPunto, { backgroundColor: '#F44336' }]} />
+                <Text style={styles.marcadorTexto}>{eventos.length} eventos cercanos</Text>
+              </View>
+            )}
+          </View>
+          
+          <TouchableOpacity
+            onPress={() => {
+              // Abrir Google Maps en la app nativa con todos los marcadores
+              const marcadoresUrl = [
+                `${coordenadas.latitud},${coordenadas.longitud}`,
+                ...usuarios.map(u => `${u.ubicacionLat},${u.ubicacionLng}`),
+                ...eventos.map(e => `${e.ubicacionLat},${e.ubicacionLng}`),
+              ].join('/');
+              const url = `https://www.google.com/maps/dir/${marcadoresUrl}`;
+              Linking.openURL(url).catch(err => console.error('Error abriendo Google Maps:', err));
+            }}
+            activeOpacity={0.8}
+            style={styles.mapaPlaceholderBoton}
+          >
+            <MaterialIcons name="open-in-new" size={20} color="#FFFFFF" />
+            <Text style={styles.mapaPlaceholderBotonTexto}>
+              Ver en Google Maps
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
       
-      <Divider style={styles.divider} />
-      
       <ScrollView style={styles.listaContainer}>
-        <Text variant="titleMedium" style={styles.seccionTitulo}>
-          👥 Usuarios Cercanos ({usuarios.length})
-        </Text>
-        
-        {usuarios.map((usuario) => (
-          <TouchableOpacity
-            key={usuario.id}
-            onPress={() => onItemPress('usuario', usuario)}
-          >
-            <List.Item
-              title={usuario.nombre}
-              description={`${usuario.edad} años - ${usuario.ubicacionCiudad}`}
-              left={(props) => <List.Icon {...props} icon="account" />}
-              right={(props) => (
-                <View style={styles.distanciaContainer}>
-                  <Text variant="bodySmall">
-                    {calcularDistanciaDisplay(coordenadas, usuario)}
-                  </Text>
-                  <MaterialIcons name="place" size={16} color="#666" />
-                </View>
-              )}
-              style={styles.listItem}
-            />
-          </TouchableOpacity>
-        ))}
-        
-        <Divider style={styles.divider} />
-        
-        <Text variant="titleMedium" style={styles.seccionTitulo}>
-          🏃‍♂️ Eventos Deportivos ({eventos.length})
-        </Text>
-        
-        {eventos.map((evento) => (
-          <TouchableOpacity
-            key={evento.id}
-            onPress={() => onItemPress('evento', evento)}
-          >
-            <List.Item
-              title={evento.titulo}
-              description={`${evento.tipo} - ${new Date(evento.fechaInicio).toLocaleDateString('es-AR')}`}
-              left={(props) => <List.Icon {...props} icon="calendar" />}
-              right={(props) => (
-                <View style={styles.distanciaContainer}>
-                  <Text variant="bodySmall">
-                    {calcularDistanciaDisplay(coordenadas, evento)}
-                  </Text>
-                  <Text variant="bodySmall">
-                    {evento.participantes}/{evento.maxParticipantes}
-                  </Text>
-                </View>
-              )}
-              style={styles.listItem}
-            />
-          </TouchableOpacity>
-        ))}
+        <ListaUsuariosYEventos
+          usuarios={usuarios}
+          eventos={eventos}
+          coordenadas={coordenadas}
+          onItemPress={onItemPress}
+        />
       </ScrollView>
     </View>
   );
 };
 
-// Función auxiliar para calcular distancia
-const calcularDistanciaDisplay = (coordenadas: any, item: any) => {
-  const R = 6371;
-  const dLat = (item.ubicacionLat - coordenadas.latitud) * Math.PI / 180;
-  const dLon = (item.ubicacionLng - coordenadas.longitud) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(coordenadas.latitud * Math.PI / 180) * Math.cos(item.ubicacionLat * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  const distancia = R * c;
-  
-  return distancia < 1 
-    ? `${Math.round(distancia * 1000)}m`
-    : `${distancia.toFixed(1)}km`;
+// Componente para lista de usuarios y eventos
+const ListaUsuariosYEventos = ({ usuarios, eventos, coordenadas, onItemPress }: any) => {
+  const calcularDistancia = (item: any) => {
+    const R = 6371;
+    const dLat = (item.ubicacionLat - coordenadas.latitud) * Math.PI / 180;
+    const dLon = (item.ubicacionLng - coordenadas.longitud) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(coordenadas.latitud * Math.PI / 180) * Math.cos(item.ubicacionLat * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distancia = R * c;
+    return distancia < 1 ? `${Math.round(distancia * 1000)}m` : `${distancia.toFixed(1)}km`;
+  };
+
+  return (
+    <>
+      <Text variant="titleMedium" style={styles.seccionTitulo}>
+        👥 Usuarios Cercanos ({usuarios.length})
+      </Text>
+      
+      {usuarios.map((usuario: UsuarioMapa) => (
+        <TouchableOpacity
+          key={usuario.id}
+          onPress={() => onItemPress('usuario', usuario)}
+        >
+          <List.Item
+            title={usuario.nombre}
+            description={`${usuario.edad} años - ${usuario.ubicacionCiudad}`}
+            left={(props) => <List.Icon {...props} icon="account" />}
+            right={() => (
+              <View style={styles.distanciaContainer}>
+                <Text variant="bodySmall">{calcularDistancia(usuario)}</Text>
+                <MaterialIcons name="place" size={16} color={temaApp.colors.onSurfaceVariant} />
+              </View>
+            )}
+            style={styles.listItem}
+          />
+        </TouchableOpacity>
+      ))}
+      
+      <Divider style={styles.divider} />
+      
+      <Text variant="titleMedium" style={styles.seccionTitulo}>
+        🏃‍♂️ Eventos Deportivos ({eventos.length})
+      </Text>
+      
+      {eventos.map((evento: EventoMapa) => (
+        <TouchableOpacity
+          key={evento.id}
+          onPress={() => onItemPress('evento', evento)}
+        >
+          <List.Item
+            title={evento.titulo}
+            description={`${evento.tipo} - ${new Date(evento.fechaInicio).toLocaleDateString('es-AR')}`}
+            left={(props) => <List.Icon {...props} icon="calendar" />}
+            right={() => (
+              <View style={styles.distanciaContainer}>
+                <Text variant="bodySmall">{calcularDistancia(evento)}</Text>
+                <Text variant="bodySmall">{evento.participantes}/{evento.maxParticipantes}</Text>
+              </View>
+            )}
+            style={styles.listItem}
+          />
+        </TouchableOpacity>
+      ))}
+    </>
+  );
 };
 
 export default function PantallaMapa() {
-  const navigation = useNavigation();
-  const { ubicacionActual, coordenadas, calcularDistancia } = useUbicacion();
+  const navigation = useNavigation<any>();
+  const { coordenadas: coordenadasContexto } = useUbicacion();
   
-  console.log('PantallaMapa - Platform:', Platform.OS);
-  console.log('PantallaMapa - coordenadas:', coordenadas);
+  // Usar coordenadas del contexto o Santa Fe Capital por defecto
+  const coordenadas = coordenadasContexto || SANTA_FE_CAPITAL;
   
   // Estados para datos del mapa
   const [usuarios, setUsuarios] = useState<UsuarioMapa[]>([]);
@@ -277,9 +352,8 @@ export default function PantallaMapa() {
     try {
       setCargando(true);
       
-      // Por ahora usamos datos de prueba locales
-      // TODO: Conectar con la API real
-      const usuariosPrueba = [
+      // Datos de prueba para Santa Fe Capital
+      const usuariosPrueba: UsuarioMapa[] = [
         {
           id: '1',
           nombre: 'María González',
@@ -318,7 +392,7 @@ export default function PantallaMapa() {
         }
       ];
 
-      const eventosPrueba = [
+      const eventosPrueba: EventoMapa[] = [
         {
           id: '1',
           titulo: 'Running matutino en Costanera',
@@ -380,37 +454,19 @@ export default function PantallaMapa() {
   const calcularDistanciaElemento = (elemento: UsuarioMapa | EventoMapa) => {
     if (!coordenadas || !elemento.ubicacionLat || !elemento.ubicacionLng) return 'N/A';
     
-    const distancia = calcularDistancia(
-      { latitud: coordenadas.latitud, longitud: coordenadas.longitud },
-      { latitud: elemento.ubicacionLat, longitud: elemento.ubicacionLng }
-    );
+    const R = 6371;
+    const dLat = (elemento.ubicacionLat - coordenadas.latitud) * Math.PI / 180;
+    const dLon = (elemento.ubicacionLng - coordenadas.longitud) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(coordenadas.latitud * Math.PI / 180) * Math.cos(elemento.ubicacionLat * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distancia = R * c;
     
     return distancia < 1 
       ? `${Math.round(distancia * 1000)}m`
       : `${distancia.toFixed(1)}km`;
   };
-
-  const { width, height } = Dimensions.get('window');
-
-  if (!coordenadas) {
-    return (
-      <Surface style={styles.container}>
-        <Appbar.Header>
-          <Appbar.BackAction onPress={() => navigation.goBack()} />
-          <Appbar.Content title="Mapa de SportPetMatch" />
-        </Appbar.Header>
-        <View style={styles.centeredContainer}>
-          <ActivityIndicator animating={true} size="large" />
-          <Text style={{ marginTop: 16 }}>
-            {ubicacionActual ? 'Cargando mapa...' : 'Configurando ubicación por defecto...'}
-          </Text>
-          <Text variant="bodySmall" style={{ marginTop: 8, textAlign: 'center' }}>
-            Usando Santa Fe Capital como ubicación inicial
-          </Text>
-        </View>
-      </Surface>
-    );
-  }
 
   return (
     <Surface style={styles.container}>
@@ -424,32 +480,39 @@ export default function PantallaMapa() {
         />
       </Appbar.Header>
 
-      <View style={styles.mapaContainer}>
-        <VistaMapa
-          coordenadas={coordenadas}
-          usuarios={usuarios}
-          eventos={eventos}
-          onItemPress={manejarPresionMarcador}
-        />
-        
-        {/* Controles flotantes */}
-        <View style={styles.controlesFlotantes}>
-          <Chip 
-            icon="account-group" 
-            mode="outlined"
-            style={styles.chip}
-          >
-            {usuarios.length} usuarios
-          </Chip>
-          <Chip 
-            icon="calendar" 
-            mode="outlined"
-            style={styles.chip}
-          >
-            {eventos.length} eventos
-          </Chip>
+      {cargando ? (
+        <View style={styles.centeredContainer}>
+          <ActivityIndicator animating={true} size="large" />
+          <Text style={{ marginTop: 16 }}>Cargando mapa...</Text>
         </View>
-      </View>
+      ) : (
+        <View style={styles.mapaContainer}>
+          <VistaMapaSimple
+            coordenadas={coordenadas}
+            usuarios={usuarios}
+            eventos={eventos}
+            onItemPress={manejarPresionMarcador}
+          />
+          
+          {/* Controles flotantes */}
+          <View style={styles.controlesFlotantes}>
+            <Chip 
+              icon="account-group" 
+              mode="outlined"
+              style={styles.chip}
+            >
+              {usuarios.length} usuarios
+            </Chip>
+            <Chip 
+              icon="calendar" 
+              mode="outlined"
+              style={styles.chip}
+            >
+              {eventos.length} eventos
+            </Chip>
+          </View>
+        </View>
+      )}
 
       {/* Dialog de información */}
       <Portal>
@@ -469,14 +532,16 @@ export default function PantallaMapa() {
                       <Text variant="bodySmall">
                         Distancia: {calcularDistanciaElemento(elementoSeleccionado)}
                       </Text>
-                      <View style={styles.mascotasContainer}>
-                        <Text variant="bodySmall" style={styles.mascotasTitle}>Mascotas:</Text>
-                        {elementoSeleccionado.mascotas?.map((mascota: string, index: number) => (
-                          <Chip key={index} compact style={styles.mascotaChip}>
-                            {mascota}
-                          </Chip>
-                        ))}
-                      </View>
+                      {elementoSeleccionado.mascotas?.length > 0 && (
+                        <View style={styles.mascotasContainer}>
+                          <Text variant="bodySmall" style={styles.mascotasTitle}>Mascotas:</Text>
+                          {elementoSeleccionado.mascotas.map((mascota: string, index: number) => (
+                            <Chip key={index} compact style={styles.mascotaChip}>
+                              {mascota}
+                            </Chip>
+                          ))}
+                        </View>
+                      )}
                     </>
                   ) : (
                     <>
@@ -484,12 +549,6 @@ export default function PantallaMapa() {
                       <Text variant="bodyMedium">Tipo: {elementoSeleccionado.tipo}</Text>
                       <Text variant="bodySmall">
                         Fecha: {new Date(elementoSeleccionado.fechaInicio).toLocaleDateString('es-AR')}
-                      </Text>
-                      <Text variant="bodySmall">
-                        Hora: {new Date(elementoSeleccionado.fechaInicio).toLocaleTimeString('es-AR', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
                       </Text>
                       <Text variant="bodySmall">
                         Participantes: {elementoSeleccionado.participantes}/{elementoSeleccionado.maxParticipantes}
@@ -507,7 +566,9 @@ export default function PantallaMapa() {
             <Button onPress={() => setDialogVisible(false)}>Cerrar</Button>
             <Button mode="contained" onPress={() => {
               setDialogVisible(false);
-              // TODO: Navegar a perfil de usuario o detalles de evento
+              if (tipoElemento === 'evento') {
+                navigation.navigate('DetalleEvento', { eventoId: elementoSeleccionado.id });
+              }
             }}>
               Ver más
             </Button>
@@ -519,10 +580,7 @@ export default function PantallaMapa() {
       <FAB
         icon="plus"
         style={styles.fab}
-        onPress={() => {
-          // TODO: Navegar a crear evento
-          console.log('Crear nuevo evento');
-        }}
+        onPress={() => navigation.navigate('CrearEvento')}
       />
     </Surface>
   );
@@ -541,78 +599,210 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  mapaSimulado: {
-    backgroundColor: '#f5f5f5',
-    padding: 16,
-  },
-  mapaImagen: {
-    width: '100%',
-    height: 300,
+  mapaWebContainer: {
+    margin: espaciado.md,
     borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: temaApp.colors.surface,
+    position: 'relative',
   },
-  ubicacionActual: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 8,
-    elevation: 2,
+  mapaClickable: {
+    position: 'relative',
+    cursor: 'pointer',
+  },
+  marcadoresOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    pointerEvents: 'box-none',
+  },
+  marcadorVisual: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    transform: [{ translateX: -16 }, { translateY: -16 }],
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    alignItems: 'center',
-    marginBottom: 16,
   },
-  coordenadasTexto: {
-    marginTop: 8,
-    fontFamily: 'monospace',
+  marcadorAzul: {
+    backgroundColor: '#2196F3',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  marcadorVerde: {
+    backgroundColor: '#4CAF50',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  marcadorRojo: {
+    backgroundColor: '#F44336',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  mapaOverlayWeb: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    padding: espaciado.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: espaciado.xs,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  mapaOverlayTextoWeb: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  mapaPlaceholderContainer: {
+    margin: espaciado.md,
+  },
+  mapaPlaceholder: {
+    height: 300,
+    backgroundColor: temaApp.colors.surface,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: espaciado.xl,
+    borderWidth: 2,
+    borderColor: temaApp.colors.primary,
+    borderStyle: 'dashed',
+  },
+  mapaPlaceholderTitulo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: temaApp.colors.onSurface,
+    marginTop: espaciado.md,
+    marginBottom: espaciado.sm,
+  },
+  mapaPlaceholderTexto: {
+    fontSize: 14,
+    color: temaApp.colors.onSurfaceVariant,
+    textAlign: 'center',
+    marginBottom: espaciado.xs,
+  },
+  marcadoresContainer: {
+    marginTop: espaciado.md,
+    marginBottom: espaciado.md,
+    gap: espaciado.sm,
+  },
+  marcadorItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaciado.sm,
+  },
+  marcadorPunto: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  marcadorTexto: {
+    fontSize: 12,
+    color: temaApp.colors.onSurface,
+  },
+  mapaPlaceholderBoton: {
+    marginTop: espaciado.md,
+    backgroundColor: temaApp.colors.primary,
+    paddingHorizontal: espaciado.lg,
+    paddingVertical: espaciado.md,
+    borderRadius: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaciado.sm,
+  },
+  mapaPlaceholderBotonTexto: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  leyendaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: espaciado.md,
+    padding: espaciado.sm,
+    backgroundColor: temaApp.colors.surface,
+    marginHorizontal: espaciado.md,
+    borderRadius: 8,
+    marginTop: espaciado.sm,
+  },
+  leyendaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaciado.xs,
+  },
+  leyendaColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  leyendaTexto: {
+    fontSize: 11,
+    color: temaApp.colors.onSurfaceVariant,
   },
   listaContainer: {
     flex: 1,
+    backgroundColor: temaApp.colors.background,
   },
   seccionTitulo: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: 'white',
-    marginBottom: 4,
+    paddingVertical: espaciado.sm,
+    paddingHorizontal: espaciado.md,
+    backgroundColor: temaApp.colors.surface,
+    fontWeight: '600',
   },
   listItem: {
-    backgroundColor: 'white',
+    backgroundColor: temaApp.colors.surface,
     marginBottom: 1,
   },
   distanciaContainer: {
     alignItems: 'flex-end',
     justifyContent: 'center',
+    gap: 4,
   },
   divider: {
-    marginVertical: 8,
+    marginVertical: espaciado.sm,
   },
   controlesFlotantes: {
     position: 'absolute',
-    top: 16,
-    right: 16,
+    top: espaciado.md,
+    right: espaciado.md,
     flexDirection: 'column',
-    gap: 8,
+    gap: espaciado.sm,
   },
   chip: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
   },
   dialogCard: {
-    marginBottom: 16,
+    marginBottom: espaciado.md,
   },
   mascotasContainer: {
-    marginTop: 8,
+    marginTop: espaciado.sm,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: espaciado.xs,
   },
   mascotasTitle: {
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginRight: espaciado.xs,
   },
   mascotaChip: {
-    marginRight: 4,
-    marginBottom: 4,
+    marginRight: espaciado.xs,
+    marginBottom: espaciado.xs,
   },
   fab: {
     position: 'absolute',
-    margin: 16,
+    margin: espaciado.md,
     right: 0,
     bottom: 0,
   },

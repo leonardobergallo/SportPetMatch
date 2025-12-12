@@ -20,6 +20,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 // Importar tema
 import { temaApp, espaciado } from '../constantes/tema';
+// Importar cliente API
+import apiClient from '../servicios/apiClient';
 
 interface DashboardData {
   usuario: {
@@ -61,17 +63,16 @@ export default function PantallaDashboard(): JSX.Element {
 
   const cargarDashboard = async () => {
     try {
-      // TODO: Reemplazar con llamada real a la API
-      const response = await fetch('http://localhost:3000/api/auth/dashboard');
-      const result = await response.json();
+      const response = await apiClient.get('/auth/dashboard');
       
-      if (result.success) {
-        setDatos(result.data);
+      if (response.data.success) {
+        setDatos(response.data.data);
       } else {
         Alert.alert('Error', 'No se pudieron cargar los datos');
       }
-    } catch (error) {
-      Alert.alert('Error', 'Error de conexión');
+    } catch (error: any) {
+      const errorMessage = error.message || 'Error de conexión';
+      Alert.alert('Error', errorMessage);
       console.error('Error cargando dashboard:', error);
     } finally {
       setCargando(false);

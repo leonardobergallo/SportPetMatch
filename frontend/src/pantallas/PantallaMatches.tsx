@@ -224,12 +224,18 @@ export default function PantallaMatches(): JSX.Element {
   };
 
   /**
+   * Ver detalle del match
+   */
+  const verDetalleMatch = (matchId: string) => {
+    navigation.navigate('DetalleMatch', { matchId });
+  };
+
+  /**
    * Ir a pantalla de matching
    */
   const irAMatching = () => {
-    // Navegar a la pantalla de matching
-    // TODO: Implementar navegación cuando esté disponible
-    Alert.alert('Matching', 'Navegar a la pantalla de matching');
+    // Navegar a la pantalla de matching desde tabs
+    navigation.navigate('Matching');
   };
 
   /**
@@ -239,6 +245,7 @@ export default function PantallaMatches(): JSX.Element {
     <TouchableOpacity
       style={estilos.conversacionItem}
       onPress={() => abrirChat(item)}
+      onLongPress={() => verDetalleMatch(item.match.id)}
       activeOpacity={0.7}
     >
       <Card
@@ -371,7 +378,8 @@ export default function PantallaMatches(): JSX.Element {
       {/* FAB para ir a matching */}
       <FAB
         icon="favorite"
-        style={estilos.fab}
+        style={[estilos.fab, { backgroundColor: temaApp.colors.like }]}
+        color="#FFFFFF"
         onPress={irAMatching}
         label="Encontrar matches"
       />

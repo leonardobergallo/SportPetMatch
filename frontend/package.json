@@ -4,8 +4,9 @@
   "description": "Aplicación móvil SportPetMatch - Conecta personas y mascotas en eventos deportivos",
   "main": "index.js",
   "scripts": {
-    "start": "expo start --lan --clear",
-    "start:lan": "expo start --lan",
+    "start": "expo start --lan --clear --reset-cache",
+    "start:lan": "expo start --lan --clear",
+    "start:fresh": "expo start --lan --clear --reset-cache",
     "start:tunnel": "expo start --tunnel",
     "start:offline": "expo start --offline",
     "android": "expo run:android",

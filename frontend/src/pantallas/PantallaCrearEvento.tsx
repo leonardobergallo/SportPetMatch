@@ -379,33 +379,21 @@ export default function PantallaCrearEvento(): JSX.Element {
     }
   }, [isWeb]);
 
-  return (
-    <KeyboardAvoidingView
-      style={estilos.contenedor}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  const contenido = (
+    <ScrollView
+      ref={scrollViewRef}
+      style={estilos.scrollView}
+      contentContainerStyle={[
+        estilos.scrollContent,
+        isWeb && { alignItems: 'center', paddingHorizontal: isTablet ? espaciado.xl : espaciado.md },
+      ]}
+      showsVerticalScrollIndicator={true}
+      showsHorizontalScrollIndicator={true}
+      keyboardShouldPersistTaps="handled"
+      {...(isWeb && {
+        className: 'scrollView-crear-evento',
+      })}
     >
-      <ScrollView
-        ref={scrollViewRef}
-        style={estilos.scrollView}
-        contentContainerStyle={[
-          estilos.scrollContent,
-          isWeb && { alignItems: 'center', paddingHorizontal: isTablet ? espaciado.xl : espaciado.md },
-        ]}
-        showsVerticalScrollIndicator={true}
-        showsHorizontalScrollIndicator={true}
-        keyboardShouldPersistTaps="handled"
-        {...(isWeb && {
-          className: 'scrollView-crear-evento',
-          style: [
-            estilos.scrollView,
-            {
-              overflow: 'auto',
-              scrollbarWidth: 'thin',
-              scrollbarColor: `${temaApp.colors.primary}CC ${temaApp.colors.background}`,
-            } as any,
-          ],
-        })}
-      >
         <Card style={[estilos.card, { maxWidth }]}>
           <CardContent>
             <Text style={estilos.titulo}>Crear Nuevo Evento</Text>
@@ -712,6 +700,20 @@ export default function PantallaCrearEvento(): JSX.Element {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+    </ScrollView>
+  );
+
+  // En web, no usar KeyboardAvoidingView porque limita el scroll
+  if (isWeb) {
+    return <View style={estilos.contenedor}>{contenido}</View>;
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={estilos.contenedor}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      {contenido}
     </KeyboardAvoidingView>
   );
 }
@@ -724,30 +726,28 @@ const estilos = StyleSheet.create({
     flex: 1,
     backgroundColor: temaApp.colors.background,
     ...(isWeb && {
-      minHeight: '100vh',
+      height: '100vh',
+      overflow: 'hidden', // Evitar scroll en el contenedor, solo en ScrollView
     }),
   },
   scrollView: {
     flex: 1,
     ...(isWeb && {
       width: '100%',
-      height: '100vh',
-      overflowY: 'auto',
+      height: '100%',
+      maxHeight: '100%',
+      overflowY: 'scroll',
       overflowX: 'hidden',
-      // Estilos para scrollbar personalizada en web
-      scrollbarWidth: 'thin',
-      scrollbarColor: `${temaApp.colors.primary}CC ${temaApp.colors.background}`,
     }),
   } as any,
   scrollContent: {
     padding: espaciado.md,
-    paddingBottom: 100,
+    paddingBottom: 200, // Más espacio al final para asegurar scroll completo
     ...(isWeb && {
-      minHeight: 'calc(100vh - 64px)',
       paddingHorizontal: SCREEN_WIDTH >= 768 ? espaciado.xl : espaciado.md,
       paddingVertical: SCREEN_WIDTH >= 768 ? espaciado.xl : espaciado.md,
-      display: 'flex',
-      justifyContent: 'center',
+      paddingBottom: 300, // Mucho más espacio en web para ver todo
+      minHeight: 'auto', // No limitar altura mínima
     }),
   },
   card: {

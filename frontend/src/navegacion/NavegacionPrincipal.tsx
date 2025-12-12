@@ -24,6 +24,13 @@ import PantallaMapaWebCompatible from '../pantallas/PantallaMapaWebCompatible';
 import PantallaMapa from '../pantallas/PantallaMapa';
 import PantallaCrearEvento from '../pantallas/PantallaCrearEvento';
 import PantallaChat from '../pantallas/PantallaChat';
+import PantallaDetalleEvento from '../pantallas/PantallaDetalleEvento';
+import PantallaDetalleMascota from '../pantallas/PantallaDetalleMascota';
+import PantallaDetalleMatch from '../pantallas/PantallaDetalleMatch';
+import PantallaEditarPerfil from '../pantallas/PantallaEditarPerfil';
+import PantallaAgregarMascota from '../pantallas/PantallaAgregarMascota';
+import PantallaEditarMascota from '../pantallas/PantallaEditarMascota';
+import PantallaConfiguracion from '../pantallas/PantallaConfiguracion';
 
 // Importar tema y contexto de autenticación
 import { temaApp } from '../constantes/tema';
@@ -49,6 +56,7 @@ export type RootStackParamList = {
   Configuracion: undefined;
   EditarPerfil: undefined;
   AgregarMascota: undefined;
+  EditarMascota: { mascotaId: string };
   CrearEvento: undefined;
 };
 
@@ -278,19 +286,19 @@ function NavegadorPrincipal(): JSX.Element {
           {/* Pantallas de detalle */}
           <Stack.Screen 
             name="DetalleEvento" 
-            component={PantallaInicio} // TODO: Crear componente real
+            component={PantallaDetalleEvento}
             options={{ title: 'Detalle del Evento' }}
           />
           
           <Stack.Screen 
             name="DetalleMascota" 
-            component={PantallaInicio} // TODO: Crear componente real
+            component={PantallaDetalleMascota}
             options={{ title: 'Detalle de la Mascota' }}
           />
           
           <Stack.Screen 
             name="DetalleMatch" 
-            component={PantallaInicio} // TODO: Crear componente real
+            component={PantallaDetalleMatch}
             options={{ title: 'Detalle del Match' }}
           />
           
@@ -303,20 +311,26 @@ function NavegadorPrincipal(): JSX.Element {
           {/* Pantallas de configuración */}
           <Stack.Screen 
             name="Configuracion" 
-            component={PantallaInicio} // TODO: Crear componente real
+            component={PantallaConfiguracion}
             options={{ title: 'Configuración' }}
           />
           
           <Stack.Screen 
             name="EditarPerfil" 
-            component={PantallaInicio} // TODO: Crear componente real
+            component={PantallaEditarPerfil}
             options={{ title: 'Editar Perfil' }}
           />
           
           <Stack.Screen 
-            name="AgregarMascota" 
-            component={PantallaInicio} // TODO: Crear componente real
+            name="AgregarMascota"
+            component={PantallaAgregarMascota}
             options={{ title: 'Agregar Mascota' }}
+          />
+          
+          <Stack.Screen 
+            name="EditarMascota"
+            component={PantallaEditarMascota}
+            options={{ title: 'Editar Mascota' }}
           />
           
           <Stack.Screen 

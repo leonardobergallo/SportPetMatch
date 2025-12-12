@@ -22,6 +22,7 @@ import { actualizarMiPerfil } from '@/servicios/servicioUsuarios';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
+import { mensajesError } from '@/utilidades/validaciones';
 
 type OnboardingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Onboarding'>;
 
@@ -96,18 +97,27 @@ export default function PantallaOnboarding(): JSX.Element {
   /**
    * Validar paso actual
    */
-  const validarPaso = (paso: number): boolean => {
+  const validarPaso = (paso: number): { valida: boolean; mensaje?: string } => {
     switch (paso) {
       case 1:
-        return tipoUsuario !== null;
+        if (tipoUsuario === null) {
+          return { valida: false, mensaje: 'Por favor selecciona cómo practicas deporte' };
+        }
+        return { valida: true };
       case 2:
-        return deportesSeleccionados.length >= 1;
+        if (deportesSeleccionados.length < 1) {
+          return { valida: false, mensaje: 'Por favor selecciona al menos un deporte' };
+        }
+        return { valida: true };
       case 3:
         // Solo validar tipo de mascota si no es "solo"
-        if (tipoUsuario === 'solo') return true;
-        return tipoMascota !== null;
+        if (tipoUsuario === 'solo') return { valida: true };
+        if (tipoMascota === null) {
+          return { valida: false, mensaje: 'Por favor selecciona el tipo de mascota' };
+        }
+        return { valida: true };
       default:
-        return false;
+        return { valida: false, mensaje: 'Paso inválido' };
     }
   };
 
@@ -115,8 +125,9 @@ export default function PantallaOnboarding(): JSX.Element {
    * Siguiente paso
    */
   const siguientePaso = () => {
-    if (!validarPaso(pasoActual)) {
-      Alert.alert('Completa la información', 'Por favor completa todos los campos requeridos');
+    const validacion = validarPaso(pasoActual);
+    if (!validacion.valida) {
+      Alert.alert('Completa la información', validacion.mensaje || 'Por favor completa todos los campos requeridos');
       return;
     }
     if (pasoActual < totalPasos) {
@@ -139,8 +150,23 @@ export default function PantallaOnboarding(): JSX.Element {
    * Finalizar onboarding
    */
   const finalizarOnboarding = async () => {
-    if (!validarPaso(pasoActual)) {
-      Alert.alert('Completa la información', 'Por favor completa todos los campos requeridos');
+    const validacion = validarPaso(pasoActual);
+    if (!validacion.valida) {
+      Alert.alert('Completa la información', validacion.mensaje || 'Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    // Validación final completa
+    if (!tipoUsuario) {
+      Alert.alert('Error', 'Debes seleccionar cómo practicas deporte');
+      return;
+    }
+    if (deportesSeleccionados.length < 1) {
+      Alert.alert('Error', 'Debes seleccionar al menos un deporte');
+      return;
+    }
+    if (tipoUsuario !== 'solo' && !tipoMascota) {
+      Alert.alert('Error', 'Debes seleccionar el tipo de mascota');
       return;
     }
 

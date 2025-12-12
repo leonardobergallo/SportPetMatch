@@ -5,20 +5,30 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Image, LinearGradient } from 'react-native';
 import { Text, Card, Avatar, Switch, Divider, List } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
+import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { Button } from '@/components/ui/button';
 
 // Importar componente Card si existe
 // import { Card, CardContent } from '@/components/ui/card';
 
+type PerfilScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
 export default function PantallaPerfil(): JSX.Element {
+  const navigation = useNavigation<PerfilScreenNavigationProp>();
   const { usuario, cerrarSesion } = useAuth();
   const [notificacionesHabilitadas, setNotificacionesHabilitadas] = useState(true);
   const [modoOscuro, setModoOscuro] = useState(false);
 
   return (
-    <ScrollView style={estilos.contenedor}>
+    <ScrollView 
+      style={estilos.contenedor}
+      contentContainerStyle={estilos.scrollContent}
+      showsVerticalScrollIndicator={true}
+    >
       {/* Header de Perfil */}
       <View style={estilos.profileHeader}>
         <View style={estilos.banner}>
@@ -52,7 +62,7 @@ export default function PantallaPerfil(): JSX.Element {
         <View style={estilos.accionesContainer}>
           <Button 
             variant="secondary" 
-            onPress={() => console.log('Editar perfil')}
+            onPress={() => navigation.navigate('EditarPerfil')}
             style={estilos.botonAccion}
           >
             <MaterialIcons name="edit" size={18} color="#FFFFFF" />
@@ -60,7 +70,7 @@ export default function PantallaPerfil(): JSX.Element {
           </Button>
           <TouchableOpacity 
             style={estilos.botonVerMascota}
-            onPress={() => console.log('Ver mascotas')}
+            onPress={() => navigation.navigate('Mascotas')}
           >
             <Text style={estilos.botonTextoVerMascota}>Ver Mis Mascotas</Text>
           </TouchableOpacity>
@@ -102,22 +112,14 @@ export default function PantallaPerfil(): JSX.Element {
 
           <Divider style={estilos.divider} />
 
-          <TouchableOpacity style={estilos.configItem}>
-            <MaterialIcons name="lock" size={24} color={temaApp.colors.primary} />
+          <TouchableOpacity 
+            style={estilos.configItem}
+            onPress={() => navigation.navigate('Configuracion')}
+          >
+            <MaterialIcons name="settings" size={24} color={temaApp.colors.primary} />
             <View style={estilos.configContent}>
-              <Text style={estilos.configLabel}>Privacidad</Text>
-              <Text style={estilos.configDescription}>Configurar privacidad y seguridad</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color={temaApp.colors.onSurfaceVariant} />
-          </TouchableOpacity>
-
-          <Divider style={estilos.divider} />
-
-          <TouchableOpacity style={estilos.configItem}>
-            <MaterialIcons name="help-outline" size={24} color={temaApp.colors.primary} />
-            <View style={estilos.configContent}>
-              <Text style={estilos.configLabel}>Ayuda y Soporte</Text>
-              <Text style={estilos.configDescription}>Preguntas frecuentes y contacto</Text>
+              <Text style={estilos.configLabel}>Configuración</Text>
+              <Text style={estilos.configDescription}>Ajustes y preferencias</Text>
             </View>
             <MaterialIcons name="chevron-right" size={24} color={temaApp.colors.onSurfaceVariant} />
           </TouchableOpacity>
@@ -135,7 +137,7 @@ export default function PantallaPerfil(): JSX.Element {
               <Text style={estilos.statLabel}>Eventos</Text>
             </View>
             <View style={estilos.statItem}>
-              <MaterialIcons name="favorite" size={32} color={temaApp.colors.secondary} />
+              <MaterialIcons name="favorite" size={32} color={temaApp.colors.like} />
               <Text style={estilos.statValue}>12</Text>
               <Text style={estilos.statLabel}>Matches</Text>
             </View>
@@ -166,6 +168,11 @@ const estilos = StyleSheet.create({
   contenedor: {
     flex: 1,
     backgroundColor: temaApp.colors.background,
+  },
+  scrollContent: {
+    paddingBottom: 150, // Espacio al final para asegurar scroll completo
+    flexGrow: 1,
+    minHeight: '100%', // Asegura que el contenido pueda hacer scroll
   },
   profileHeader: {
     backgroundColor: temaApp.colors.surface,

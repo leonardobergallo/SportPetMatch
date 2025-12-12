@@ -15,7 +15,8 @@ import { Text, Avatar, Menu, Divider } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { RootStackParamList, TabParamList } from '@/navegacion/NavegacionPrincipal';
 
 // Importar nuevos componentes UI
 import { Button } from '@/components/ui/button';
@@ -39,7 +40,7 @@ const images = {
   placeholder: require('../../assets/placeholder.jpg'),
 };
 
-type InicioScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+type InicioScreenNavigationProp = StackNavigationProp<RootStackParamList> & BottomTabNavigationProp<TabParamList>;
 
 /**
  * Pantalla de Inicio - Feed principal de la aplicación
@@ -166,7 +167,7 @@ export default function PantallaInicio(): JSX.Element {
             <Menu.Item 
               onPress={() => {
                 setMostrarMenu(false);
-                console.log('Ver perfil');
+                navigation.navigate('Perfil');
               }} 
               title="Mi Perfil" 
               leadingIcon="account"
@@ -174,7 +175,7 @@ export default function PantallaInicio(): JSX.Element {
             <Menu.Item 
               onPress={() => {
                 setMostrarMenu(false);
-                console.log('Ver configuración');
+                navigation.navigate('Configuracion');
               }} 
               title="Configuración" 
               leadingIcon="cog"
@@ -302,7 +303,7 @@ export default function PantallaInicio(): JSX.Element {
                       <Text style={estilos.matchPet}>{match.pet}</Text>
                       <Text style={estilos.matchFecha}>{match.matchDate}</Text>
                     </View>
-                    <MaterialIcons name="favorite" size={20} color={temaApp.colors.secondary} />
+                    <MaterialIcons name="favorite" size={20} color={temaApp.colors.like} />
                   </View>
                 </CardContent>
               </Card>
@@ -437,7 +438,7 @@ const estilos = StyleSheet.create({
     position: 'absolute',
     top: 12,
     right: 12,
-    backgroundColor: temaApp.colors.secondary,
+    backgroundColor: temaApp.colors.match, // Verde intenso para matches
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
