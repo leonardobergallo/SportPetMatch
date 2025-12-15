@@ -96,9 +96,25 @@ export default function PantallaMatches(): JSX.Element {
     try {
       const matches = await obtenerMisMatches();
 
+      // Filtrar solo matches aceptados y eliminar duplicados
+      const matchesAceptados = matches.filter(match => match.estado === 'aceptado');
+      
+      // Eliminar duplicados basándose en el par de usuarios (usuarioId + usuarioMatchId)
+      const matchesUnicos = matchesAceptados.reduce((acc, match) => {
+        const parUsuarios = [match.usuario.id, match.usuarioMatch.id].sort().join('-');
+        const existe = acc.find(m => {
+          const parExistente = [m.usuario.id, m.usuarioMatch.id].sort().join('-');
+          return parExistente === parUsuarios;
+        });
+        if (!existe) {
+          acc.push(match);
+        }
+        return acc;
+      }, [] as Match[]);
+
       // Construir conversaciones con información del otro usuario y último mensaje
       const conversacionesData = await Promise.all(
-        matches.map(async (match) => {
+        matchesUnicos.map(async (match) => {
           // Determinar quién es el otro usuario
           const otroUsuario =
             match.usuarioId === usuario?.id

@@ -336,6 +336,9 @@ export default function PantallaMatching(): JSX.Element {
         usuarioMatchId: usuarioId,
       });
       
+      // Eliminar el usuario de la lista de recomendaciones para evitar duplicados
+      setUsuarios(prev => prev.filter(u => u.id !== usuarioId));
+      
       // Si el match fue aceptado (ambos se gustaron), mostrar alerta
       if (match.estado === 'aceptado') {
         Alert.alert(
@@ -351,9 +354,20 @@ export default function PantallaMatching(): JSX.Element {
             },
           ]
         );
+      } else {
+        // Match pendiente - mostrar mensaje informativo
+        Alert.alert(
+          'Like enviado',
+          'Has enviado un like. Si la otra persona también te da like, será un match.',
+          [{ text: 'OK' }]
+        );
       }
     } catch (error: any) {
       console.error('Error enviando like:', error);
+      // Si el error es que ya existe un match, eliminar el usuario de la lista igualmente
+      if (error.message?.includes('Ya existe un match') || error.response?.status === 409) {
+        setUsuarios(prev => prev.filter(u => u.id !== usuarioId));
+      }
       Alert.alert('Error', error.message || 'No se pudo enviar el like');
     }
   };
@@ -362,6 +376,8 @@ export default function PantallaMatching(): JSX.Element {
    * Envía un pass al backend (no hacer match)
    */
   const enviarPass = async (usuarioId: string) => {
+    // Eliminar el usuario de la lista de recomendaciones
+    setUsuarios(prev => prev.filter(u => u.id !== usuarioId));
     try {
       // Un pass simplemente no crea un match, no necesitamos llamar a la API
       // Solo continuamos al siguiente usuario

@@ -380,6 +380,7 @@ export default function PantallaCrearEvento(): JSX.Element {
   }, [isWeb]);
 
   const contenido = (
+    <>
     <ScrollView
       ref={scrollViewRef}
       style={estilos.scrollView}
@@ -700,7 +701,7 @@ export default function PantallaCrearEvento(): JSX.Element {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-    </ScrollView>
+    </>
   );
 
   // En web, no usar KeyboardAvoidingView porque limita el scroll

@@ -99,7 +99,9 @@ frontend/
 - **Primario**: Verde bosque (#2E7D32) - Naturaleza y vida
 - **Secundario**: Naranja vibrante (#FF6F00) - Energía y actividad
 - **Acento**: Dorado (#FFD700) - Logros y premios
-- **Fondo**: Gris claro (#FAFAFA) - Limpieza y simplicidad
+- **Fondo**: Beige claro (#FAFAFA) - Limpieza y simplicidad
+
+*Colores basados en la paleta de la carpeta Estructura*
 
 ### Componentes
 

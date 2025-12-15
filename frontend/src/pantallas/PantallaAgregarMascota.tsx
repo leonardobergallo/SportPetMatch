@@ -93,22 +93,25 @@ export default function PantallaAgregarMascota(): JSX.Element {
    */
   const seleccionarImagen = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permisos', 'Se necesitan permisos para acceder a la galería');
-        return;
+      // Solicitar permisos solo en mobile
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permisos', 'Se necesitan permisos para acceder a la galería');
+          return;
+        }
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'images', // Nueva API sin deprecación
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
         allowsMultipleSelection: true,
       });
 
-      if (!result.canceled && result.assets) {
-        const nuevasFotos = result.assets.map((asset) => asset.uri);
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const nuevasFotos = result.assets.map((asset) => asset.uri).filter(uri => uri);
         setFotos([...fotos, ...nuevasFotos]);
       }
     } catch (error) {
@@ -194,32 +197,45 @@ export default function PantallaAgregarMascota(): JSX.Element {
         intereses,
         salud: salud.trim() || undefined,
         veterinario: veterinario.trim() || undefined,
+        // No incluir fotos locales en la creación inicial
         fotos: fotosExistentes.length > 0 ? fotosExistentes : undefined,
       };
 
-      // Crear mascota primero
+      // Crear mascota primero (sin fotos locales)
       const mascotaCreada = await crearMascota(datos);
 
-      // Si hay fotos locales, subirlas
+      // Si hay fotos locales, subirlas después de crear la mascota
       if (fotosLocales.length > 0) {
         try {
           await subirFotosMascota(mascotaCreada.id, fotosLocales);
         } catch (error: any) {
           console.error('Error subiendo fotos:', error);
           // No fallar si las fotos no se suben, solo mostrar advertencia
-          Alert.alert('Advertencia', 'Mascota creada pero algunas fotos no se pudieron subir');
+          Alert.alert(
+            'Mascota creada',
+            'La mascota se creó correctamente, pero algunas fotos no se pudieron subir. Puedes agregarlas después editando la mascota.',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.goBack(),
+              },
+            ]
+          );
+          return; // Salir aquí para no mostrar el alert de éxito duplicado
         }
       }
 
-      Alert.alert('Éxito', 'Mascota agregada correctamente', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      // Navegar de vuelta inmediatamente después de guardar
+      navigation.goBack();
+      
+      // Mostrar mensaje de éxito (opcional, sin bloquear navegación)
+      setTimeout(() => {
+        Alert.alert('Éxito', 'Mascota agregada correctamente');
+      }, 300);
     } catch (error: any) {
       console.error('Error guardando mascota:', error);
-      Alert.alert('Error', error.message || 'No se pudo agregar la mascota');
+      const mensajeError = error.response?.data?.message || error.message || 'No se pudo agregar la mascota';
+      Alert.alert('Error', mensajeError);
     } finally {
       setGuardando(false);
     }

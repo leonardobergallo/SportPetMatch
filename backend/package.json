@@ -16,7 +16,9 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:listar-usuarios": "node scripts/listar-usuarios.js",
+    "db:aceptar-matches": "node scripts/aceptar-matches-ejemplo.js"
   },
   "keywords": [
     "api",

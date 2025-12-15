@@ -2,7 +2,7 @@
 .scrollView-crear-evento,
 .scrollView-crear-evento * {
   scrollbar-width: auto;
-  scrollbar-color: #10B981 #F9FAFB;
+  scrollbar-color: #2E7D32 #FAFAFA;
 }
 
 .scrollView-crear-evento::-webkit-scrollbar,
@@ -12,19 +12,19 @@
 
 .scrollView-crear-evento::-webkit-scrollbar-track,
 .scrollView-crear-evento *::-webkit-scrollbar-track {
-  background: #F9FAFB;
+  background: #FAFAFA;
   border-radius: 6px;
 }
 
 .scrollView-crear-evento::-webkit-scrollbar-thumb,
 .scrollView-crear-evento *::-webkit-scrollbar-thumb {
-  background: #10B981;
+  background: #2E7D32;
   border-radius: 6px;
-  border: 2px solid #F9FAFB;
+  border: 2px solid #FAFAFA;
 }
 
 .scrollView-crear-evento::-webkit-scrollbar-thumb:hover,
 .scrollView-crear-evento *::-webkit-scrollbar-thumb:hover {
-  background: #059669;
+  background: #1B5E20;
 }
 

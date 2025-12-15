@@ -157,7 +157,7 @@ function NavegadorTabs(): JSX.Element {
         component={PantallaInicio}
         options={{
           title: 'Inicio',
-          headerTitle: 'SportPetMatch',
+          headerShown: false, // El header está en el componente Header
         }}
       />
       

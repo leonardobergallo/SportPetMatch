@@ -67,7 +67,7 @@ const NIVELES_DEPORTE = [
  */
 export default function PantallaEditarPerfil(): JSX.Element {
   const navigation = useNavigation<EditarPerfilNavigationProp>();
-  const { usuario: usuarioAuth, actualizarUsuario } = useAuth();
+  const { actualizarUsuario } = useAuth();
 
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -113,27 +113,36 @@ export default function PantallaEditarPerfil(): JSX.Element {
    */
   const seleccionarImagen = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permisos', 'Se necesitan permisos para acceder a la galería');
-        return;
+      // Solicitar permisos solo en mobile
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permisos', 'Se necesitan permisos para acceder a la galería');
+          return;
+        }
       }
 
+      // Usar la API correcta - en expo-image-picker 17+ se usa MediaType
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: 'images', // Nueva API sin deprecación
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
 
-      if (!result.canceled && result.assets[0]) {
-        try {
-          // Subir imagen al servidor
-          const imageUrl = await subirAvatar(result.assets[0].uri);
-          setAvatar(imageUrl);
-        } catch (error: any) {
-          console.error('Error subiendo avatar:', error);
-          Alert.alert('Error', error.message || 'No se pudo subir la imagen');
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const selectedImage = result.assets[0];
+        if (selectedImage.uri) {
+          try {
+            // Subir imagen al servidor
+            const imageUrl = await subirAvatar(selectedImage.uri);
+            setAvatar(imageUrl);
+            // Mostrar éxito silencioso (sin alert que bloquee)
+            console.log('✅ Imagen subida correctamente');
+          } catch (error: any) {
+            console.error('Error subiendo avatar:', error);
+            Alert.alert('Error', error.message || 'No se pudo subir la imagen');
+          }
         }
       }
     } catch (error) {
@@ -186,15 +195,17 @@ export default function PantallaEditarPerfil(): JSX.Element {
         actualizarUsuario(usuarioActualizado);
       }
 
-      Alert.alert('Éxito', 'Perfil actualizado correctamente', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      // Navegar de vuelta inmediatamente después de guardar
+      navigation.goBack();
+      
+      // Mostrar mensaje de éxito (opcional, sin bloquear navegación)
+      setTimeout(() => {
+        Alert.alert('Éxito', 'Perfil actualizado correctamente');
+      }, 300);
     } catch (error: any) {
       console.error('Error guardando perfil:', error);
-      Alert.alert('Error', error.message || 'No se pudo actualizar el perfil');
+      const mensajeError = error.response?.data?.message || error.message || 'No se pudo actualizar el perfil';
+      Alert.alert('Error', mensajeError);
     } finally {
       setGuardando(false);
     }

@@ -4,44 +4,44 @@
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
 // Colores principales de la marca SportPetMatch
-// Paleta moderna y vibrante mejorada
+// Paleta basada en la carpeta Estructura con colores preferidos
 const coloresMarca = {
-  // Colores primarios - Verde moderno y vibrante
-  primario: '#10B981', // Verde esmeralda moderno - representa naturaleza y vida
-  primarioVariant: '#059669', // Verde más oscuro para variantes
-  primarioClaro: '#D1FAE5', // Verde muy claro para fondos
+  // Colores primarios - Verde bosque (de Estructura)
+  primario: '#2E7D32', // Verde bosque - representa naturaleza y vida
+  primarioVariant: '#1B5E20', // Verde más oscuro para variantes
+  primarioClaro: '#C8E6C9', // Verde muy claro para fondos
   
-  // Colores secundarios - Azul vibrante
-  secundario: '#3B82F6', // Azul moderno - energía y actividad
-  secundarioVariant: '#2563EB', // Azul más oscuro
-  secundarioClaro: '#DBEAFE', // Azul muy claro
+  // Colores secundarios - Naranja vibrante (de Estructura)
+  secundario: '#FF6F00', // Naranja vibrante - energía y actividad
+  secundarioVariant: '#E65100', // Naranja más oscuro
+  secundarioClaro: '#FFE0B2', // Naranja muy claro
   
-  // Colores de acento
-  acento: '#F59E0B', // Ámbar dorado - logros y premios
-  acentoSuave: '#FEF3C7', // Ámbar claro
+  // Colores de acento - Dorado (de Estructura)
+  acento: '#FFD700', // Dorado - logros y premios
+  acentoSuave: '#FFF9C4', // Dorado claro
   
   // Colores de estado
-  exito: '#10B981', // Verde para éxito
-  advertencia: '#F59E0B', // Ámbar para advertencias
-  error: '#EF4444', // Rojo moderno para errores
-  info: '#3B82F6', // Azul para información
+  exito: '#2E7D32', // Verde para éxito (mismo que primario)
+  advertencia: '#FF6F00', // Naranja para advertencias (mismo que secundario)
+  error: '#D32F2F', // Rojo para errores
+  info: '#1976D2', // Azul para información
   
   // Colores semánticos para funcionalidades
-  like: '#EF4444', // Rojo para corazón/like
-  likeClaro: '#FEE2E2', // Rojo claro para fondos
-  match: '#059669', // Verde intenso para matches
-  matchClaro: '#D1FAE5', // Verde claro para fondos de match
-  pass: '#9CA3AF', // Gris para pass/rechazar
+  like: '#D32F2F', // Rojo para corazón/like
+  likeClaro: '#FFCDD2', // Rojo claro para fondos
+  match: '#2E7D32', // Verde bosque para matches (mismo que primario)
+  matchClaro: '#C8E6C9', // Verde claro para fondos de match
+  pass: '#9E9E9E', // Gris para pass/rechazar
   
-  // Colores neutros - Más suaves y modernos
-  fondo: '#F9FAFB', // Fondo principal muy claro (gris azulado)
+  // Colores neutros - Basados en Estructura
+  fondo: '#FAFAFA', // Fondo principal muy claro (beige claro)
   superficie: '#FFFFFF', // Superficie de tarjetas (blanco puro)
-  superficieVariant: '#F3F4F6', // Superficie alternativa (gris muy claro)
-  borde: '#E5E7EB', // Bordes sutiles (gris claro)
-  texto: '#111827', // Texto principal (casi negro suave)
-  textoSecundario: '#6B7280', // Texto secundario (gris medio)
-  textoDeshabilitado: '#9CA3AF', // Texto deshabilitado (gris)
-  muted: '#F3F4F6', // Fondo muted (gris muy claro)
+  superficieVariant: '#F5F5F5', // Superficie alternativa (gris muy claro)
+  borde: '#E0E0E0', // Bordes sutiles (gris claro)
+  texto: '#212121', // Texto principal (casi negro)
+  textoSecundario: '#757575', // Texto secundario (gris medio)
+  textoDeshabilitado: '#9E9E9E', // Texto deshabilitado (gris)
+  muted: '#F5F5F5', // Fondo muted (gris muy claro)
   
   // Colores para mascotas
   perro: '#8D6E63', // Marrón para perros
@@ -137,8 +137,8 @@ export const temaApp = {
       fontWeight: '500' as const,
     },
   },
-  // Configuración de formas y bordes
-  roundness: 12, // Bordes redondeados más suaves
+  // Configuración de formas y bordes (basado en Estructura)
+  roundness: 12, // Bordes redondeados (0.75rem = 12px)
 };
 
 // Tema oscuro (para modo nocturno futuro)

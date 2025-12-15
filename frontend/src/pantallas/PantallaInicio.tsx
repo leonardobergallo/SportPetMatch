@@ -11,7 +11,7 @@ import {
   TextInput,
   TouchableOpacity
 } from 'react-native';
-import { Text, Avatar, Menu, Divider } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -21,6 +21,7 @@ import { RootStackParamList, TabParamList } from '@/navegacion/NavegacionPrincip
 // Importar nuevos componentes UI
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import Header from '@/components/Header';
 
 // Importar servicios
 import { obtenerDashboard } from '@/servicios/servicioAuth';
@@ -48,12 +49,11 @@ type InicioScreenNavigationProp = StackNavigationProp<RootStackParamList> & Bott
  */
 export default function PantallaInicio(): JSX.Element {
   const navigation = useNavigation<InicioScreenNavigationProp>();
-  const { usuario, cerrarSesion, estaAutenticado } = useAuth();
+  const { usuario, estaAutenticado } = useAuth();
   const [refrescando, setRefrescando] = useState(false);
   const [datos, setDatos] = useState<any>(null);
   const [cargando, setCargando] = useState(true);
   const [searchText, setSearchText] = useState('');
-  const [mostrarMenu, setMostrarMenu] = useState(false);
 
   // Datos mockados basados en la estructura
   const events = [
@@ -143,56 +143,7 @@ export default function PantallaInicio(): JSX.Element {
   return (
     <View style={estilos.contenedor}>
       {/* Header */}
-      <View style={estilos.header}>
-        <View style={estilos.headerContent}>
-          <View style={estilos.logoContainer}>
-            <View style={estilos.logo}>
-              <Text style={estilos.logoEmoji}>🐾</Text>
-            </View>
-            <Text style={estilos.titulo}>SportPetMatch</Text>
-          </View>
-          <Menu
-            visible={mostrarMenu}
-            onDismiss={() => setMostrarMenu(false)}
-            anchor={
-              <TouchableOpacity onPress={() => setMostrarMenu(true)} style={estilos.avatarContainer}>
-                {usuario?.foto ? (
-                  <Avatar.Image size={40} source={{ uri: usuario.foto }} />
-                ) : (
-                  <Avatar.Text size={40} label={usuario?.nombre?.charAt(0).toUpperCase() || 'U'} />
-                )}
-              </TouchableOpacity>
-            }
-          >
-            <Menu.Item 
-              onPress={() => {
-                setMostrarMenu(false);
-                navigation.navigate('Perfil');
-              }} 
-              title="Mi Perfil" 
-              leadingIcon="account"
-            />
-            <Menu.Item 
-              onPress={() => {
-                setMostrarMenu(false);
-                navigation.navigate('Configuracion');
-              }} 
-              title="Configuración" 
-              leadingIcon="cog"
-            />
-            <Divider />
-            <Menu.Item 
-              onPress={async () => {
-                setMostrarMenu(false);
-                await cerrarSesion();
-              }} 
-              title="Cerrar Sesión" 
-              leadingIcon="logout"
-              titleStyle={{ color: temaApp.colors.error }}
-            />
-          </Menu>
-        </View>
-      </View>
+      <Header titulo="SportPetMatch" />
 
       {/* Content */}
       <ScrollView
@@ -320,44 +271,6 @@ const estilos = StyleSheet.create({
   contenedor: {
     flex: 1,
     backgroundColor: temaApp.colors.background,
-  },
-  header: {
-    backgroundColor: temaApp.colors.primary,
-    paddingTop: 40,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    ...sombras.media,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: temaApp.colors.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...sombras.media,
-  },
-  logoEmoji: {
-    fontSize: 20,
-  },
-  titulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: temaApp.colors.onPrimary,
-  },
-  avatarContainer: {
-    width: 40,
-    height: 40,
   },
   scrollView: {
     flex: 1,

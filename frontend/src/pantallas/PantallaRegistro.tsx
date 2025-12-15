@@ -47,7 +47,9 @@ export default function PantallaRegistro(): JSX.Element {
    * Validar formulario
    */
   const validarFormulario = (): boolean => {
-    const { validarEmail, validarContraseña, validarTelefono, validarCampoRequerido, mensajesError } = require('../utilidades/validaciones');
+    // Importar validaciones
+    const validaciones = require('../utilidades/validaciones');
+    const { validarEmail, validarContraseña, validarTelefono, validarCampoRequerido, mensajesError } = validaciones;
     
     if (!validarCampoRequerido(nombre)) {
       Alert.alert('Error', mensajesError.campoRequerido('El nombre'));
@@ -130,10 +132,9 @@ export default function PantallaRegistro(): JSX.Element {
         // La navegación se maneja automáticamente por el contexto de auth
       }
     } catch (error: any) {
-      Alert.alert(
-        'Error',
-        error.message || 'No se pudo crear la cuenta. Intenta de nuevo.'
-      );
+      console.error('Error en registro:', error);
+      const mensajeError = error.response?.data?.message || error.message || 'No se pudo crear la cuenta. Intenta de nuevo.';
+      Alert.alert('Error', mensajeError);
     } finally {
       setCargando(false);
     }

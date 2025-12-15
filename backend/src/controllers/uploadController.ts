@@ -115,7 +115,27 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const archivos = Array.isArray(req.files) ? req.files : [req.files];
+    // Normalizar archivos: req.files puede ser array, objeto con campos, o undefined
+    let archivos: Express.Multer.File[] = [];
+    
+    if (Array.isArray(req.files)) {
+      // Caso: upload.array() - req.files es un array
+      archivos = req.files;
+    } else if (req.files && typeof req.files === 'object') {
+      // Caso: upload.fields() - req.files es un objeto { [fieldname]: File[] }
+      // Extraer todos los archivos de todos los campos
+      const filesObj = req.files as { [fieldname: string]: Express.Multer.File[] };
+      archivos = Object.values(filesObj).flat();
+    }
+    
+    if (archivos.length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'No se proporcionaron archivos válidos',
+      });
+      return;
+    }
+
     const fotosUrls: string[] = [];
 
     // Subir cada imagen
