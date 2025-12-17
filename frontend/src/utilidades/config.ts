@@ -60,12 +60,22 @@ export function getAPIBaseURL(): string {
     return `http://localhost:${API_PORT}/api`;
   }
 
-  // Si estamos en móvil, usar IP local
+  // Si estamos en móvil
   if (isMobile) {
-    return `http://${LOCAL_IP}:${API_PORT}/api`;
+    // En producción (builds de EAS), siempre usar variable de entorno
+    // Si no está configurada, mostrar error claro
+    if (__DEV__) {
+      // En desarrollo con Expo Go, usar IP local
+      return `http://${LOCAL_IP}:${API_PORT}/api`;
+    } else {
+      // En producción, la variable EXPO_PUBLIC_API_URL debe estar configurada
+      console.error('❌ EXPO_PUBLIC_API_URL no está configurada. Configúrala antes de crear el build.');
+      console.error('❌ Ejemplo: EXPO_PUBLIC_API_URL=https://tu-backend.vercel.app/api');
+      return ''; // Retornar vacío para que la app maneje esto gracefully
+    }
   }
 
-  // Por defecto, usar IP local para Expo Go
+  // Por defecto, usar IP local para desarrollo
   return `http://${LOCAL_IP}:${API_PORT}/api`;
 }
 

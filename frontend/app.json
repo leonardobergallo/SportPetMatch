@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sportpetmatch.app",
-      "buildNumber": "1.0.0",
+      "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "Esta app necesita acceso a la cámara para tomar fotos de tu mascota y perfil.",
         "NSLocationWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para mostrarte eventos cercanos y conectar con personas de tu zona.",

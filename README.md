@@ -176,6 +176,24 @@ sportpetmatch/
 - **Base de datos**: Neon (PostgreSQL)
 - **CDN**: Cloudinary para imágenes
 
+### 📱 Guías de Publicación
+
+- **[Guía Completa de Publicación](./GUIA_PUBLICACION_COMPLETA.md)** - Guía detallada paso a paso
+- **[Inicio Rápido](./INICIO_RAPIDO_PUBLICACION.md)** - Guía rápida para comenzar
+- **[Resumen de Publicación](./RESUMEN_PUBLICACION.md)** - Checklist y resumen
+- **[Configurar Variables EAS](./docs/CONFIGURAR_VARIABLES_EAS.md)** - Variables de entorno
+
+### 🛠️ Scripts de Automatización
+
+Todos los scripts están en la carpeta `scripts/`:
+- `publicar-backend-vercel.ps1` - Publicar backend en Vercel
+- `inicializar-eas.ps1` - Inicializar EAS (primera vez)
+- `build-app-android.ps1` - Crear build de Android
+- `build-app-ios.ps1` - Crear build de iOS
+- `submit-google-play.ps1` - Subir a Google Play
+- `submit-app-store.ps1` - Subir a App Store
+- `actualizar-version.ps1` - Actualizar versión de la app
+
 ## 📄 Licencia
 
 MIT License - ver [LICENSE](LICENSE) para más detalles.

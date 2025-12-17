@@ -160,3 +160,5 @@ const estilos = StyleSheet.create({
   },
 });
 
+
+
