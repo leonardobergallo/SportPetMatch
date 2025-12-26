@@ -68,6 +68,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Manejar explícitamente OPTIONS (preflight) para todas las rutas
+// Esto es crítico para que funcione correctamente en Vercel
+app.options('*', cors(corsOptions));
+
 // Middleware de compresión para optimizar respuestas
 app.use(compression());
 

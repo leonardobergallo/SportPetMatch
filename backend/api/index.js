@@ -45,6 +45,14 @@ module.exports = (req, res) => {
   console.log(`📥 ${req.method} ${req.url || req.path} - Original: ${req.originalUrl || req.url}`);
   console.log(`📍 Query:`, req.query);
   console.log(`🔍 Headers:`, req.headers['content-type']);
+  console.log(`🌐 Origin:`, req.headers['origin']);
+  
+  // Manejar OPTIONS (preflight) explícitamente si es necesario
+  // Aunque Express con CORS debería manejarlo, lo hacemos explícito para Vercel
+  if (req.method === 'OPTIONS') {
+    console.log('✅ OPTIONS (preflight) recibido');
+    // Dejar que Express maneje OPTIONS con CORS
+  }
   
   // En Vercel, cuando se reescribe /api/(.*) a /api/index.js,
   // la ruta puede llegar sin el prefijo /api
