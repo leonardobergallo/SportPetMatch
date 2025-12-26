@@ -22,8 +22,13 @@ if (!fs.existsSync(path.join(__dirname, '../api'))) {
 // Copiar api/index.js
 if (fs.existsSync(sourceApi)) {
   try {
-    fs.copyFileSync(sourceApi, destApi);
-    console.log('✅ Copiado: api/index.js');
+    // Leer el contenido y ajustar la ruta de require
+    let content = fs.readFileSync(sourceApi, 'utf8');
+    // Cambiar require('../dist/index.js') a require('./dist/index.js')
+    // porque desde api/index.js, dist está en api/dist/
+    content = content.replace(/require\(['"]\.\.\/dist\//g, "require('./dist/");
+    fs.writeFileSync(destApi, content, 'utf8');
+    console.log('✅ Copiado: api/index.js (con rutas ajustadas)');
   } catch (error) {
     console.error('❌ Error copiando api/index.js:', error.message);
     process.exit(1);
