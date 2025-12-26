@@ -1,9 +1,6 @@
 // Handler de Vercel Serverless para Express
 // Este archivo permite que tu backend Express funcione en Vercel
 
-// Handler de Vercel Serverless para Express
-// Este archivo permite que tu backend Express funcione en Vercel
-
 // Importar la app Express compilada
 let app;
 try {
@@ -40,8 +37,20 @@ try {
   app = errorApp;
 }
 
-// Exportar la app para Vercel
-// Vercel espera que exportemos la app de Express directamente
-// La app debe manejar todas las rutas, incluyendo /api/*
-// Vercel automáticamente enruta /api/* a esta función
-module.exports = app;
+// Exportar handler para Vercel
+// Vercel espera una función que reciba (req, res)
+// Necesitamos asegurarnos de que las rutas se manejen correctamente
+module.exports = (req, res) => {
+  // En Vercel, cuando se reescribe /api/(.*) a /api/index.js,
+  // la ruta original se mantiene en req.url
+  // Pero necesitamos asegurarnos de que Express la maneje correctamente
+  
+  // Log para debugging
+  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV) {
+    console.log(`📥 ${req.method} ${req.url} - Original: ${req.originalUrl || req.url}`);
+  }
+  
+  // Ejecutar la app de Express
+  // Express manejará las rutas que empiezan con /api/*
+  return app(req, res);
+};
