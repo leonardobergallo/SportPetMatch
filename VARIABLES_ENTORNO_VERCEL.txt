@@ -1,0 +1,77 @@
+# Variables de Entorno para Vercel - SportPetMatch
+# Copia y pega estas variables en Vercel → Settings → Environment Variables
+
+# ============================================
+# OBLIGATORIAS - DEBES CONFIGURAR ESTAS
+# ============================================
+
+# Base de Datos PostgreSQL (Neon)
+DATABASE_URL=postgresql://neondb_owner:npg_JOFZ4IlXL6HY@ep-steep-queen-a8xy4xkr-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require
+
+# Entorno
+NODE_ENV=production
+
+# Puerto (opcional, Vercel lo maneja automáticamente)
+PORT=3000
+
+# JWT Secrets (Ya generados - listos para usar)
+JWT_SECRET=21bdc0f3b89d6295fa4b4c7d43d02eba994cd993467b2d990ae719c27a8d4bbc
+JWT_REFRESH_SECRET=03e0df7fc0304ec282cb0e511f2174be6fd31fb818ff228f3b657332e62d68ee
+
+# CORS (Actualiza con tu URL real después del deploy)
+CORS_ORIGIN=https://tu-proyecto.vercel.app
+
+# ============================================
+# FRONTEND (Opcional - se detecta automáticamente)
+# ============================================
+
+# URL del API (opcional, se detecta automáticamente en producción)
+EXPO_PUBLIC_API_URL=/api
+
+# ============================================
+# OPCIONALES - Solo si las usas
+# ============================================
+
+# Cloudinary (para subir imágenes)
+# CLOUDINARY_CLOUD_NAME=tu_cloud_name
+# CLOUDINARY_API_KEY=tu_api_key
+# CLOUDINARY_API_SECRET=tu_api_secret
+
+# Email (Resend)
+# RESEND_API_KEY=tu_resend_api_key
+# EMAIL_FROM=noreply@sportpetmatch.com
+
+# MercadoPago
+# MERCADOPAGO_ACCESS_TOKEN=tu_mercadopago_access_token
+# MERCADOPAGO_PUBLIC_KEY=tu_mercadopago_public_key
+
+# Google OAuth
+# GOOGLE_CLIENT_ID=tu_google_client_id
+# GOOGLE_CLIENT_SECRET=tu_google_client_secret
+
+# Google Maps
+# GOOGLE_MAPS_API_KEY=tu_google_maps_api_key
+
+# WhatsApp API
+# WHATSAPP_API_URL=https://graph.facebook.com/v18.0
+# WHATSAPP_ACCESS_TOKEN=tu_whatsapp_access_token
+# WHATSAPP_PHONE_NUMBER_ID=tu_phone_number_id
+
+# ============================================
+# INSTRUCCIONES
+# ============================================
+
+# 1. Genera JWT_SECRET y JWT_REFRESH_SECRET:
+#    Ejecuta dos veces: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+#
+# 2. Reemplaza los valores de JWT_SECRET y JWT_REFRESH_SECRET con los generados
+#
+# 3. Actualiza CORS_ORIGIN con tu URL real de Vercel después del primer deploy
+#
+# 4. Copia cada variable (Key y Value) a Vercel → Settings → Environment Variables
+#
+# 5. Selecciona los entornos: Production, Preview, Development
+#
+# 6. Haz redeploy después de agregar las variables
+
+
