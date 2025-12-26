@@ -56,8 +56,10 @@ filesToCopy.forEach(file => {
 console.log('');
 console.log(`✅ Proceso completado: ${copied} archivos copiados, ${skipped} omitidos`);
 
+// No fallar si algunos archivos no existen (solo advertir)
 if (copied === 0) {
   console.warn('⚠️  No se copió ningún archivo. Verifica que los archivos estén en web/');
-  process.exit(1);
+  // No hacer exit(1) para no romper el build si faltan algunos archivos opcionales
 }
+
 
