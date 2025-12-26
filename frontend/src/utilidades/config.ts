@@ -20,35 +20,6 @@ export const isWeb = Platform.OS === 'web';
  * Obtener la URL base de la API según el entorno
  */
 export function getAPIBaseURL(): string {
-  // Si hay una variable de entorno, validarla primero
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    const apiUrl = process.env.EXPO_PUBLIC_API_URL.trim();
-    
-    // Validar que sea una URL HTTP/HTTPS válida o una ruta relativa (para monorepo)
-    // Si contiene "postgresql://" o "psql", no es una URL válida del API
-    // En este caso, ignorar la variable y usar la detección automática
-    if (apiUrl.includes('postgresql://') || apiUrl.includes('psql')) {
-      console.warn('⚠️ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos.');
-      console.warn('⚠️ Ignorando variable y usando detección automática.');
-      // Continuar con la lógica de detección automática en lugar de retornar vacío
-      // Esto permite que funcione automáticamente en Vercel
-    } else {
-      // Si es una ruta relativa (empieza con /), usarla directamente
-      if (apiUrl.startsWith('/')) {
-        return apiUrl;
-      }
-      
-      // Si es una URL completa (http/https), validarla y usarla
-      if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
-        return apiUrl;
-      }
-      
-      // Si no es ni ruta relativa ni URL completa, asumir que es relativa
-      return apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`;
-    }
-    
-  }
-
   // Si estamos en web
   if (isWeb) {
     // En web, verificar si estamos en producción o desarrollo
@@ -60,14 +31,44 @@ export function getAPIBaseURL(): string {
                            !window.location.hostname.includes('172.');
       
       if (isProduction) {
-        // En producción (Vercel), usar ruta relativa /api automáticamente
+        // En producción (Vercel), SIEMPRE usar ruta relativa /api
         // Esto funciona para monorepo donde backend y frontend están en el mismo dominio
+        // Ignorar cualquier variable de entorno que pueda tener una URL completa
+        console.log('🌐 Producción detectada: usando ruta relativa /api');
         return '/api';
       }
     }
     
     // En desarrollo web local
     return `http://localhost:${API_PORT}/api`;
+  }
+
+  // Si hay una variable de entorno, validarla primero (solo para móvil)
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL.trim();
+    
+    // Validar que sea una URL HTTP/HTTPS válida o una ruta relativa (para monorepo)
+    // Si contiene "postgresql://" o "psql", no es una URL válida del API
+    // En este caso, ignorar la variable y usar la detección automática
+    if (apiUrl.includes('postgresql://') || apiUrl.includes('psql')) {
+      console.warn('⚠️ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos.');
+      console.warn('⚠️ Ignorando variable y usando detección automática.');
+      // Continuar con la lógica de detección automática en lugar de retornar vacío
+    } else {
+      // Si es una ruta relativa (empieza con /), usarla directamente
+      if (apiUrl.startsWith('/')) {
+        return apiUrl;
+      }
+      
+      // Si es una URL completa (http/https), validarla y usarla (solo para móvil)
+      if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+        return apiUrl;
+      }
+      
+      // Si no es ni ruta relativa ni URL completa, asumir que es relativa
+      return apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`;
+    }
+    
   }
 
   // Si estamos en móvil
