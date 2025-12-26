@@ -26,25 +26,27 @@ export function getAPIBaseURL(): string {
     
     // Validar que sea una URL HTTP/HTTPS válida o una ruta relativa (para monorepo)
     // Si contiene "postgresql://" o "psql", no es una URL válida del API
+    // En este caso, ignorar la variable y usar la detección automática
     if (apiUrl.includes('postgresql://') || apiUrl.includes('psql')) {
-      console.error('❌ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos, no una URL del API.');
-      console.error('❌ Debe ser algo como: https://tu-backend.render.com/api o /api');
-      console.error('❌ No debe ser: postgresql://... o psql \'...\'');
-      return ''; // Retornar vacío para que funcione sin backend
+      console.warn('⚠️ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos.');
+      console.warn('⚠️ Ignorando variable y usando detección automática.');
+      // Continuar con la lógica de detección automática en lugar de retornar vacío
+      // Esto permite que funcione automáticamente en Vercel
+    } else {
+      // Si es una ruta relativa (empieza con /), usarla directamente
+      if (apiUrl.startsWith('/')) {
+        return apiUrl;
+      }
+      
+      // Si es una URL completa (http/https), validarla y usarla
+      if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+        return apiUrl;
+      }
+      
+      // Si no es ni ruta relativa ni URL completa, asumir que es relativa
+      return apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`;
     }
     
-    // Si es una ruta relativa (empieza con /), usarla directamente
-    if (apiUrl.startsWith('/')) {
-      return apiUrl;
-    }
-    
-    // Si es una URL completa (http/https), validarla y usarla
-    if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
-      return apiUrl;
-    }
-    
-    // Si no es ni ruta relativa ni URL completa, asumir que es relativa
-    return apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`;
   }
 
   // Si estamos en web
@@ -58,12 +60,9 @@ export function getAPIBaseURL(): string {
                            !window.location.hostname.includes('172.');
       
       if (isProduction) {
-        // En producción, si no hay variable de entorno configurada,
-        // mostrar un mensaje de error claro en lugar de intentar conectar a un endpoint inexistente
-        // El usuario debe configurar EXPO_PUBLIC_API_URL en Vercel
-        console.warn('⚠️ EXPO_PUBLIC_API_URL no está configurada en Vercel. La app funcionará en modo offline.');
-        // Retornar null o una URL vacía para que la app maneje esto gracefully
-        return '';
+        // En producción (Vercel), usar ruta relativa /api automáticamente
+        // Esto funciona para monorepo donde backend y frontend están en el mismo dominio
+        return '/api';
       }
     }
     
