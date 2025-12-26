@@ -39,18 +39,24 @@ try {
 
 // Exportar handler para Vercel
 // Vercel espera una función que reciba (req, res)
-// Necesitamos asegurarnos de que las rutas se manejen correctamente
+// Necesitamos manejar las rutas correctamente cuando Vercel reescribe
 module.exports = (req, res) => {
-  // En Vercel, cuando se reescribe /api/(.*) a /api/index.js,
-  // la ruta original se mantiene en req.url
-  // Pero necesitamos asegurarnos de que Express la maneje correctamente
+  // Log para debugging (siempre en Vercel)
+  console.log(`📥 ${req.method} ${req.url || req.path} - Original: ${req.originalUrl || req.url}`);
+  console.log(`📍 Query:`, req.query);
+  console.log(`🔍 Headers:`, req.headers['content-type']);
   
-  // Log para debugging
-  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV) {
-    console.log(`📥 ${req.method} ${req.url} - Original: ${req.originalUrl || req.url}`);
+  // En Vercel, cuando se reescribe /api/(.*) a /api/index.js,
+  // la ruta puede llegar sin el prefijo /api
+  // Necesitamos asegurarnos de que Express la maneje correctamente
+  
+  // Si la ruta no empieza con /api, agregarlo
+  const originalUrl = req.url || req.path || '';
+  if (!originalUrl.startsWith('/api')) {
+    req.url = '/api' + originalUrl;
+    req.originalUrl = req.originalUrl || req.url;
   }
   
   // Ejecutar la app de Express
-  // Express manejará las rutas que empiezan con /api/*
   return app(req, res);
 };
