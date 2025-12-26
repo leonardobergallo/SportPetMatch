@@ -10,6 +10,10 @@ import { ProveedorAuth } from './src/contextos/ContextoAuth';
 import { ProveedorUbicacion } from './src/contextos/ContextoUbicacion';
 import NavegacionPrincipal from './src/navegacion/NavegacionPrincipal';
 
+// Componente opcional para mostrar prompt de instalación PWA
+// Descomenta la siguiente línea si quieres mostrar el banner de instalación:
+// import InstallPrompt from './src/componentes/InstallPrompt';
+
 // Configurar tema personalizado
 const tema = {
   ...MD3LightTheme,
@@ -37,6 +41,8 @@ export default function App() {
         <ProveedorUbicacion>
           <StatusBar style="auto" />
           <NavegacionPrincipal />
+          {/* Descomenta la siguiente línea para mostrar el banner de instalación PWA: */}
+          {/* <InstallPrompt /> */}
         </ProveedorUbicacion>
       </ProveedorAuth>
     </PaperProvider>

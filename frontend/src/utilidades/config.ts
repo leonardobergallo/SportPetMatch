@@ -24,16 +24,27 @@ export function getAPIBaseURL(): string {
   if (process.env.EXPO_PUBLIC_API_URL) {
     const apiUrl = process.env.EXPO_PUBLIC_API_URL.trim();
     
-    // Validar que sea una URL HTTP/HTTPS válida (no una cadena de conexión de base de datos)
+    // Validar que sea una URL HTTP/HTTPS válida o una ruta relativa (para monorepo)
     // Si contiene "postgresql://" o "psql", no es una URL válida del API
-    if (apiUrl.includes('postgresql://') || apiUrl.includes('psql') || !apiUrl.startsWith('http')) {
+    if (apiUrl.includes('postgresql://') || apiUrl.includes('psql')) {
       console.error('❌ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos, no una URL del API.');
-      console.error('❌ Debe ser algo como: https://tu-backend.render.com/api');
+      console.error('❌ Debe ser algo como: https://tu-backend.render.com/api o /api');
       console.error('❌ No debe ser: postgresql://... o psql \'...\'');
       return ''; // Retornar vacío para que funcione sin backend
     }
     
-    return apiUrl;
+    // Si es una ruta relativa (empieza con /), usarla directamente
+    if (apiUrl.startsWith('/')) {
+      return apiUrl;
+    }
+    
+    // Si es una URL completa (http/https), validarla y usarla
+    if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+      return apiUrl;
+    }
+    
+    // Si no es ni ruta relativa ni URL completa, asumir que es relativa
+    return apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`;
   }
 
   // Si estamos en web

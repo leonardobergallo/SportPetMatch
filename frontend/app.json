@@ -41,7 +41,18 @@
       ]
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "name": "SportPetMatch",
+      "shortName": "SportPetMatch",
+      "lang": "es",
+      "scope": "/",
+      "themeColor": "#6200ea",
+      "backgroundColor": "#ffffff",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/",
+      "favicon": "./assets/icono.png",
+      "manifest": "./web/manifest.json"
     },
     "plugins": [
       "expo-location",
