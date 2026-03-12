@@ -96,3 +96,4 @@ npm run build
 
 Y verifica en DevTools → Application → Manifest que todos los iconos se carguen correctamente.
 
+

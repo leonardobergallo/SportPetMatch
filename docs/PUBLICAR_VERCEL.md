@@ -1,6 +1,6 @@
 # 🚀 Guía Completa: Publicar SportPetMatch en Vercel
 
-Esta guía te muestra paso a paso cómo publicar tu app SportPetMatch en Vercel para que esté disponible en internet.
+Esta guía describe cómo publicar **backend y frontend juntos** en un solo proyecto de Vercel (monorepo).
 
 ---
 
@@ -8,7 +8,7 @@ Esta guía te muestra paso a paso cómo publicar tu app SportPetMatch en Vercel 
 
 1. ✅ Cuenta en [Vercel](https://vercel.com) (gratis)
 2. ✅ Proyecto en GitHub, GitLab o Bitbucket
-3. ✅ Backend desplegado (Railway, Render, Vercel, etc.)
+3. ✅ Base de datos PostgreSQL (Neon, Supabase, Railway, etc.)
 4. ✅ Node.js instalado localmente
 
 ---
@@ -17,17 +17,17 @@ Esta guía te muestra paso a paso cómo publicar tu app SportPetMatch en Vercel 
 
 ### 1.1 Verificar que el build funciona localmente
 
+Desde la **raíz del proyecto** (no dentro de `frontend`):
+
 ```bash
-cd frontend
-npm install
-npm run build
+npm run vercel-build
 ```
 
-Esto debería crear una carpeta `dist` con los archivos estáticos. El script `postbuild` copiará automáticamente los archivos PWA (manifest.json, sw.js, iconos) desde `web/` a `dist/`. Si funciona, estás listo para desplegar.
+Esto ejecuta: build del backend → build del frontend → copia de `api/` y archivos a la raíz. Si termina sin errores, estás listo para desplegar.
 
-### 1.2 Asegúrate de tener los iconos PWA
+### 1.2 Iconos PWA (opcional)
 
-Si aún no los tienes, genera los iconos:
+Si faltan iconos PWA:
 
 ```bash
 cd frontend
@@ -38,10 +38,7 @@ npm run generate:pwa-icons
 
 ## 📦 Paso 2: Subir Código a Git
 
-Si aún no has subido tu código:
-
 ```bash
-# En la raíz del proyecto
 git add .
 git commit -m "Preparar para deploy en Vercel"
 git push origin main
@@ -51,238 +48,163 @@ git push origin main
 
 ## 🌐 Paso 3: Desplegar en Vercel
 
-### Opción A: Desde la Interfaz Web (Recomendado)
+### Opción A: Desde la interfaz web (recomendado)
 
-#### 3.1 Crear Proyecto en Vercel
+#### 3.1 Crear proyecto en Vercel
 
-1. Ve a [vercel.com](https://vercel.com) e inicia sesión
-2. Haz clic en **"Add New Project"** o **"New Project"**
-3. Conecta tu repositorio:
-   - Si es la primera vez, conecta tu cuenta de GitHub/GitLab/Bitbucket
-   - Selecciona el repositorio `SportPetMatch`
+1. Entra a [vercel.com](https://vercel.com) e inicia sesión.
+2. **Add New Project** / **New Project**.
+3. Conecta el repositorio `SportPetMatch`.
 
-#### 3.2 Configurar el Proyecto
+#### 3.2 Configurar el proyecto
 
-En la configuración del proyecto, usa estos valores:
+Usa **un solo proyecto** para backend + frontend:
 
-- **Framework Preset**: `Other` (Otro)
-- **Root Directory**: `frontend` ⚠️ **IMPORTANTE**
-- **Build Command**: `npm install && npm run vercel-build`
-- **Output Directory**: `dist`
+- **Framework Preset**: `Other`
+- **Root Directory**: **(dejar en blanco – raíz del proyecto)** ⚠️ Importante
+- **Build Command**: `npm run vercel-build`
+- **Output Directory**: **(dejar en blanco)** – lo define `vercel.json`
 - **Install Command**: `npm install`
 
-**Nota:** El `vercel.json` ya está configurado en `frontend/`, así que Vercel debería detectarlo automáticamente.
+El `vercel.json` en la raíz ya define rewrites y funciones.
 
-#### 3.3 Configurar Variables de Entorno
+#### 3.3 Variables de entorno
 
-Antes de hacer deploy, agrega las variables de entorno:
+En **Environment Variables** agrega:
 
-1. Haz clic en **"Environment Variables"**
-2. Agrega las siguientes variables:
+**Obligatorias (backend):**
 
-**Obligatoria:**
 ```
-EXPO_PUBLIC_API_URL=https://tu-backend-url.com/api
-```
-(Reemplaza con la URL real de tu backend desplegado)
-
-**Opcionales (si las usas):**
-```
-GOOGLE_WEB_CLIENT_ID=tu_google_web_client_id
-GOOGLE_MAPS_API_KEY=tu_google_maps_api_key
-CLOUDINARY_CLOUD_NAME=tu_cloudinary_cloud_name
-CLOUDINARY_API_KEY=tu_cloudinary_api_key
-CLOUDINARY_API_SECRET=tu_cloudinary_api_secret
+DATABASE_URL=postgresql://user:password@host:5432/database?sslmode=require
+NODE_ENV=production
+JWT_SECRET=tu_secreto_jwt_largo_y_aleatorio
+JWT_REFRESH_SECRET=otro_secreto_diferente
+CORS_ORIGIN=https://tu-proyecto.vercel.app
 ```
 
-3. Selecciona los entornos donde aplicar (Production, Preview, Development)
+**Opcional (frontend):**
 
-#### 3.4 Hacer Deploy
+```
+EXPO_PUBLIC_API_URL=/api
+```
 
-1. Haz clic en **"Deploy"**
-2. Espera 2-5 minutos mientras se construye y despliega
-3. Una vez terminado, verás una URL tipo: `https://sportpetmatch-xxxx.vercel.app`
+En producción web la app usa `/api` por defecto; esta variable es opcional.
+
+Generar secretos JWT:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Ejecútalo dos veces para `JWT_SECRET` y `JWT_REFRESH_SECRET`.
+
+#### 3.4 Deploy
+
+1. **Deploy**.
+2. Espera 3–7 minutos (build backend + frontend).
+3. URL resultante tipo: `https://sport-pet-match-backend-xxxx.vercel.app`
 
 ---
 
-### Opción B: Desde la Terminal (CLI)
-
-#### 3.1 Instalar Vercel CLI
+### Opción B: Desde la terminal (CLI)
 
 ```bash
 npm install -g vercel
-```
-
-#### 3.2 Login en Vercel
-
-```bash
 vercel login
 ```
 
-#### 3.3 Desplegar
+En la **raíz del proyecto**:
 
 ```bash
-cd frontend
 vercel
 ```
 
-Sigue las instrucciones:
-- **Set up and deploy?** → `Y`
-- **Which scope?** → Selecciona tu cuenta
-- **Link to existing project?** → `N` (primera vez) o `Y` (si ya existe)
-- **Project name:** → `sportpetmatch` (o el que prefieras)
-- **Directory:** → `./dist` (o deja en blanco si está en vercel.json)
-- **Override settings?** → `N` (usa el vercel.json existente)
-
-#### 3.4 Agregar Variables de Entorno
-
-```bash
-vercel env add EXPO_PUBLIC_API_URL
-# Ingresa: https://tu-backend-url.com/api
-# Selecciona: Production, Preview, Development
-```
-
-#### 3.5 Deploy a Producción
-
-```bash
-vercel --prod
-```
+Luego en el dashboard agrega las variables de entorno y haz **Redeploy** si hace falta.
 
 ---
 
-## ✅ Paso 4: Verificar el Deploy
+## ✅ Paso 4: Verificar el deploy
 
-### 4.1 Verificar que la App Funciona
+### Backend
 
-1. Abre la URL de Vercel en tu navegador
-2. Deberías ver la app funcionando
-3. Abre DevTools (F12) y verifica:
-   - **Application → Manifest**: Debe ser válido
-   - **Application → Service Workers**: Debe estar activado
-   - **Console**: No debe haber errores críticos
+- `https://tu-proyecto.vercel.app/api/salud` → debe devolver JSON de salud.
 
-### 4.2 Probar en Móvil
+### Frontend
 
-1. Abre la URL en tu celular
-2. La app debería verse como una app móvil
-3. Prueba instalar como PWA:
-   - **Android (Chrome):** Menú → "Agregar a pantalla de inicio"
-   - **iOS (Safari):** Compartir → "Agregar a pantalla de inicio"
+- `https://tu-proyecto.vercel.app` → debe cargar la app.
+- Login: por ejemplo `maria.gonzalez@sportpetmatch.com` / `123456`.
+
+### PWA
+
+- DevTools → **Application** → **Manifest** y **Service Workers** correctos.
+- En móvil: “Agregar a pantalla de inicio” (Chrome Android o Safari iOS).
 
 ---
 
-## 🔄 Paso 5: Actualizaciones Futuras
+## 🔄 Paso 5: Actualizaciones
 
-Cada vez que hagas cambios:
-
-1. **Haz commit y push:**
-   ```bash
-   git add .
-   git commit -m "Descripción de cambios"
-   git push origin main
-   ```
-
-2. **Vercel desplegará automáticamente** (si tienes auto-deploy activado)
-
-3. O despliega manualmente:
-   - Desde la web: Ve al proyecto → "Deployments" → "Redeploy"
-   - Desde CLI: `vercel --prod`
+1. `git add .` → `git commit -m "..."` → `git push`
+2. Vercel despliega solo si el repo está conectado.
+3. O **Redeploy** manual desde el dashboard.
 
 ---
 
-## 🐛 Solución de Problemas
+## 🐛 Solución de problemas
 
-### Error: "Build failed"
+### Build falla
 
-**Causa común:** Falta alguna dependencia o el build command está mal.
+- Revisar logs en Vercel.
+- Probar localmente: `npm run vercel-build` en la raíz.
+- Revisar que existan `backend/api/index.js`, `scripts/copiar-api.js` y que el build de backend y frontend termine bien.
 
-**Solución:**
-1. Verifica que `npm run build` funcione localmente
-2. Revisa los logs de build en Vercel
-3. Asegúrate de que `vercel-build` esté en `package.json`
+### Error 405 en `/api/auth/login`
 
-### Error: "Cannot find module"
+- CORS y OPTIONS ya están configurados en el backend (`app.options('*', cors(...))`).
+- Revisar en Vercel → **Functions** → `api/index.js` que no haya errores de carga (p. ej. `Cannot find module`).
+- Confirmar que las variables de entorno estén en el proyecto correcto y que hayas hecho redeploy después de cambiarlas.
 
-**Causa común:** Dependencias no instaladas correctamente.
+### “API URL not found” / no conecta al backend
 
-**Solución:**
-1. Verifica que `package.json` tenga todas las dependencias
-2. Ejecuta `npm install` localmente y verifica que no haya errores
-3. Asegúrate de que `node_modules` esté en `.gitignore`
+- En producción web se usa la ruta relativa `/api`; no hace falta `EXPO_PUBLIC_API_URL` para la web.
+- Si usas variable, que sea `/api` (ruta relativa) y no una URL de otro dominio salvo que tengas front y backend en dominios distintos.
 
-### Error: "API URL not found"
+### Pantalla en blanco
 
-**Causa común:** Variable de entorno no configurada.
-
-**Solución:**
-1. Ve a Settings → Environment Variables
-2. Verifica que `EXPO_PUBLIC_API_URL` esté configurada
-3. Haz redeploy después de agregar variables
-
-### La app muestra pantalla en blanco
-
-**Causa común:** Error de JavaScript o problema con rutas.
-
-**Solución:**
-1. Abre DevTools → Console y revisa errores
-2. Verifica que el backend esté accesible
-3. Verifica que las rutas en `vercel.json` estén correctas
-
-### Service Worker no funciona
-
-**Causa común:** Headers incorrectos o ruta mal configurada.
-
-**Solución:**
-1. Verifica que `sw.js` esté en `dist/` después del build
-2. Verifica los headers en `vercel.json`
-3. Limpia el cache del navegador
+- DevTools → **Console** y **Network**.
+- Comprobar que `/api/salud` responda y que no haya bloqueos CORS en las peticiones a `/api/*`.
 
 ---
 
-## 📊 Configuración Recomendada
+## 📊 Cómo quedó el proyecto
 
-### Dominio Personalizado (Opcional)
+- **Un solo proyecto** en Vercel (monorepo).
+- **Raíz**: `vercel.json`, `package.json`, `scripts/copiar-api.js`; tras el build se generan `api/`, `index.html`, assets del frontend, etc.
+- **Rewrites**: `/api/(.*)` → `/api/index.js` (backend); el resto → frontend (p. ej. `/index.html`).
+- **Variables**: sobre todo `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `CORS_ORIGIN`; opcional `EXPO_PUBLIC_API_URL=/api`.
 
-1. Ve a Settings → Domains
-2. Agrega tu dominio personalizado
-3. Sigue las instrucciones para configurar DNS
-
-### Variables de Entorno por Entorno
-
-Puedes tener diferentes valores según el entorno:
-- **Production**: URL del backend de producción
-- **Preview**: URL del backend de staging
-- **Development**: URL local (para desarrollo)
+Para más detalle del flujo monorepo: `docs/DEPLOY_MONOREPO_VERCEL.md`.  
+Para variables listas para copiar: `VARIABLES_VERCEL_LISTAS.md`.
 
 ---
 
-## 📚 Recursos Adicionales
+## ✅ Checklist
 
-- [Documentación de Vercel](https://vercel.com/docs)
-- [Guía de Expo en Vercel](https://docs.expo.dev/distribution/publishing-websites/)
-- [Variables de Entorno en Vercel](https://vercel.com/docs/concepts/projects/environment-variables)
-
----
-
-## ✅ Checklist Final
-
-- [ ] Build funciona localmente (`npm run build`)
-- [ ] Código subido a Git
-- [ ] Proyecto creado en Vercel
-- [ ] Root Directory configurado como `frontend`
-- [ ] Variables de entorno configuradas
+- [ ] Build local OK: `npm run vercel-build` en la raíz
+- [ ] Código en Git
+- [ ] Proyecto en Vercel con **Root Directory en blanco**
+- [ ] Variables de entorno (sobre todo `DATABASE_URL`, JWT, `CORS_ORIGIN`)
 - [ ] Deploy exitoso
-- [ ] App funciona en la URL de Vercel
-- [ ] PWA instalable en móvil
-- [ ] Service Worker activado
+- [ ] `/api/salud` responde
+- [ ] App carga en `/` y login funciona
+- [ ] PWA instalable
 
 ---
 
-## 🎉 ¡Listo!
+## 🎉 Listo
 
-Tu app ahora está disponible en internet. Cada vez que hagas push a tu repositorio, Vercel desplegará automáticamente una nueva versión.
+Una sola URL para todo:
 
-**URL de tu app:** `https://tu-proyecto.vercel.app`
+- **App**: `https://tu-proyecto.vercel.app`
+- **API**: `https://tu-proyecto.vercel.app/api/*`
 
-¡Comparte la URL con tus usuarios! 🚀
-
+Comparte la URL de la app con tus usuarios.

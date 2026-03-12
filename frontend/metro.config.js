@@ -1,10 +1,23 @@
 // Configuración de Metro para SportPetMatch
 // Bundler de React Native para Expo
 
+const path = require('path');
+
+// Evitar que Metro use la raíz del workspace (monorepo); así ./index se resuelve desde frontend
+process.env.EXPO_NO_METRO_WORKSPACE_ROOT = '1';
+
 const { getDefaultConfig } = require('expo/metro-config');
 
-// Obtener configuración por defecto de Expo
-const config = getDefaultConfig(__dirname);
+// Raíz del proyecto Expo (siempre la carpeta frontend)
+const projectRoot = path.resolve(__dirname);
+const config = getDefaultConfig(projectRoot);
+
+// Fijar projectRoot para que Metro resuelva ./index y todo desde frontend, no desde la raíz del repo
+config.projectRoot = projectRoot;
+
+// Monorepo: vigilar solo la carpeta frontend para evitar ENOENT al vigilar
+// node_modules de la raíz (ej. @tybys/wasm-util/lib/mjs que no existe)
+config.watchFolders = [projectRoot];
 
 // Configuración personalizada para el proyecto
 config.resolver.alias = {
@@ -33,12 +46,18 @@ config.transformer.minifierConfig = {
 // Configuraciones del servidor
 config.server = {
   ...config.server,
-  // Configurar para aceptar conexiones desde la red local
   port: 8081,
-  // Mejorar estabilidad de conexiones y evitar problemas de caché
+  // Solo reescribir /frontend/ → / para peticiones del bundle nativo (iOS/Android).
+  // No tocar la web (platform=web) para no romper localhost:8081.
   enhanceMiddleware: (middleware) => {
     return (req, res, next) => {
-      // Agregar headers para evitar problemas de caché en el cliente
+      const url = req.url || '';
+      const isNativeBundle = url.startsWith('/frontend/') && (url.includes('platform=ios') || url.includes('platform=android'));
+      if (isNativeBundle) {
+        const rewritten = url.replace(/^\/frontend\//, '/');
+        req.url = rewritten;
+        req.originalUrl = rewritten;
+      }
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');

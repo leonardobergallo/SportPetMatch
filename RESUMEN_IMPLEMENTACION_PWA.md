@@ -182,3 +182,4 @@ npx serve dist
 
 **¡La app está lista para ser una PWA instalable una vez que generes los iconos!** 🎉
 
+

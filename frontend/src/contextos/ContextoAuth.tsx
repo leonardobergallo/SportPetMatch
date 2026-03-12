@@ -52,6 +52,24 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
     verificarSesionGuardada();
   }, []);
 
+  /** Usuario de prueba para ver el frontend sin backend (solo en desarrollo) */
+  const USUARIO_DEMO: Usuario = {
+    id: 'demo-user-id',
+    nombre: 'María',
+    apellido: 'González',
+    email: 'maria.gonzalez@sportpetmatch.com',
+    ciudad: 'Santa Fe',
+    provincia: 'Santa Fe',
+    pais: 'Argentina',
+    fechaNacimiento: '',
+    genero: '',
+    deportesFavoritos: ['correr', 'caminar'],
+    nivelActividad: 'intermedio',
+    disponibilidadSemanal: ['sabado', 'domingo'],
+    tipoUsuario: 'con_mascota',
+    onboardingCompletado: true,
+  };
+
   /**
    * Verificar si hay una sesión guardada en AsyncStorage
    */
@@ -66,9 +84,13 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
       if (token && datosUsuario) {
         const usuario: Usuario = JSON.parse(datosUsuario);
         setUsuario(usuario);
+      } else if (__DEV__) {
+        // En desarrollo: entrar directo a la app sin login para ver pantallas
+        setUsuario(USUARIO_DEMO);
       }
     } catch (error) {
       console.error('Error al verificar sesión guardada:', error);
+      if (__DEV__) setUsuario(USUARIO_DEMO);
     } finally {
       setCargandoAuth(false);
     }

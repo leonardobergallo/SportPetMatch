@@ -171,3 +171,4 @@ node scripts/liberar-puerto.js
 
 Una vez que ambos estén corriendo, puedes usar la app normalmente. Los cambios se reflejarán automáticamente gracias al hot reload.
 
+

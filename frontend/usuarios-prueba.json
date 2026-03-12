@@ -1,0 +1,35 @@
+{
+  "descripcion": "Usuarios de prueba para SportPetMatch. Contraseña de todos: 123456",
+  "usuarios": [
+    {
+      "email": "maria.gonzalez@sportpetmatch.com",
+      "password": "123456",
+      "nombre": "María González",
+      "perfil": "Corredora con perro Max (Golden Retriever)"
+    },
+    {
+      "email": "carlos.rodriguez@sportpetmatch.com",
+      "password": "123456",
+      "nombre": "Carlos Rodríguez",
+      "perfil": "Ciclista, sin mascota"
+    },
+    {
+      "email": "ana.martinez@sportpetmatch.com",
+      "password": "123456",
+      "nombre": "Ana Martínez",
+      "perfil": "Veterinaria con Luna, Rocky y Mimi"
+    },
+    {
+      "email": "diego.fernandez@sportpetmatch.com",
+      "password": "123456",
+      "nombre": "Diego Fernández",
+      "perfil": "Entrenador premium"
+    },
+    {
+      "email": "laura.sanchez@sportpetmatch.com",
+      "password": "123456",
+      "nombre": "Laura Sánchez",
+      "perfil": "Principiante con gato Luna"
+    }
+  ]
+}

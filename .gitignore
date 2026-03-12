@@ -7,8 +7,11 @@ frontend/node_modules/
 dist/
 backend/dist/
 frontend/dist/
-api/
+api/dist/
 *.log
+
+# Nota: api/index.js debe estar en Git para Vercel
+# pero api/dist/ se genera en el build
 
 # Environment variables
 .env

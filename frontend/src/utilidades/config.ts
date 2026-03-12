@@ -62,6 +62,10 @@ export function getAPIBaseURL(): string {
       
       // Si es una URL completa (http/https), validarla y usarla (solo para móvil)
       if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+        // En móvil, localhost no funciona (apunta al teléfono). Usar IP de la PC.
+        if (isMobile && (apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1'))) {
+          return apiUrl.replace(/localhost|127\.0\.0\.1/g, LOCAL_IP);
+        }
         return apiUrl;
       }
       
