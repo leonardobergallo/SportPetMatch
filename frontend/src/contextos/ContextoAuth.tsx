@@ -1,8 +1,9 @@
 // Contexto de Autenticación para SportPetMatch
 // Maneja el estado global de autenticación del usuario
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setOnUnauthorized } from '../utilidades/onUnauthorized';
 
 // Tipo para el usuario autenticado
 export interface Usuario {
@@ -51,6 +52,24 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
   useEffect(() => {
     verificarSesionGuardada();
   }, []);
+
+  // Registrar callback para 401: el apiClient lo invoca para cerrar sesión y mostrar Login
+  const cerrarSesionCallback = useCallback(async () => {
+    try {
+      await Promise.all([
+        AsyncStorage.removeItem(TOKEN_KEY),
+        AsyncStorage.removeItem(USER_KEY)
+      ]);
+      setUsuario(null);
+    } catch (e) {
+      console.error('Error al cerrar sesión (401):', e);
+      setUsuario(null);
+    }
+  }, []);
+  useEffect(() => {
+    setOnUnauthorized(cerrarSesionCallback);
+    return () => setOnUnauthorized(null);
+  }, [cerrarSesionCallback]);
 
   /** Usuario de prueba para ver el frontend sin backend (solo en desarrollo) */
   const USUARIO_DEMO: Usuario = {

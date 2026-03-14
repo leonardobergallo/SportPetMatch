@@ -5,10 +5,11 @@ import React from 'react';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 
-// Importar contextos y navegación
+// Importar contextos, navegación y error boundary
 import { ProveedorAuth } from './src/contextos/ContextoAuth';
 import { ProveedorUbicacion } from './src/contextos/ContextoUbicacion';
 import NavegacionPrincipal from './src/navegacion/NavegacionPrincipal';
+import ErrorBoundary from './src/componentes/ErrorBoundary';
 
 // Componente opcional para mostrar prompt de instalación PWA
 // Descomenta la siguiente línea si quieres mostrar el banner de instalación:
@@ -37,14 +38,16 @@ const tema = {
 export default function App() {
   return (
     <PaperProvider theme={tema}>
-      <ProveedorAuth>
-        <ProveedorUbicacion>
-          <StatusBar style="auto" />
-          <NavegacionPrincipal />
-          {/* Descomenta la siguiente línea para mostrar el banner de instalación PWA: */}
-          {/* <InstallPrompt /> */}
-        </ProveedorUbicacion>
-      </ProveedorAuth>
+      <ErrorBoundary>
+        <ProveedorAuth>
+          <ProveedorUbicacion>
+            <StatusBar style="auto" />
+            <NavegacionPrincipal />
+            {/* Descomenta la siguiente línea para mostrar el banner de instalación PWA: */}
+            {/* <InstallPrompt /> */}
+          </ProveedorUbicacion>
+        </ProveedorAuth>
+      </ErrorBoundary>
     </PaperProvider>
   );
 }

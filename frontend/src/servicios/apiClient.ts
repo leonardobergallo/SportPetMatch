@@ -3,8 +3,8 @@
 
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
 import { getAPIBaseURL, getConfigInfo, isMobile } from '../utilidades/config';
+import { getOnUnauthorized } from '../utilidades/onUnauthorized';
 
 // URL base de la API (se obtiene de la configuración centralizada)
 const API_BASE_URL = getAPIBaseURL();
@@ -75,16 +75,14 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     // Manejar errores de autenticación
     if (error.response?.status === 401) {
-      // Token inválido o expirado
+      // Token inválido o expirado: limpiar storage y notificar al contexto para mostrar Login
       try {
         await AsyncStorage.removeItem(TOKEN_KEY);
         await AsyncStorage.removeItem('@SportPetMatch:user');
       } catch (storageError) {
         console.error('Error limpiando storage:', storageError);
       }
-      
-      // Podrías redirigir al login aquí si es necesario
-      // navigationRef.navigate('Login');
+      getOnUnauthorized()?.();
     }
 
     // Manejar errores de red

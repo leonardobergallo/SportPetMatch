@@ -1,0 +1,7 @@
+Usuario para probar si anda la app
+==================================
+
+Email:    maria.gonzalez@sportpetmatch.com
+Password: 123456
+
+(Después de correr el seed del backend: npm run db:seed en la carpeta backend)

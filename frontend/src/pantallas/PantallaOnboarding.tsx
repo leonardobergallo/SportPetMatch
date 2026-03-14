@@ -14,7 +14,7 @@ import {
 import { Text, Chip, IconButton, Surface } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { temaApp, espaciado, sombras } from '@/constantes/tema';
+import { temaApp, espaciado, sombras, MARCA } from '@/constantes/tema';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contextos/ContextoAuth';
@@ -351,7 +351,7 @@ export default function PantallaOnboarding(): JSX.Element {
           <View style={estilos.logo}>
             <Text style={estilos.logoEmoji}>🐾</Text>
           </View>
-          <Text style={estilos.logoTexto}>SportPetMatch</Text>
+          <Text style={estilos.logoTexto}>{MARCA.nombre}</Text>
         </View>
         {renderIndicadoresPasos()}
       </View>
@@ -422,6 +422,12 @@ const estilos = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: temaApp.colors.onPrimary,
+  },
+  logoSlogan: {
+    fontSize: 12,
+    color: temaApp.colors.onPrimary,
+    opacity: 0.9,
+    marginTop: 4,
   },
   indicadoresContainer: {
     flexDirection: 'row',

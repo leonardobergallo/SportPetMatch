@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "SportPetMatch",
-    "slug": "sportpetmatch",
+    "name": "Indio",
+    "slug": "indio",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icono.png",
@@ -42,8 +42,8 @@
     },
     "web": {
       "bundler": "metro",
-      "name": "SportPetMatch",
-      "shortName": "SportPetMatch",
+      "name": "Indio",
+      "shortName": "Indio",
       "lang": "es",
       "scope": "/",
       "themeColor": "#6200ea",
@@ -69,7 +69,8 @@
     "extra": {
       "eas": {
         "projectId": "tu-project-id-aqui"
-      }
+      },
+      "slogan": "Indio, mi mejor amigo"
     }
   }
 }

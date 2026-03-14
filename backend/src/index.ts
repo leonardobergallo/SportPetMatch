@@ -126,9 +126,7 @@ app.get('/api', (req, res) => {
       mascotas: '/api/mascotas',
       eventos: '/api/eventos',
       matches: '/api/matches',
-      mensajes: '/api/mensajes',
-      desafios: '/api/desafios',
-      notificaciones: '/api/notificaciones'
+      mensajes: '/api/mensajes'
     }
   });
 });

@@ -5,7 +5,6 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -19,8 +18,6 @@ import PantallaPerfil from '../pantallas/PantallaPerfil';
 import PantallaLogin from '../pantallas/PantallaLogin';
 import PantallaRegistro from '../pantallas/PantallaRegistro';
 import PantallaOnboarding from '../pantallas/PantallaOnboarding';
-import PantallaDashboard from '../pantallas/PantallaDashboard';
-import PantallaMapaWebCompatible from '../pantallas/PantallaMapaWebCompatible';
 import PantallaMapa from '../pantallas/PantallaMapa';
 import PantallaCrearEvento from '../pantallas/PantallaCrearEvento';
 import PantallaChat from '../pantallas/PantallaChat';
@@ -74,7 +71,6 @@ export type TabParamList = {
 // Crear navegadores
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
-const Drawer = createDrawerNavigator();
 
 /**
  * Navegador de pestañas inferiores

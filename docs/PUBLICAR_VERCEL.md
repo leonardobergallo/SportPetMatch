@@ -4,6 +4,14 @@ Esta guía describe cómo publicar **backend y frontend juntos** en un solo proy
 
 ---
 
+## Backend + frontend en un solo deploy
+
+Este proyecto está configurado para **un único deploy en Vercel**: al hacer push, se ejecuta `npm run vercel-build`, que compila el backend, compila el frontend (Expo export web) y el script `scripts/copiar-api.js` deja en la raíz la carpeta `api/` (función serverless del backend) y los estáticos del frontend (`index.html`, `static/`, etc.). Las rewrites de `vercel.json` envían `/api/*` al backend y el resto a la SPA. No hace falta configurar dos proyectos ni unir manualmente backend y frontend.
+
+**Antes de hacer push:** ejecuta en la raíz `npm run vercel-build` y comprueba que termine sin errores.
+
+---
+
 ## 📋 Prerrequisitos
 
 1. ✅ Cuenta en [Vercel](https://vercel.com) (gratis)

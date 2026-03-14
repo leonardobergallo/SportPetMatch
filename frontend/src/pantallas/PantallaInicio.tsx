@@ -22,6 +22,7 @@ import { RootStackParamList, TabParamList } from '@/navegacion/NavegacionPrincip
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/Header';
+import AdBanner from '@/componentes/AdBanner';
 
 // Importar servicios
 import { obtenerDashboard } from '@/servicios/servicioAuth';
@@ -143,7 +144,7 @@ export default function PantallaInicio(): JSX.Element {
   return (
     <View style={estilos.contenedor}>
       {/* Header */}
-      <Header titulo="SportPetMatch" />
+      <Header />
 
       {/* Content */}
       <ScrollView
@@ -261,6 +262,8 @@ export default function PantallaInicio(): JSX.Element {
             ))}
           </View>
         </View>
+
+        <AdBanner minHeight={50} />
       </ScrollView>
     </View>
   );

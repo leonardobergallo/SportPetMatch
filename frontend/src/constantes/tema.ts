@@ -3,6 +3,12 @@
 
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
+/** Nombre de la app y slogan de marca */
+export const MARCA = {
+  nombre: 'Indio',
+  slogan: 'mi mejor amigo',
+} as const;
+
 // Colores principales de la marca SportPetMatch
 // Paleta basada en la carpeta Estructura con colores preferidos
 const coloresMarca = {

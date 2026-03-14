@@ -22,7 +22,7 @@ import { Card, CardContent } from '@/components/ui/card';
 // Importar servicios y contexto
 import { registrarUsuario, DatosRegistro } from '@/servicios/servicioAuth';
 import { useAuth } from '@/contextos/ContextoAuth';
-import { temaApp, espaciado, sombras } from '@/constantes/tema';
+import { temaApp, espaciado, sombras, MARCA } from '@/constantes/tema';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 
 type RegistroScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Registro'>;
@@ -163,7 +163,7 @@ export default function PantallaRegistro(): JSX.Element {
             <View style={estilos.logo}>
               <Text style={estilos.logoEmoji}>🐾</Text>
             </View>
-            <Text style={estilos.titulo}>SportPetMatch</Text>
+            <Text style={estilos.titulo}>{MARCA.nombre}</Text>
           </View>
           <Text style={estilos.subtitulo}>Crea tu cuenta y conecta con otros</Text>
         </View>

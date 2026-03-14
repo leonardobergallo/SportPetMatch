@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { useAuth } from '../contextos/ContextoAuth';
-import { temaApp, espaciado } from '../constantes/tema';
+import { temaApp, espaciado, MARCA } from '../constantes/tema';
 
 type HeaderNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -25,7 +25,7 @@ interface HeaderProps {
  * Header reutilizable para las pantallas principales
  */
 export default function Header({ 
-  titulo = 'SportPetMatch',
+  titulo = MARCA.nombre,
   mostrarUsuario = true,
   onLogoPress 
 }: HeaderProps): JSX.Element {
@@ -54,7 +54,10 @@ export default function Header({
           <View style={estilos.logo}>
             <Text style={estilos.logoEmoji}>🐾</Text>
           </View>
-          <Text style={estilos.titulo}>{titulo}</Text>
+          <View>
+            <Text style={estilos.titulo}>{titulo}</Text>
+            <Text style={estilos.slogan}>{MARCA.slogan}</Text>
+          </View>
         </TouchableOpacity>
 
         {/* Avatar y Menú de Usuario */}
@@ -151,6 +154,12 @@ const estilos = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: temaApp.colors.onPrimary,
+  },
+  slogan: {
+    fontSize: 11,
+    color: temaApp.colors.onPrimary,
+    opacity: 0.9,
+    marginTop: 2,
   },
   avatarContainer: {
     marginLeft: 'auto',

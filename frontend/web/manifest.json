@@ -1,7 +1,7 @@
 {
-  "name": "SportPetMatch",
-  "short_name": "SportPetMatch",
-  "description": "Aplicación social para dueños de mascotas que practican deportes. Encuentra compañeros de entrenamiento y eventos pet-friendly.",
+  "name": "Indio",
+  "short_name": "Indio",
+  "description": "Indio - mi mejor amigo. Conecta personas y mascotas en eventos deportivos.",
   "start_url": "/",
   "display": "standalone",
   "prefer_related_applications": false,

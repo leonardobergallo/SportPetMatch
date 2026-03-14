@@ -23,7 +23,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 
 // Importar tema, contexto y constantes
-import { temaApp, espaciado, sombras } from '../constantes/tema';
+import { temaApp, espaciado, sombras, MARCA } from '../constantes/tema';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { useAuth, Usuario } from '../contextos/ContextoAuth';
 import { iniciarSesion as servicioIniciarSesion } from '../servicios/servicioAuth';
@@ -190,10 +190,10 @@ export default function PantallaLogin(): JSX.Element {
               color={temaApp.colors.primary} 
             />
             <Text variant="headlineMedium" style={estilos.tituloApp}>
-              SportPetMatch
+              {MARCA.nombre}
             </Text>
             <Text variant="bodyLarge" style={estilos.subtituloApp}>
-              Conecta personas y mascotas en eventos deportivos
+              {MARCA.slogan}
             </Text>
           </View>
         </View>
