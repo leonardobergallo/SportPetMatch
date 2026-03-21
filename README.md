@@ -1,218 +1,153 @@
-# 🐕‍🦺 SportPetMatch
+<p align="center">
+  <img src="frontend/assets/icon.png" alt="Indio" width="100" />
+</p>
 
-Una aplicación móvil innovadora que une personas y mascotas en eventos, desafíos y actividades deportivas, fomentando un estilo de vida saludable para ambos.
+<h1 align="center">Indio</h1>
+<p align="center"><strong>mi mejor amigo</strong></p>
+<p align="center">
+App gratis que conecta personas y mascotas en eventos, actividades y salidas pet-friendly.
+</p>
 
-## 🚀 Características Principales
+---
 
-### 🏃‍♂️ Eventos Deportivos
-- Crear y participar en eventos deportivos
-- Filtros avanzados por tipo, ubicación y nivel
-- Sistema de calificaciones y reseñas
-- Eventos pet-friendly especializados
+## Funcionalidades
 
-### 🐾 Gestión de Mascotas
-- Perfiles detallados de mascotas
-- Registro de salud y vacunas
-- Intereses y preferencias deportivas
-- Galería de fotos
+| Modulo | Que hace |
+|--------|----------|
+| **Eventos** | Crear y unirse a actividades deportivas pet-friendly con filtros por tipo, ubicacion y nivel. |
+| **Matching** | Descubrir personas y mascotas compatibles con swipe, geolocalización y algoritmo de afinidad. |
+| **Chat** | Coordinar salidas y encuentros directamente con tus matches. |
+| **Mapa** | Visualizar eventos y usuarios cercanos en mapa interactivo. |
+| **Mascotas** | Perfil detallado de cada mascota: datos, intereses y galeria de fotos. |
+| **Perfil** | Gestionar tu cuenta, preferencias y ver estadisticas. |
 
-### 💕 Sistema de Matching
-- Algoritmo de compatibilidad
-- Geolocalización para encuentros cercanos
-- Chat integrado
-- Sistema de reportes y seguridad
+---
 
-### 🎮 Gamificación
-- Desafíos deportivos
-- Sistema de logros y badges
-- Monedas virtuales
-- Rankings y competencias
+## Stack
 
-### 💰 Monetización
-- Suscripciones premium
-- Compras in-app
-- Eventos exclusivos
-- Marketplace de productos
+| Capa | Tecnologia |
+|------|-----------|
+| Frontend | Expo (React Native) · TypeScript · React Navigation · React Native Paper |
+| Backend | Node.js · Express · Prisma · JWT |
+| Base de datos | PostgreSQL (Neon) |
+| Deploy | Vercel (monorepo: frontend + backend serverless) |
+| PWA | Service Worker · manifest.json · instalable desde web |
 
-## 🛠️ Stack Tecnológico
+---
 
-### Backend
-- **Node.js** + **Express** - Servidor web
-- **PostgreSQL** (Neon) - Base de datos
-- **Prisma** - ORM
-- **JWT** - Autenticación
-- **MercadoPago** - Pagos
-- **Resend** - Email
-- **WhatsApp API** - Notificaciones
+## Inicio rapido
 
-### Frontend Mobile
-- **Expo** (React Native) - Framework móvil
-- **TypeScript** - Tipado estático
-- **React Navigation** - Navegación
-- **React Native Paper** - UI Components
-- **React Query** - Estado del servidor
-- **Zustand** - Estado local
-- **Geolocalización** - Ubicación
-- **Cámara** - Fotos
-
-## 🚀 Instalación y Configuración
-
-### Prerrequisitos
-- Node.js 18+
-- npm o yarn
-- Expo CLI
-- PostgreSQL (o cuenta en Neon)
-
-### Instalación
-
-1. **Clonar el repositorio**
 ```bash
-git clone https://github.com/tu-usuario/sportpetmatch.git
-cd sportpetmatch
-```
-
-2. **Instalar dependencias**
-```bash
+git clone https://github.com/leonardobergallo/SportPetMatch.git
+cd SportPetMatch
 npm install
 ```
 
-3. **Configurar variables de entorno**
-```bash
-# Backend
-cp backend/.env.example backend/.env
-# Editar backend/.env con tus credenciales
+Configurar variables de entorno:
 
-# Frontend
-cp frontend/.env.example frontend/.env
-# Editar frontend/.env con tus configuraciones
+```bash
+cp backend/config.env.example backend/config.env   # editar con tus credenciales
+cp frontend/.env.example frontend/.env               # editar si es necesario
 ```
 
-4. **Configurar base de datos**
+Base de datos:
+
 ```bash
 cd backend
 npx prisma generate
 npx prisma db push
+npx prisma db seed          # crea usuario de prueba
+cd ..
 ```
 
-5. **Ejecutar en desarrollo**
+Ejecutar:
+
 ```bash
-npm run dev
+npm start                   # arranca el frontend (web)
+npm run dev:backend         # en otra terminal, arranca el backend
 ```
-
-## 📱 Scripts Disponibles
-
-- `npm run dev` - Ejecuta backend y frontend en modo desarrollo
-- `npm run dev:backend` - Solo backend
-- `npm run dev:frontend` - Solo frontend
-- `npm run build` - Construye para producción
-- `npm run test` - Ejecuta todos los tests
-
-## 🏗️ Estructura del Proyecto
-
-```
-sportpetmatch/
-├── backend/                 # API y servidor
-│   ├── src/
-│   │   ├── controllers/     # Controladores de rutas
-│   │   ├── models/          # Modelos de Prisma
-│   │   ├── routes/          # Definición de rutas
-│   │   ├── middleware/      # Middleware personalizado
-│   │   ├── services/        # Lógica de negocio
-│   │   └── utils/           # Utilidades
-│   ├── prisma/              # Esquemas de base de datos
-│   └── tests/               # Tests del backend
-├── frontend/                # Aplicación móvil
-│   ├── src/
-│   │   ├── components/      # Componentes reutilizables
-│   │   ├── screens/         # Pantallas de la app
-│   │   ├── navigation/      # Configuración de navegación
-│   │   ├── services/        # Servicios API
-│   │   ├── store/           # Estado global (Zustand)
-│   │   ├── hooks/           # Custom hooks
-│   │   └── utils/           # Utilidades
-│   └── assets/              # Imágenes, fuentes, etc.
-└── docs/                    # Documentación
-```
-
-## 🔐 Autenticación
-
-- **JWT** para autenticación de sesión
-- **Google OAuth** opcional para registro rápido
-- **Verificación de email** obligatoria
-- **Recuperación de contraseña** por email
-
-## 📍 Geolocalización
-
-- **Eventos cercanos** basados en ubicación
-- **Rutas optimizadas** para caminatas/carreras
-- **Filtros de distancia** personalizables
-- **Mapas integrados** para visualización
-
-## 💳 Pagos
-
-- **MercadoPago** integrado
-- **Suscripciones premium** mensuales/anuales
-- **Compras in-app** para monedas virtuales
-- **Eventos de pago** para actividades especiales
-
-## 🔔 Notificaciones
-
-- **Push notifications** para eventos y matches
-- **Email** para confirmaciones y recordatorios
-- **WhatsApp** para notificaciones importantes
-- **Configuración personalizable** por usuario
-
-## 🧪 Testing
-
-- **Tests unitarios** con Jest
-- **Tests E2E** con Detox (futuro)
-- **Cobertura de código** configurada
-- **CI/CD** con GitHub Actions
-
-## 🚀 Deployment
-
-- **Backend**: Vercel o Railway
-- **Frontend**: Expo Application Services (EAS)
-- **Base de datos**: Neon (PostgreSQL)
-- **CDN**: Cloudinary para imágenes
-
-### 📱 Guías de Publicación
-
-- **[Guía Completa de Publicación](./GUIA_PUBLICACION_COMPLETA.md)** - Guía detallada paso a paso
-- **[Inicio Rápido](./INICIO_RAPIDO_PUBLICACION.md)** - Guía rápida para comenzar
-- **[Resumen de Publicación](./RESUMEN_PUBLICACION.md)** - Checklist y resumen
-- **[Configurar Variables EAS](./docs/CONFIGURAR_VARIABLES_EAS.md)** - Variables de entorno
-
-### 🛠️ Scripts de Automatización
-
-Todos los scripts están en la carpeta `scripts/`:
-- `publicar-backend-vercel.ps1` - Publicar backend en Vercel
-- `inicializar-eas.ps1` - Inicializar EAS (primera vez)
-- `build-app-android.ps1` - Crear build de Android
-- `build-app-ios.ps1` - Crear build de iOS
-- `submit-google-play.ps1` - Subir a Google Play
-- `submit-app-store.ps1` - Subir a App Store
-- `actualizar-version.ps1` - Actualizar versión de la app
-
-## 📄 Licencia
-
-MIT License - ver [LICENSE](LICENSE) para más detalles.
-
-## 🤝 Soporte
-
-- **Email**: soporte@sportpetmatch.com
-- **Discord**: [Servidor de la comunidad](https://discord.gg/sportpetmatch)
-- **Reporte in-app**: Disponible en la configuración
-
-## 🎯 Roadmap
-
-- [ ] Versión MVP (Q1 2024)
-- [ ] Integración completa de pagos
-- [ ] Sistema de chat avanzado
-- [ ] IA para matching inteligente
-- [ ] Versión web complementaria
-- [ ] API pública para desarrolladores
 
 ---
 
-Hecho con ❤️ para la comunidad de amantes de las mascotas y el deporte.
+## Scripts principales
+
+| Comando | Que hace |
+|---------|----------|
+| `npm start` | Inicia el frontend (Expo web) |
+| `npm run dev:backend` | Inicia el backend en desarrollo |
+| `npm run dev:frontend` | Inicia el frontend en desarrollo |
+| `npm run vercel-build` | Build completo para Vercel (backend + frontend + copia) |
+| `npm run build:all` | Compila backend, frontend y copia archivos |
+
+---
+
+## Estructura del proyecto
+
+```
+SportPetMatch/
+├── backend/
+│   ├── src/              # Controladores, rutas, middleware
+│   ├── prisma/           # Schema y seed
+│   └── api/index.js      # Handler serverless para Vercel
+├── frontend/
+│   ├── src/
+│   │   ├── pantallas/    # Pantallas de la app
+│   │   ├── componentes/  # Componentes reutilizables
+│   │   ├── servicios/    # Clientes API
+│   │   ├── contextos/    # Auth, ubicacion
+│   │   └── constantes/   # Tema y marca
+│   └── web/              # index.html, manifest, landing, sw.js
+├── docs/                 # Guias de deploy, PWA, AdMob, etc.
+├── scripts/              # Scripts de build y publicacion
+└── vercel.json           # Rewrites y config Vercel
+```
+
+---
+
+## Deploy en Vercel
+
+Es un **monorepo**: un solo proyecto en Vercel sirve frontend (estaticos) y backend (funcion serverless en `api/index.js`).
+
+```bash
+npm run vercel-build       # compilar todo localmente
+git push origin main       # Vercel despliega automaticamente
+```
+
+Variables de entorno obligatorias en Vercel:
+
+- `DATABASE_URL` — conexion PostgreSQL
+- `JWT_SECRET` / `JWT_REFRESH_SECRET` — secretos para tokens
+- `NODE_ENV=production`
+- `CORS_ORIGIN=https://tu-dominio.vercel.app`
+
+Guia completa: [docs/PUBLICAR_VERCEL.md](docs/PUBLICAR_VERCEL.md)
+
+---
+
+## Instalar en celular (sin tiendas)
+
+**PWA (recomendada):** abre la URL en Chrome (Android) o Safari (iPhone), menu > "Agregar a pantalla de inicio". Se instala como app nativa.
+
+**APK Android:** genera un APK con EAS Build (`scripts/build-app-android.ps1`).
+
+Guia: [docs/INSTALAR_SIN_TIENDAS.md](docs/INSTALAR_SIN_TIENDAS.md)
+
+---
+
+## Documentacion
+
+| Guia | Archivo |
+|------|---------|
+| Deploy Vercel | [docs/PUBLICAR_VERCEL.md](docs/PUBLICAR_VERCEL.md) |
+| Instalar sin tiendas | [docs/INSTALAR_SIN_TIENDAS.md](docs/INSTALAR_SIN_TIENDAS.md) |
+| Copy de venta | [docs/COPY_VENTA_INDIO.md](docs/COPY_VENTA_INDIO.md) |
+| AdMob (publicidad) | [docs/ADMOB.md](docs/ADMOB.md) |
+| PWA | [docs/GUIA_PWA.md](docs/GUIA_PWA.md) |
+| Estado de la API | [docs/ESTADO_API.md](docs/ESTADO_API.md) |
+| Monorepo Vercel | [docs/DEPLOY_MONOREPO_VERCEL.md](docs/DEPLOY_MONOREPO_VERCEL.md) |
+
+---
+
+## Licencia
+
+MIT
