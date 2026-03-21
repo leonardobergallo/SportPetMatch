@@ -44,3 +44,9 @@ coverage/
 # Misc
 *.pem
 *.key
+
+# Expo / Metro cache (no subir)
+.expo/
+_expo/
+frontend/.expo/
+backend/.expo/

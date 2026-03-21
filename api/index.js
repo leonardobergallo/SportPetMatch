@@ -38,33 +38,17 @@ try {
 }
 
 // Exportar handler para Vercel
-// Vercel espera una función que reciba (req, res)
-// Necesitamos manejar las rutas correctamente cuando Vercel reescribe
+// Vercel espera una función que reciba (req, res). No cerrar hasta que Express envíe la respuesta.
 module.exports = (req, res) => {
-  // Log para debugging (siempre en Vercel)
-  console.log(`📥 ${req.method} ${req.url || req.path} - Original: ${req.originalUrl || req.url}`);
-  console.log(`📍 Query:`, req.query);
-  console.log(`🔍 Headers:`, req.headers['content-type']);
-  console.log(`🌐 Origin:`, req.headers['origin']);
-  
-  // Manejar OPTIONS (preflight) explícitamente si es necesario
-  // Aunque Express con CORS debería manejarlo, lo hacemos explícito para Vercel
-  if (req.method === 'OPTIONS') {
-    console.log('✅ OPTIONS (preflight) recibido');
-    // Dejar que Express maneje OPTIONS con CORS
-  }
-  
-  // En Vercel, cuando se reescribe /api/(.*) a /api/index.js,
-  // la ruta puede llegar sin el prefijo /api
-  // Necesitamos asegurarnos de que Express la maneje correctamente
-  
-  // Si la ruta no empieza con /api, agregarlo
-  const originalUrl = req.url || req.path || '';
-  if (!originalUrl.startsWith('/api')) {
-    req.url = '/api' + originalUrl;
-    req.originalUrl = req.originalUrl || req.url;
-  }
-  
-  // Ejecutar la app de Express
-  return app(req, res);
+  const rawPath = req.url || req.path || req.originalUrl || '';
+  const path = rawPath.startsWith('/api') ? rawPath : '/api' + (rawPath.startsWith('/') ? rawPath : '/' + rawPath);
+  req.url = path;
+  req.originalUrl = req.originalUrl || path;
+
+  // No devolver hasta que la respuesta esté enviada (evita 405/connection closed)
+  return new Promise((resolve) => {
+    res.on('finish', resolve);
+    res.on('close', resolve);
+    app(req, res);
+  });
 };

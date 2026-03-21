@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Indio | mi mejor amigo</title>
+  <meta
+    name="description"
+    content="Indio es la app gratis para conectar personas y mascotas en eventos, salidas y actividades pet-friendly."
+  />
+  <meta name="theme-color" content="#22a447" />
+  <style>
+    :root {
+      --green: #22a447;
+      --green-dark: #187736;
+      --text: #1a1a1a;
+      --muted: #64748b;
+      --bg: #f6fbf7;
+      --card: #ffffff;
+      --line: #d9e6dd;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      width: min(1080px, 92vw);
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(6px);
+      background: rgba(246, 251, 247, 0.9);
+      border-bottom: 1px solid var(--line);
+      z-index: 20;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--green-dark);
+    }
+
+    .cta-inline {
+      display: inline-block;
+      background: var(--green);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      padding: 64px 0 36px;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: clamp(34px, 6vw, 56px);
+      line-height: 1.1;
+      margin: 0 0 14px;
+    }
+
+    .subtitle {
+      font-size: clamp(17px, 2.5vw, 22px);
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+
+    .btns {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 18px;
+      text-decoration: none;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-secondary { background: #fff; color: var(--green-dark); border: 1px solid var(--line); }
+
+    .micro {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 14px 0 32px;
+    }
+
+    h2 {
+      margin: 10px 0 12px;
+      font-size: clamp(24px, 4vw, 34px);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 14px 0 42px;
+    }
+
+    .step-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: #ecf9f0;
+      color: var(--green-dark);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .install {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 14px 0 42px;
+    }
+
+    .faq {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 38px;
+    }
+
+    details {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 22px 0 34px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .hero,
+      .grid3,
+      .steps,
+      .install {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <div class="brand">Indio · mi mejor amigo</div>
+      <a class="cta-inline" href="/">Abrir app</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <h1>La app gratis para salir, entrenar y conectar con tu mascota</h1>
+        <p class="subtitle">
+          En <strong>Indio</strong> encuentras eventos pet-friendly, personas afines, chat y mapa de actividades cerca tuyo.
+        </p>
+        <div class="btns">
+          <a class="btn btn-primary" href="/">Probar gratis ahora</a>
+          <a class="btn btn-secondary" href="#instalar">Instalar en celular</a>
+        </div>
+        <p class="micro">Sin costo para usuarios. Ideal para dueños de perros y mascotas activas.</p>
+      </div>
+      <aside class="card">
+        <h3 style="margin-top:0;">Que obtienes hoy</h3>
+        <ul>
+          <li>Perfil de usuario y de mascota.</li>
+          <li>Eventos y actividades deportivas pet-friendly.</li>
+          <li>Matching por compatibilidad e intereses.</li>
+          <li>Mapa para descubrir personas y eventos cercanos.</li>
+          <li>Chat para coordinar salidas.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section>
+      <h2>Por que la gente elige Indio</h2>
+      <div class="grid3">
+        <article class="card">
+          <h3>Conexion real</h3>
+          <p>Conoce personas con el mismo estilo de vida y planifica actividades con mascotas de forma simple.</p>
+        </article>
+        <article class="card">
+          <h3>Mas actividad, mejor bienestar</h3>
+          <p>Transforma paseos en entrenamientos y salidas sociales para tu mascota y para vos.</p>
+        </article>
+        <article class="card">
+          <h3>Comunidad segura</h3>
+          <p>Autenticacion con cuenta, gestion de perfiles y herramientas de reporte para mejor experiencia.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Como funciona</h2>
+      <div class="steps">
+        <article class="card">
+          <div class="step-num">1</div>
+          <h3>Crea tu perfil</h3>
+          <p>Registra tu cuenta, carga datos de tu mascota y define intereses.</p>
+        </article>
+        <article class="card">
+          <div class="step-num">2</div>
+          <h3>Descubre y conecta</h3>
+          <p>Explora eventos, revisa matches y encuentra opciones cerca en el mapa.</p>
+        </article>
+        <article class="card">
+          <div class="step-num">3</div>
+          <h3>Coordina por chat</h3>
+          <p>Habla con otros dueños, organiza encuentros y salgan juntos.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="instalar">
+      <h2>Instala en celular sin App Store o Play Store</h2>
+      <div class="install">
+        <article class="card">
+          <h3>Opcion 1: PWA (recomendada)</h3>
+          <p><strong>Android (Chrome):</strong> abre la app web, toca menu y elige <em>Agregar a pantalla de inicio</em>.</p>
+          <p><strong>iPhone (Safari):</strong> abre la app web, toca compartir y elige <em>Agregar a inicio</em>.</p>
+          <p class="micro">Se instala como app, con icono y pantalla completa.</p>
+          <a class="btn btn-primary" href="/">Abrir app para instalar</a>
+        </article>
+        <article class="card">
+          <h3>Opcion 2: APK directa (Android)</h3>
+          <p>Si quieres instalacion como app nativa de prueba, descarga el APK firmado y habilita instalar desde origen desconocido.</p>
+          <p class="micro">Puedes generar el APK con EAS Build usando el script del proyecto.</p>
+          <a class="btn btn-secondary" href="https://expo.dev" target="_blank" rel="noreferrer">Ver EAS Build</a>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Preguntas frecuentes</h2>
+      <div class="faq">
+        <details>
+          <summary>Es realmente gratis para usuarios?</summary>
+          <p>Si. La propuesta actual es gratuita para crecer comunidad. El modelo de monetizacion principal puede ser publicidad y opciones premium futuras.</p>
+        </details>
+        <details>
+          <summary>Necesito publicar en tiendas para usarla?</summary>
+          <p>No. Hoy puedes usar la version web instalable (PWA) y en Android tambien distribuir APK de prueba sin tienda.</p>
+        </details>
+        <details>
+          <summary>Funciona en mi ciudad?</summary>
+          <p>Si hay usuarios o eventos cercanos, el mapa y matching te ayudan a encontrarlos. La comunidad crece por zona.</p>
+        </details>
+      </div>
+      <div class="card">
+        <h3 style="margin-top: 0;">Quiero esta app para mi comunidad o negocio</h3>
+        <p>Contactanos para alianzas, lanzamientos locales y patrocinios de eventos pet-friendly.</p>
+        <a class="btn btn-primary" href="https://wa.me/5490000000000" target="_blank" rel="noreferrer">Hablar por WhatsApp</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <strong>Indio</strong> · mi mejor amigo<br />
+      App social para personas y mascotas activas.
+    </div>
+  </footer>
+</body>
+</html>

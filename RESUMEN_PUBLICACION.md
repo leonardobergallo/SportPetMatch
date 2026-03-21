@@ -6,6 +6,12 @@
 - ✅ **GUIA_PUBLICACION_COMPLETA.md** - Guía detallada paso a paso
 - ✅ **INICIO_RAPIDO_PUBLICACION.md** - Guía rápida de inicio
 - ✅ **RESUMEN_PUBLICACION.md** - Este archivo
+- ✅ **docs/INSTALAR_SIN_TIENDAS.md** - Instalación por PWA y APK sin tiendas
+- ✅ **docs/COPY_VENTA_INDIO.md** - Copy de ventas para landing, anuncios y WhatsApp
+
+### 🛍️ Landing de venta
+- ✅ `frontend/web/landing.html` - Single page comercial de Indio
+- En producción quedará disponible en: `https://tu-dominio/landing.html`
 
 ### 🔧 Scripts de Automatización
 - ✅ `scripts/publicar-backend-vercel.ps1` - Publicar backend en Vercel

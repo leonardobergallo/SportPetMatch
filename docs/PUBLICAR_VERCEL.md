@@ -167,9 +167,11 @@ Luego en el dashboard agrega las variables de entorno y haz **Redeploy** si hace
 
 ### Error 405 en `/api/auth/login`
 
-- CORS y OPTIONS ya están configurados en el backend (`app.options('*', cors(...))`).
+- El handler en `backend/api/index.js` ya está preparado para Vercel: normaliza el path (`req.url` con prefijo `/api` si hace falta) y **no termina hasta que Express envía la respuesta** (Promise que resuelve en `res.on('finish')`), para evitar que la función serverless cierre antes de tiempo y devuelva 405.
+- Tras cambios en el handler, haz **Redeploy** en Vercel para que use el nuevo `api/index.js`.
+- CORS y OPTIONS están configurados en el backend (`app.options('*', cors(...))`).
 - Revisar en Vercel → **Functions** → `api/index.js` que no haya errores de carga (p. ej. `Cannot find module`).
-- Confirmar que las variables de entorno estén en el proyecto correcto y que hayas hecho redeploy después de cambiarlas.
+- Confirmar que las variables de entorno estén en el proyecto correcto.
 
 ### “API URL not found” / no conecta al backend
 

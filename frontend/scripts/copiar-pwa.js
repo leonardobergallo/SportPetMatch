@@ -1,10 +1,10 @@
 /**
  * Script para copiar archivos PWA al directorio dist después del build
- * Copia manifest.json, sw.js e iconos desde web/ a dist/
+ * Copia manifest.json, sw.js, landing e iconos desde web/ a dist/
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const sourceDir = path.join(__dirname, '../web');
 const distDir = path.join(__dirname, '../dist');
@@ -13,6 +13,7 @@ const distDir = path.join(__dirname, '../dist');
 const filesToCopy = [
   'manifest.json',
   'sw.js',
+  'landing.html',
   'icon-72x72.png',
   'icon-96x96.png',
   'icon-128x128.png',
