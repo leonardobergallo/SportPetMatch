@@ -50,7 +50,7 @@
       "backgroundColor": "#ffffff",
       "display": "standalone",
       "orientation": "portrait",
-      "startUrl": "/",
+      "startUrl": "/app.html",
       "favicon": "./assets/icono.png",
       "manifest": "./web/manifest.json"
     },

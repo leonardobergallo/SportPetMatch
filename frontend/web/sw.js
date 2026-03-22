@@ -2,7 +2,7 @@
 const CACHE_NAME = 'sportpetmatch-v1'
 const urlsToCache = [
   '/',
-  '/index.html',
+  '/app.html',
   '/manifest.json'
 ]
 
@@ -69,7 +69,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate' || event.request.destination === 'document') {
     event.respondWith(
       networkFirst(event.request).catch(() => {
-        return caches.match('/index.html').then(cached => {
+        return caches.match('/app.html').then(cached => {
           if (cached) return cached
           return new Response('Offline', { status: 503 })
         })

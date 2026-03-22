@@ -52,7 +52,9 @@ config.server = {
   enhanceMiddleware: (middleware) => {
     return (req, res, next) => {
       const url = req.url || '';
-      const isNativeBundle = url.startsWith('/frontend/') && (url.includes('platform=ios') || url.includes('platform=android'));
+      const isNativeBundle =
+        url.startsWith('/frontend/') &&
+        (url.includes('platform=ios') || url.includes('platform=android'));
       if (isNativeBundle) {
         const rewritten = url.replace(/^\/frontend\//, '/');
         req.url = rewritten;

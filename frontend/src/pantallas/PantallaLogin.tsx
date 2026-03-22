@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import {
   View,
+  Text,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
@@ -13,7 +14,6 @@ import {
   Pressable,
 } from 'react-native';
 import {
-  Text,
   TextInput,
   Button,
   Card,
@@ -22,7 +22,7 @@ import {
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { temaApp, espaciado, MARCA } from '../constantes/tema';
+import { MARCA } from '../constantes/tema';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { useAuth, Usuario } from '../contextos/ContextoAuth';
 import { iniciarSesion as servicioIniciarSesion } from '../servicios/servicioAuth';
@@ -155,14 +155,16 @@ export default function PantallaLogin(): JSX.Element {
 
         {/* ═══════════════ GALERIA ═══════════════ */}
         <View style={st.gallerySection}>
-          <Text style={st.sectionTag}>GALERIA</Text>
-          <Text style={[st.sectionTitle, { color: '#fff' }]}>Asi se vive con Indio</Text>
+          <Text style={st.sectionTagOnDark}>GALERIA</Text>
+          <Text style={st.sectionTitleOnDark}>Asi se vive con Indio</Text>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.galleryScroll}>
             {GALLERY.map((g) => (
               <View key={g.caption} style={st.galleryCard}>
                 <Image source={g.img} style={st.galleryImg} />
-                <Text style={st.galleryCaption}>{g.caption}</Text>
+                <View style={st.galleryCaptionWrap}>
+                  <Text style={st.galleryCaption}>{g.caption}</Text>
+                </View>
               </View>
             ))}
           </ScrollView>
@@ -232,16 +234,43 @@ export default function PantallaLogin(): JSX.Element {
                 <Text style={st.loginTitle}>Iniciar Sesion</Text>
                 <Text style={st.loginSub}>Ingresa tus datos para continuar</Text>
 
-                <TextInput label="Email" value={email} onChangeText={setEmail} mode="outlined"
-                  keyboardType="email-address" autoCapitalize="none" autoComplete="email"
-                  style={st.input} left={<TextInput.Icon icon="email" />} disabled={loading}
-                  outlineStyle={st.inputOutline} />
+                <TextInput
+                  label="Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  mode="outlined"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  style={st.input}
+                  left={<TextInput.Icon icon="email" />}
+                  disabled={loading}
+                  outlineStyle={st.inputOutline}
+                  textColor="#0f172a"
+                  activeOutlineColor="#6200ea"
+                  outlineColor="#64748b"
+                  placeholderTextColor="#64748b"
+                  theme={{ colors: { onSurfaceVariant: '#334155', onSurface: '#0f172a' } }}
+                />
 
-                <TextInput label="Contraseña" value={pw} onChangeText={setPw} mode="outlined"
-                  secureTextEntry={!showPw} autoComplete="password"
-                  style={st.input} left={<TextInput.Icon icon="lock" />}
+                <TextInput
+                  label="Contraseña"
+                  value={pw}
+                  onChangeText={setPw}
+                  mode="outlined"
+                  secureTextEntry={!showPw}
+                  autoComplete="password"
+                  style={st.input}
+                  left={<TextInput.Icon icon="lock" />}
                   right={<TextInput.Icon icon={showPw ? 'eye-off' : 'eye'} onPress={() => setShowPw(!showPw)} />}
-                  disabled={loading} outlineStyle={st.inputOutline} />
+                  disabled={loading}
+                  outlineStyle={st.inputOutline}
+                  textColor="#0f172a"
+                  activeOutlineColor="#6200ea"
+                  outlineColor="#64748b"
+                  placeholderTextColor="#64748b"
+                  theme={{ colors: { onSurfaceVariant: '#334155', onSurface: '#0f172a' } }}
+                />
 
                 <Button mode="text" onPress={() => {
                   if (!email.trim()) { Alert.alert('Error', 'Ingresa tu email primero'); return; }
@@ -293,11 +322,37 @@ const st = StyleSheet.create({
   // Hero
   hero: { width: '100%', minHeight: 440 },
   heroImg: { resizeMode: 'cover' },
-  heroOverlay: { flex: 1, backgroundColor: 'rgba(20,0,60,0.65)', justifyContent: 'center', paddingVertical: 60 },
+  heroOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.78)', justifyContent: 'center', paddingVertical: 60 },
   heroContent: { alignItems: 'center', paddingHorizontal: 24, maxWidth: 560, alignSelf: 'center', width: '100%' },
-  heroTitle: { fontSize: 42, fontWeight: '900', color: '#fff', marginTop: 8, letterSpacing: 1 },
-  heroSlogan: { fontSize: 17, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontStyle: 'italic' },
-  heroDesc: { fontSize: 16, color: 'rgba(255,255,255,0.9)', textAlign: 'center', marginTop: 18, lineHeight: 24 },
+  heroTitle: {
+    fontSize: 42,
+    fontWeight: '900',
+    color: '#ffffff',
+    marginTop: 8,
+    letterSpacing: 1,
+    textShadowColor: 'rgba(0,0,0,0.85)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+  },
+  heroSlogan: {
+    fontSize: 17,
+    color: '#f8fafc',
+    marginTop: 2,
+    fontStyle: 'italic',
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
+  heroDesc: {
+    fontSize: 16,
+    color: '#ffffff',
+    textAlign: 'center',
+    marginTop: 18,
+    lineHeight: 24,
+    textShadowColor: 'rgba(0,0,0,0.85)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
   heroBtns: { flexDirection: 'row', gap: 12, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center' },
   heroCtaPrimary: { backgroundColor: '#fff', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 28 },
   heroCtaPrimaryTxt: { color: '#6200ea', fontWeight: '800', fontSize: 15 },
@@ -306,53 +361,66 @@ const st = StyleSheet.create({
 
   // Sections
   section: { paddingHorizontal: 20, paddingVertical: 36, maxWidth: 600, alignSelf: 'center', width: '100%' },
-  sectionTag: { fontSize: 11, fontWeight: '800', color: '#6200ea', letterSpacing: 2, textAlign: 'center', marginBottom: 6 },
-  sectionTitle: { fontSize: 24, fontWeight: '800', color: '#1a1a2e', textAlign: 'center', marginBottom: 24, lineHeight: 30 },
+  sectionTag: { fontSize: 11, fontWeight: '800', color: '#5b21b6', letterSpacing: 2, textAlign: 'center', marginBottom: 6 },
+  sectionTitle: { fontSize: 24, fontWeight: '800', color: '#0f172a', textAlign: 'center', marginBottom: 24, lineHeight: 30 },
+  sectionTagOnDark: { fontSize: 11, fontWeight: '800', color: '#e9d5ff', letterSpacing: 2, textAlign: 'center', marginBottom: 6 },
+  sectionTitleOnDark: { fontSize: 24, fontWeight: '800', color: '#ffffff', textAlign: 'center', marginBottom: 24, lineHeight: 30 },
 
   // Features
   featureRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, gap: 16 },
   featureRowReverse: { flexDirection: 'row-reverse' },
   featureIcon: { width: 64, height: 64, borderRadius: 18, backgroundColor: '#f3edff', justifyContent: 'center', alignItems: 'center' },
   featureText: { flex: 1 },
-  featureTitle: { fontSize: 16, fontWeight: '700', color: '#1a1a2e', marginBottom: 4 },
-  featureDesc: { fontSize: 13, color: '#6b7280', lineHeight: 19 },
+  featureTitle: { fontSize: 16, fontWeight: '700', color: '#0f172a', marginBottom: 4 },
+  featureDesc: { fontSize: 14, color: '#334155', lineHeight: 21 },
 
   // Gallery
   gallerySection: { backgroundColor: '#1a1a2e', paddingVertical: 36 },
   galleryScroll: { paddingHorizontal: 20, gap: 14 },
   galleryCard: { width: 220, borderRadius: 16, overflow: 'hidden', backgroundColor: '#2a2a4e' },
   galleryImg: { width: 220, height: 150, resizeMode: 'cover' },
-  galleryCaption: { color: '#fff', fontSize: 13, fontWeight: '600', padding: 12 },
+  galleryCaptionWrap: { backgroundColor: 'rgba(15,23,42,0.92)', paddingVertical: 10, paddingHorizontal: 12 },
+  galleryCaption: { color: '#ffffff', fontSize: 14, fontWeight: '700', lineHeight: 20 },
 
   // Steps
   stepsRow: { flexDirection: 'row', gap: 12 },
   stepCard: { flex: 1, backgroundColor: '#fff', borderRadius: 16, padding: 16, alignItems: 'center', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, borderWidth: 1, borderColor: '#f0f0f0' },
   stepNum: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#6200ea', justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   stepNumTxt: { color: '#fff', fontWeight: '900', fontSize: 15 },
-  stepTitle: { fontSize: 14, fontWeight: '800', color: '#1a1a2e', marginBottom: 4, textAlign: 'center' },
-  stepDesc: { fontSize: 11, color: '#6b7280', textAlign: 'center', lineHeight: 16 },
+  stepTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 4, textAlign: 'center' },
+  stepDesc: { fontSize: 12, color: '#475569', textAlign: 'center', lineHeight: 17 },
 
   // Mid banner
   midBanner: { width: '100%', minHeight: 280 },
   midBannerImg: { resizeMode: 'cover' },
   midBannerOverlay: { flex: 1, backgroundColor: 'rgba(98,0,234,0.75)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 40 },
-  midBannerTitle: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'center', lineHeight: 30, marginBottom: 20 },
+  midBannerTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#ffffff',
+    textAlign: 'center',
+    lineHeight: 30,
+    marginBottom: 20,
+    textShadowColor: 'rgba(0,0,0,0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
 
   // Install
   installRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
   installCard: { flex: 1, backgroundColor: '#fff', borderRadius: 16, padding: 20, alignItems: 'center', elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, borderWidth: 1, borderColor: '#f0f0f0' },
-  installTitle: { fontSize: 15, fontWeight: '700', color: '#1a1a2e', marginTop: 8, marginBottom: 6 },
-  installDesc: { fontSize: 12, color: '#6b7280', textAlign: 'center', lineHeight: 17 },
-  installMicro: { fontSize: 12, color: '#9ca3af', textAlign: 'center' },
+  installTitle: { fontSize: 15, fontWeight: '700', color: '#0f172a', marginTop: 8, marginBottom: 6 },
+  installDesc: { fontSize: 13, color: '#334155', textAlign: 'center', lineHeight: 19 },
+  installMicro: { fontSize: 13, color: '#475569', textAlign: 'center' },
 
   // Login
   loginSection: { backgroundColor: '#f0ecf8', paddingVertical: 36, paddingHorizontal: 20 },
   loginInner: { maxWidth: 420, alignSelf: 'center', width: '100%' },
   loginLogo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 18 },
-  loginLogoTxt: { fontSize: 24, fontWeight: '900', color: '#6200ea' },
+  loginLogoTxt: { fontSize: 24, fontWeight: '900', color: '#4c1d95' },
   loginCard: { borderRadius: 20, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, backgroundColor: '#fff' },
-  loginTitle: { fontSize: 22, fontWeight: '700', color: '#1a1a2e', marginBottom: 4 },
-  loginSub: { fontSize: 14, color: '#6b7280', marginBottom: 20 },
+  loginTitle: { fontSize: 22, fontWeight: '700', color: '#0f172a', marginBottom: 4 },
+  loginSub: { fontSize: 15, color: '#334155', marginBottom: 20 },
   input: { marginBottom: 14, backgroundColor: '#fff' },
   inputOutline: { borderRadius: 12 },
   forgot: { alignSelf: 'flex-end', marginBottom: 8 },
@@ -360,13 +428,13 @@ const st = StyleSheet.create({
   loginBtnInner: { paddingVertical: 6 },
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 16 },
   dividerLine: { flex: 1 },
-  dividerTxt: { paddingHorizontal: 12, fontSize: 13, color: '#9ca3af' },
+  dividerTxt: { paddingHorizontal: 12, fontSize: 13, color: '#475569' },
   googleBtn: { borderRadius: 12, borderColor: '#ddd' },
   regRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 14, marginBottom: 8 },
-  regTxt: { color: '#6b7280', fontSize: 14 },
+  regTxt: { color: '#334155', fontSize: 15 },
 
   // Footer
   footer: { backgroundColor: '#1a1a2e', paddingVertical: 28, paddingHorizontal: 20, alignItems: 'center' },
-  footerTxt: { color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: '600', marginTop: 6 },
-  footerSub: { color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 4 },
+  footerTxt: { color: '#f1f5f9', fontSize: 15, fontWeight: '700', marginTop: 6 },
+  footerSub: { color: '#cbd5e1', fontSize: 13, marginTop: 4 },
 });

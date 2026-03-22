@@ -1,15 +1,16 @@
 /**
- * Script para copiar archivos PWA al directorio dist después del build
- * Copia manifest.json, sw.js, landing e iconos desde web/ a dist/
+ * Tras `expo export`: renombra el SPA a app.html, copia la landing Multiverse a index.html
+ * y sincroniza web/multiverse → dist/multiverse.
  */
 
 const fs = require('node:fs');
 const path = require('node:path');
 
-const sourceDir = path.join(__dirname, '../web');
+const webDir = path.join(__dirname, '../web');
 const distDir = path.join(__dirname, '../dist');
+const multiverseSrc = path.join(webDir, 'multiverse');
+const multiverseIndex = path.join(multiverseSrc, 'index.html');
 
-// Archivos a copiar
 const filesToCopy = [
   'manifest.json',
   'sw.js',
@@ -21,23 +22,69 @@ const filesToCopy = [
   'icon-152x152.png',
   'icon-192x192.png',
   'icon-384x384.png',
-  'icon-512x512.png'
+  'icon-512x512.png',
 ];
 
-console.log('📦 Copiando archivos PWA a dist/...');
+function copyDirRecursive(src, dest) {
+  if (!fs.existsSync(src)) return;
+  fs.mkdirSync(dest, { recursive: true });
+  for (const name of fs.readdirSync(src)) {
+    const from = path.join(src, name);
+    const to = path.join(dest, name);
+    const st = fs.statSync(from);
+    if (st.isDirectory()) {
+      copyDirRecursive(from, to);
+    } else {
+      fs.copyFileSync(from, to);
+    }
+  }
+}
 
-// Verificar que dist existe
+console.log('📦 Post-build: PWA + landing Multiverse → dist/...');
+
 if (!fs.existsSync(distDir)) {
   console.error('❌ Error: El directorio dist/ no existe. Ejecuta npm run build primero.');
   process.exit(1);
 }
 
-// Copiar cada archivo
+const spaIndex = path.join(distDir, 'index.html');
+const spaApp = path.join(distDir, 'app.html');
+
+if (fs.existsSync(spaIndex)) {
+  try {
+    if (fs.existsSync(spaApp)) {
+      fs.unlinkSync(spaApp);
+    }
+    fs.renameSync(spaIndex, spaApp);
+    console.log('✅ SPA Expo renombrado a dist/app.html');
+  } catch (e) {
+    console.error('❌ No se pudo renombrar index.html → app.html:', e.message);
+    process.exit(1);
+  }
+} else {
+  console.warn('⚠️  No hay dist/index.html (¿export vacío?). Se omite renombre a app.html');
+}
+
+if (fs.existsSync(multiverseIndex)) {
+  fs.copyFileSync(multiverseIndex, path.join(distDir, 'index.html'));
+  console.log('✅ Landing Multiverse copiada a dist/index.html');
+} else {
+  console.warn('⚠️  Falta web/multiverse/index.html — no se escribió dist/index.html');
+}
+
+const multiverseDest = path.join(distDir, 'multiverse');
+if (fs.existsSync(multiverseSrc)) {
+  copyDirRecursive(multiverseSrc, multiverseDest);
+  console.log('✅ Copiado web/multiverse → dist/multiverse');
+} else {
+  console.warn('⚠️  No existe web/multiverse');
+}
+
 let copied = 0;
 let skipped = 0;
 
-filesToCopy.forEach(file => {
-  const sourcePath = path.join(sourceDir, file);
+filesToCopy.forEach((file) => {
+  const sourcePath = path.join(webDir, file);
   const destPath = path.join(distDir, file);
 
   if (fs.existsSync(sourcePath)) {
@@ -55,12 +102,4 @@ filesToCopy.forEach(file => {
 });
 
 console.log('');
-console.log(`✅ Proceso completado: ${copied} archivos copiados, ${skipped} omitidos`);
-
-// No fallar si algunos archivos no existen (solo advertir)
-if (copied === 0) {
-  console.warn('⚠️  No se copió ningún archivo. Verifica que los archivos estén en web/');
-  // No hacer exit(1) para no romper el build si faltan algunos archivos opcionales
-}
-
-
+console.log(`✅ PWA: ${copied} archivos, ${skipped} omitidos`);

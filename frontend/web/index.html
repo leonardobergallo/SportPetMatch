@@ -1,18 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="%LANG_ISO_CODE%">
 <head>
   <meta charset="utf-8" />
-  <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  
-  <title>Indio | mi mejor amigo</title>
+  <title>%WEB_TITLE%</title>
   <meta name="description" content="Indio: app gratis para conectar personas y mascotas en actividades pet-friendly." />
-  
-  <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#6200ea" />
   <link rel="manifest" href="/manifest.json" />
-  
-  <!-- iOS Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Indio" />
@@ -22,49 +17,94 @@
   <link rel="apple-touch-icon" sizes="144x144" href="/icon-144x144.png" />
   <link rel="apple-touch-icon" sizes="120x120" href="/icon-128x128.png" />
   <link rel="apple-touch-icon" sizes="76x76" href="/icon-96x96.png" />
-  
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="/icon-192x192.png" />
-  
-  <!-- Leaflet CSS para mapas -->
-  <link 
-    rel="stylesheet" 
+  <link
+    rel="stylesheet"
     href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
     integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
     crossorigin=""
   />
-
-  <style>
+  <style id="expo-reset">
+    html,
     body {
+      height: 100%;
       margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     }
-    
+    body {
+      overflow: hidden;
+    }
+    #expo-landing-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: #1a1a1a;
+    }
+    #expo-landing-status {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #888;
+      font: 14px/1.4 system-ui, sans-serif;
+      pointer-events: none;
+      z-index: 11;
+    }
+    #expo-landing-wrap iframe.loaded ~ #expo-landing-status,
+    body.expo-show-app #expo-landing-status {
+      display: none;
+    }
+    #expo-landing-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
     #root {
-      height: 100vh;
-      width: 100vw;
+      display: none;
+      flex: 1;
+      height: 100%;
+      width: 100%;
     }
-    
-    /* Estilos específicos para el mapa de Leaflet */
+    body.expo-show-app #expo-landing-wrap {
+      display: none;
+    }
+    body.expo-show-app {
+      overflow: hidden;
+    }
+    body.expo-show-app #root {
+      display: flex;
+    }
     .leaflet-container {
       height: 100%;
       width: 100%;
     }
-    
     .leaflet-popup-content {
       font-family: inherit;
     }
   </style>
 </head>
 <body>
+  <noscript>Necesitás JavaScript para usar la app.</noscript>
+  <div id="expo-landing-wrap">
+    <iframe
+      src="/multiverse/index.html"
+      title="Indio — landing"
+      onload="this.classList.add('loaded')"
+    ></iframe>
+    <p id="expo-landing-status">Cargando landing… Si ves solo gris, ejecutá: npm run sync-public</p>
+  </div>
   <div id="root"></div>
-  
-  <!-- Leaflet JS para mapas -->
-  <script 
+  <script
     src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-    crossorigin="">
+    crossorigin=""
+  ></script>
+  <script>
+    (function () {
+      if (/\bapp=1\b/.test(location.search) || location.hash === '#app') {
+        document.body.classList.add('expo-show-app');
+      }
+    })();
   </script>
 </body>
 </html>

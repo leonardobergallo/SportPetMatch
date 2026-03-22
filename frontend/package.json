@@ -4,6 +4,9 @@
   "description": "Aplicación móvil SportPetMatch - Conecta personas y mascotas en eventos deportivos",
   "main": "index.js",
   "scripts": {
+    "sync-public": "node scripts/sync-web-public.js",
+    "prestart": "node scripts/sync-web-public.js",
+    "preweb": "node scripts/sync-web-public.js",
     "start": "expo start --lan --clear --reset-cache",
     "start:lan": "expo start --lan --clear",
     "start:fresh": "expo start --lan --clear --reset-cache",
@@ -12,6 +15,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "prebuild": "node scripts/sync-web-public.js",
     "build": "npx expo export --platform web",
     "postbuild": "node scripts/copiar-pwa.js",
     "vercel-build": "npm run build",

@@ -45,6 +45,9 @@ coverage/
 *.pem
 *.key
 
+# Expo: copia generada para estáticos en dev (npm run sync-public / preweb)
+frontend/public/
+
 # Expo / Metro cache (no subir)
 .expo/
 _expo/
