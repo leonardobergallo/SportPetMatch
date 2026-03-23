@@ -106,7 +106,8 @@
   ></script>
   <script>
     (function () {
-      if (/\bapp=1\b/.test(location.search) || location.hash === '#app') {
+      var forceLanding = /\blanding=1\b/.test(location.search) || location.hash === '#landing';
+      if (!forceLanding || /\bapp=1\b/.test(location.search) || location.hash === '#app') {
         document.body.classList.add('expo-show-app');
       }
     })();
