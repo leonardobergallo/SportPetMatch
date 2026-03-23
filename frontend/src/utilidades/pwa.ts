@@ -8,6 +8,20 @@ export const registerServiceWorker = () => {
     return
   }
 
+  // En desarrollo el Service Worker suele interferir con Expo Web, HMR y pruebas de login.
+  if (__DEV__) {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations()
+        .then((registrations) => {
+          registrations.forEach((registration) => {
+            registration.unregister().catch(() => {})
+          })
+        })
+        .catch(() => {})
+    }
+    return
+  }
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker

@@ -21,7 +21,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 // Importar servicios y contexto
 import { registrarUsuario, DatosRegistro } from '@/servicios/servicioAuth';
-import { useAuth } from '@/contextos/ContextoAuth';
+import { normalizarUsuario, useAuth } from '@/contextos/ContextoAuth';
 import { temaApp, espaciado, sombras, MARCA } from '@/constantes/tema';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 
@@ -104,22 +104,15 @@ export default function PantallaRegistro(): JSX.Element {
       const respuesta = await registrarUsuario(datosRegistro);
 
       if (respuesta.success && respuesta.data) {
-        // Convertir usuario del backend al formato del contexto
-        const usuario = {
+        const usuario = normalizarUsuario({
           id: respuesta.data.usuario.id,
-          nombre: respuesta.data.usuario.nombre.split(' ')[0] || respuesta.data.usuario.nombre,
-          apellido: respuesta.data.usuario.nombre.split(' ').slice(1).join(' ') || '',
+          nombre: respuesta.data.usuario.nombre,
           email: respuesta.data.usuario.email,
-          fechaNacimiento: '',
-          genero: 'otro',
-          ciudad: '',
-          provincia: '',
-          pais: '',
-          deportesFavoritos: [],
-          nivelActividad: 'intermedio',
-          disponibilidadSemanal: [],
-          foto: respuesta.data.usuario.avatar || undefined,
-        };
+          avatar: respuesta.data.usuario.avatar || null,
+          esPremium: respuesta.data.usuario.esPremium,
+          intereses: [],
+          onboardingCompletado: false,
+        });
 
         await iniciarSesion(usuario, respuesta.data.token);
 

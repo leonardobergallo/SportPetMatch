@@ -20,21 +20,65 @@ function irALandingPrincipalSiWeb(): void {
 export interface Usuario {
   id: string;
   nombre: string;
-  apellido: string;
   email: string;
-  telefono?: string;
-  fechaNacimiento: string;
-  genero: string;
-  ciudad: string;
-  provincia: string;
-  pais: string;
-  biografia?: string;
-  foto?: string;
-  deportesFavoritos: string[];
-  nivelActividad: string;
-  disponibilidadSemanal: string[];
-  tipoUsuario?: string;
+  telefono?: string | null;
+  fechaNacimiento?: string | null;
+  avatar?: string | null;
+  biografia?: string | null;
+  ubicacionCiudad?: string | null;
+  ubicacionPais?: string | null;
+  nivelDeporte?: number | null;
+  intereses: string[];
+  tipoUsuario?: string | null;
   onboardingCompletado?: boolean;
+  esPremium?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  // Alias legacy para no romper pantallas que todavía no se migraron del todo
+  apellido?: string;
+  genero?: string;
+  ciudad?: string;
+  provincia?: string;
+  pais?: string;
+  foto?: string | null;
+  deportesFavoritos?: string[];
+  nivelActividad?: string;
+  disponibilidadSemanal?: string[];
+}
+
+export function normalizarUsuario(datos: Partial<Usuario>): Usuario {
+  const intereses = datos.intereses ?? datos.deportesFavoritos ?? [];
+  const avatar = datos.avatar ?? datos.foto ?? null;
+  const ubicacionCiudad = datos.ubicacionCiudad ?? datos.ciudad ?? null;
+  const ubicacionPais = datos.ubicacionPais ?? datos.pais ?? null;
+
+  return {
+    id: datos.id || '',
+    nombre: datos.nombre || '',
+    email: datos.email || '',
+    telefono: datos.telefono ?? null,
+    fechaNacimiento: datos.fechaNacimiento ?? null,
+    avatar,
+    biografia: datos.biografia ?? null,
+    ubicacionCiudad,
+    ubicacionPais,
+    nivelDeporte: datos.nivelDeporte ?? null,
+    intereses,
+    tipoUsuario: datos.tipoUsuario ?? null,
+    onboardingCompletado: datos.onboardingCompletado ?? false,
+    esPremium: datos.esPremium ?? false,
+    createdAt: datos.createdAt,
+    updatedAt: datos.updatedAt,
+    apellido: datos.apellido || '',
+    genero: datos.genero || '',
+    ciudad: ubicacionCiudad ?? '',
+    provincia: datos.provincia || '',
+    pais: ubicacionPais ?? '',
+    foto: avatar,
+    deportesFavoritos: intereses,
+    nivelActividad: datos.nivelActividad || 'intermedio',
+    disponibilidadSemanal: datos.disponibilidadSemanal ?? [],
+  };
 }
 
 // Tipo para el contexto de autenticación
@@ -82,24 +126,6 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
     return () => setOnUnauthorized(null);
   }, [cerrarSesionCallback]);
 
-  /** Usuario de prueba para ver el frontend sin backend (solo en desarrollo) */
-  const USUARIO_DEMO: Usuario = {
-    id: 'demo-user-id',
-    nombre: 'María',
-    apellido: 'González',
-    email: 'maria.gonzalez@sportpetmatch.com',
-    ciudad: 'Santa Fe',
-    provincia: 'Santa Fe',
-    pais: 'Argentina',
-    fechaNacimiento: '',
-    genero: '',
-    deportesFavoritos: ['correr', 'caminar'],
-    nivelActividad: 'intermedio',
-    disponibilidadSemanal: ['sabado', 'domingo'],
-    tipoUsuario: 'con_mascota',
-    onboardingCompletado: true,
-  };
-
   /**
    * Verificar si hay una sesión guardada en AsyncStorage
    */
@@ -112,15 +138,12 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
       ]);
 
       if (token && datosUsuario) {
-        const usuario: Usuario = JSON.parse(datosUsuario);
+        const usuario: Usuario = normalizarUsuario(JSON.parse(datosUsuario));
         setUsuario(usuario);
-      } else if (__DEV__) {
-        // En desarrollo: entrar directo a la app sin login para ver pantallas
-        setUsuario(USUARIO_DEMO);
       }
     } catch (error) {
       console.error('Error al verificar sesión guardada:', error);
-      if (__DEV__) setUsuario(USUARIO_DEMO);
+      setUsuario(null);
     } finally {
       setCargandoAuth(false);
     }
@@ -131,14 +154,16 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
    */
   const iniciarSesion = async (datosUsuario: Usuario, token: string) => {
     try {
+      const usuarioNormalizado = normalizarUsuario(datosUsuario);
+
       // Guardar en AsyncStorage
       await Promise.all([
         AsyncStorage.setItem(TOKEN_KEY, token),
-        AsyncStorage.setItem(USER_KEY, JSON.stringify(datosUsuario))
+        AsyncStorage.setItem(USER_KEY, JSON.stringify(usuarioNormalizado))
       ]);
 
       // Actualizar estado
-      setUsuario(datosUsuario);
+      setUsuario(usuarioNormalizado);
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       throw error;
@@ -170,7 +195,7 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
    */
   const actualizarUsuario = (datosUsuario: Partial<Usuario>) => {
     if (usuario) {
-      const usuarioActualizado = { ...usuario, ...datosUsuario };
+      const usuarioActualizado = normalizarUsuario({ ...usuario, ...datosUsuario });
       setUsuario(usuarioActualizado);
       
       // Guardar en AsyncStorage

@@ -36,8 +36,8 @@ export default function PantallaPerfil(): JSX.Element {
         </View>
         <View style={estilos.profileInfo}>
           <View style={estilos.avatarContainer}>
-            {usuario?.foto ? (
-              <Image source={{ uri: usuario.foto }} style={estilos.avatar} />
+            {usuario?.avatar ? (
+              <Image source={{ uri: usuario.avatar }} style={estilos.avatar} />
             ) : (
               <Avatar.Text 
                 size={80} 
@@ -47,13 +47,13 @@ export default function PantallaPerfil(): JSX.Element {
             )}
           </View>
           <Text style={estilos.nombreUsuario}>
-            {usuario?.nombre || 'Usuario'} {usuario?.apellido || ''}
+            {usuario?.nombre || 'Usuario'}
           </Text>
           <Text style={estilos.emailUsuario}>{usuario?.email || 'email@example.com'}</Text>
           <View style={estilos.ubicacionContainer}>
             <MaterialIcons name="place" size={16} color={temaApp.colors.onSurfaceVariant} />
             <Text style={estilos.ubicacion}>
-              {usuario?.ciudad || 'Santa Fe'}, {usuario?.provincia || 'Santa Fe'}
+              {usuario?.ubicacionCiudad || usuario?.ciudad || 'Ubicación pendiente'}
             </Text>
           </View>
         </View>

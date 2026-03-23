@@ -21,7 +21,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 import { MARCA } from '../constantes/tema';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
-import { useAuth, Usuario } from '../contextos/ContextoAuth';
+import { useAuth, normalizarUsuario } from '../contextos/ContextoAuth';
 import { iniciarSesion as servicioIniciarSesion } from '../servicios/servicioAuth';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -86,17 +86,16 @@ export default function PantallaLogin(): JSX.Element {
       const r = await servicioIniciarSesion({ email: email.trim(), password: pw });
       if (r.success && r.data) {
         const u = r.data.usuario;
-        const usuario: Usuario = {
+        const usuario = normalizarUsuario({
           id: u.id,
-          nombre: u.nombre.split(' ')[0] || u.nombre,
-          apellido: u.nombre.split(' ').slice(1).join(' ') || '',
+          nombre: u.nombre,
           email: u.email, fechaNacimiento: '', genero: 'otro',
-          ciudad: '', provincia: '', pais: '',
-          deportesFavoritos: u.intereses || [], nivelActividad: 'intermedio',
-          disponibilidadSemanal: [], foto: u.avatar || undefined,
-          tipoUsuario: u.tipoUsuario || undefined,
+          intereses: u.intereses || [],
+          avatar: u.avatar || null,
+          esPremium: u.esPremium,
+          tipoUsuario: u.tipoUsuario || null,
           onboardingCompletado: u.onboardingCompletado || false,
-        };
+        });
         await iniciarSesion(usuario, r.data.token);
         Alert.alert('Bienvenido!', `Hola ${usuario.nombre}!`, [{ text: 'Continuar' }]);
       }

@@ -70,6 +70,7 @@ export default function PantallaMatching(): JSX.Element {
   const [usuarios, setUsuarios] = useState<UsuarioPotencial[]>([]);
   const [usuarioActual, setUsuarioActual] = useState(0);
   const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState<string | null>(null);
   
   // Usar contexto de ubicación
   const { 
@@ -98,147 +99,39 @@ export default function PantallaMatching(): JSX.Element {
   const cargarUsuariosPotenciales = async () => {
     try {
       setCargando(true);
-      
-      // Intentar cargar de la API
-      try {
-        const recomendaciones = await obtenerRecomendaciones();
-        
-        if (recomendaciones && recomendaciones.length > 0) {
-          // Convertir UsuarioRecomendado a UsuarioPotencial
-          const usuariosConvertidos = recomendaciones.map(usuario => ({
-            id: usuario.id,
-            nombre: usuario.nombre,
-            edad: 25, // TODO: Agregar edad al backend
-            avatar: usuario.avatar || 'https://via.placeholder.com/400',
-            biografia: usuario.biografia || 'Sin biografía',
-            distancia: usuario.distancia || 0,
-            ubicacionCiudad: usuario.ubicacionCiudad || 'Desconocida',
-            coordenadas: usuario.ubicacionLat && usuario.ubicacionLng 
-              ? { latitud: usuario.ubicacionLat, longitud: usuario.ubicacionLng }
-              : { latitud: 0, longitud: 0 },
-            intereses: usuario.intereses,
-            mascotas: usuario.mascotas.map((m, idx) => ({
-              id: `m${idx}`,
-              nombre: m.nombre,
-              tipo: m.tipo,
-              edad: 3, // TODO: Agregar edad al backend
-              foto: m.fotos && m.fotos.length > 0 ? m.fotos[0] : 'https://via.placeholder.com/300'
-            })),
-            esPremium: false,
-            score: usuario.score,
-            interesesComunes: usuario.interesesComunes,
-          }));
-          
-          setUsuarios(usuariosConvertidos);
-          setCargando(false);
-          return;
-        }
-      } catch (error) {
-        console.log('Error cargando recomendaciones de API, usando datos mock:', error);
-        // Continuar con datos mock si falla la API
-      }
-      
-      // Fallback: usar datos mock con geolocalización
-      let usuariosMock: UsuarioPotencial[] = [
-        {
-          id: '1',
-          nombre: 'María González',
-          edad: 28,
-          avatar: 'https://picsum.photos/400/400?random=1',
-          biografia: 'Amo correr con mi Golden Retriever todas las mañanas. Buscando compañía para aventuras!',
-          distancia: 2.5,
-          ubicacionCiudad: 'Buenos Aires',
-          coordenadas: { latitud: -34.6118, longitud: -58.3960 }, // Palermo
-          intereses: ['correr', 'senderismo', 'yoga'],
-          mascotas: [
-            {
-              id: 'm1',
-              nombre: 'Max',
-              tipo: 'Perro',
-              edad: 3,
-              foto: 'https://picsum.photos/300/300?random=11'
-            }
-          ],
-          esPremium: true
-        },
-        {
-          id: '2',
-          nombre: 'Carlos Silva',
-          edad: 32,
-          avatar: 'https://picsum.photos/400/400?random=2',
-          biografia: 'Ciclista urbano con mi Border Collie. Los fines de semana exploramos nuevas rutas en la ciudad.',
-          distancia: 1.2,
-          ubicacionCiudad: 'Buenos Aires',
-          coordenadas: { latitud: -34.6033, longitud: -58.3816 }, // Centro
-          intereses: ['ciclismo', 'explorar'],
-          mascotas: [
-            {
-              id: 'm2',
-              nombre: 'Luna',
-              tipo: 'Perro',
-              edad: 2,
-              foto: 'https://picsum.photos/300/300?random=12'
-            }
-          ],
-          esPremium: false
-        },
-        {
-          id: '3',
-          nombre: 'Ana Ruiz',
-          edad: 25,
-          avatar: 'https://picsum.photos/400/400?random=3',
-          biografia: 'Estudiante de veterinaria. Mi gata Mimi y yo buscamos grupos tranquilos para caminar.',
-          distancia: 4.1,
-          ubicacionCiudad: 'Buenos Aires',
-          coordenadas: { latitud: -34.6158, longitud: -58.3731 }, // Recoleta
-          intereses: ['caminar', 'naturaleza'],
-          mascotas: [
-            {
-              id: 'm3',
-              nombre: 'Mimi',
-              tipo: 'Gato',
-              edad: 1,
-              foto: 'https://picsum.photos/300/300?random=13'
-            }
-          ],
-          esPremium: false
-        },
-        {
-          id: '4',
-          nombre: 'Diego Martín',
-          edad: 30,
-          avatar: 'https://picsum.photos/400/400?random=4',
-          biografia: 'Entrenador personal que ama el fútbol. Mi Husky y yo organizamos entrenamientos grupales.',
-          distancia: 3.8,
-          ubicacionCiudad: 'Buenos Aires',
-          coordenadas: { latitud: -34.6092, longitud: -58.3734 }, // Belgrano
-          intereses: ['futbol', 'entrenamientos'],
-          mascotas: [
-            {
-              id: 'm4',
-              nombre: 'Thor',
-              tipo: 'Perro',
-              edad: 4,
-              foto: 'https://picsum.photos/300/300?random=14'
-            }
-          ],
-          esPremium: true
-        }
-      ];
+      setErrorCarga(null);
+      setUsuarioActual(0);
 
-      // Calcular distancias reales si tenemos coordenadas del usuario
-      if (coordenadas) {
-        usuariosMock = usuariosMock.map(usuario => ({
-          ...usuario,
-          distancia: calcularDistancia(coordenadas, usuario.coordenadas)
-        }));
-        
-        // Ordenar por distancia (más cercanos primero)
-        usuariosMock.sort((a, b) => a.distancia - b.distancia);
-      }
+      const recomendaciones = await obtenerRecomendaciones();
+      const usuariosConvertidos = recomendaciones.map((usuario, idx) => ({
+        id: usuario.id,
+        nombre: usuario.nombre,
+        edad: 25, // TODO: Agregar edad al backend
+        avatar: usuario.avatar || 'https://via.placeholder.com/400',
+        biografia: usuario.biografia || 'Sin biografía',
+        distancia: usuario.distancia || 0,
+        ubicacionCiudad: usuario.ubicacionCiudad || 'Desconocida',
+        coordenadas: usuario.ubicacionLat && usuario.ubicacionLng
+          ? { latitud: usuario.ubicacionLat, longitud: usuario.ubicacionLng }
+          : { latitud: 0, longitud: 0 },
+        intereses: usuario.intereses,
+        mascotas: usuario.mascotas.map((m, mascotaIdx) => ({
+          id: `${usuario.id}-mascota-${mascotaIdx}`,
+          nombre: m.nombre,
+          tipo: m.tipo,
+          edad: 3, // TODO: Agregar edad al backend
+          foto: m.fotos && m.fotos.length > 0 ? m.fotos[0] : 'https://via.placeholder.com/300'
+        })),
+        esPremium: idx < 3,
+        score: usuario.score,
+        interesesComunes: usuario.interesesComunes,
+      }));
 
-      setUsuarios(usuariosMock);
+      setUsuarios(usuariosConvertidos);
     } catch (error) {
+      setUsuarios([]);
+      setUsuarioActual(0);
+      setErrorCarga(error instanceof Error ? error.message : 'No se pudieron cargar las recomendaciones');
       Alert.alert('Error', 'No se pudieron cargar los usuarios');
       console.error('Error cargando usuarios:', error);
     } finally {
@@ -542,10 +435,12 @@ export default function PantallaMatching(): JSX.Element {
       <View style={estilos.contenedorVacio}>
         <MaterialIcons name="pets" size={80} color={temaApp.colors.primary} />
         <Text variant="headlineSmall" style={estilos.textoVacio}>
-          No hay usuarios disponibles
+          {errorCarga ? 'No se pudieron cargar las recomendaciones' : 'No hay usuarios disponibles'}
         </Text>
         <Text variant="bodyMedium" style={estilos.subtextoVacio}>
-          Intenta ampliar tu radio de búsqueda o vuelve más tarde
+          {errorCarga
+            ? errorCarga
+            : 'Completa tu perfil y vuelve más tarde para ver nuevas personas cerca tuyo.'}
         </Text>
         <Button 
           mode="contained" 

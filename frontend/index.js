@@ -1,7 +1,7 @@
 import { registerRootComponent } from 'expo';
 import App from './App';
 
-// Registrar Service Worker para PWA (solo en web)
+// Registrar PWA solo donde tenga sentido; en desarrollo el helper limpia SW viejos y no registra uno nuevo.
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   import('./src/utilidades/pwa').then(({ registerServiceWorker }) => {
     registerServiceWorker();
@@ -9,5 +9,4 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
 }
 
 registerRootComponent(App);
-
 

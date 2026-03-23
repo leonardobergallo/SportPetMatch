@@ -22,6 +22,9 @@ export interface UsuarioAuth {
   nombre: string;
   avatar?: string | null;
   esPremium: boolean;
+  onboardingCompletado?: boolean;
+  tipoUsuario?: string | null;
+  intereses?: string[];
   createdAt?: string;
 }
 
@@ -87,5 +90,4 @@ export async function obtenerDashboard(): Promise<DatosDashboard> {
   const response = await apiClient.get<{ success: boolean; data: DatosDashboard }>('/auth/dashboard');
   return response.data.data;
 }
-
 

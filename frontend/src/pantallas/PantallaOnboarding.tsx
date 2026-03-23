@@ -181,11 +181,7 @@ export default function PantallaOnboarding(): JSX.Element {
       });
 
       // Actualizar contexto local
-      actualizarUsuario({
-        deportesFavoritos: deportesSeleccionados,
-        onboardingCompletado: true,
-        tipoUsuario: tipoUsuario || undefined,
-      });
+      actualizarUsuario(usuarioActualizado);
 
       // Navegar a la pantalla principal
       navigation.reset({
