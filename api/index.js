@@ -4,8 +4,8 @@
 // Importar la app Express compilada
 let app;
 try {
-  // Intentar cargar desde api/dist (ruta relativa desde api/index.js)
-  const importedApp = require('./dist/index.js');
+  // En deploy monorepo, el build copiado queda en ./dist/src/index.js
+  const importedApp = require('./dist/src/index.js');
   // Obtener la app de Express (puede ser default export o named export)
   app = importedApp.default || importedApp;
   
