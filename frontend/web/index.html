@@ -106,8 +106,8 @@
   ></script>
   <script>
     (function () {
-      var forceLanding = /\blanding=1\b/.test(location.search) || location.hash === '#landing';
-      if (!forceLanding || /\bapp=1\b/.test(location.search) || location.hash === '#app') {
+      // Por defecto: portada Multiverse (mosaico). App solo con ?app=1 o #app
+      if (/\bapp=1\b/.test(location.search) || location.hash === '#app') {
         document.body.classList.add('expo-show-app');
       }
     })();
