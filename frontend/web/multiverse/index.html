@@ -12,6 +12,40 @@
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
 		<link rel="stylesheet" href="/multiverse/assets/css/main.css" />
 		<link rel="stylesheet" href="/multiverse/assets/css/indio-override.css" />
+		<style>
+			#acceso-panel {
+				padding: 2.5rem 1.25rem 3rem;
+				background: #111827;
+				color: #e5e7eb;
+			}
+			#acceso-panel .acceso-wrap {
+				max-width: 1080px;
+				margin: 0 auto;
+			}
+			#acceso-panel h2 {
+				margin: 0 0 0.65rem;
+				font-size: 2rem;
+				color: #ffffff;
+			}
+			#acceso-panel p {
+				margin: 0 0 1.1rem;
+				color: #cbd5e1;
+			}
+			#acceso-panel .app-embed {
+				border-radius: 16px;
+				overflow: hidden;
+				border: 1px solid rgba(255,255,255,0.16);
+				background: #000;
+				box-shadow: 0 14px 34px rgba(0,0,0,0.35);
+			}
+			#acceso-panel iframe {
+				width: 100%;
+				min-height: 900px;
+				border: 0;
+				display: block;
+				background: #fff;
+			}
+		</style>
 		<noscript><link rel="stylesheet" href="/multiverse/assets/css/noscript.css" /></noscript>
 	</head>
 	<body class="is-preload">
@@ -24,7 +58,7 @@
 						<h1><a href="/"><strong>Indio</strong> · gratis · próximamente en tiendas</a></h1>
 						<nav>
 							<ul>
-								<li><a href="/app.html" class="open-app"><span class="icon solid fa-mobile-alt"></span> Entrar</a></li>
+								<li><a href="#acceso-panel" class="open-app"><span class="icon solid fa-mobile-alt"></span> Entrar</a></li>
 								<li><a href="#footer" class="icon solid fa-info-circle">Info</a></li>
 							</ul>
 						</nav>
@@ -94,6 +128,16 @@
 						</article>
 					</div>
 
+				<section id="acceso-panel">
+					<div class="acceso-wrap">
+						<h2>Indio · mi mejor amigo</h2>
+						<p>App gratis: eventos, matching y chat con tu mascota. Desde acá mismo puedes iniciar sesión y usar la app, sin abrir otra página.</p>
+						<div class="app-embed">
+							<iframe src="/app.html" title="Indio app"></iframe>
+						</div>
+					</div>
+				</section>
+
 				<!-- Footer -->
 					<footer id="footer" class="panel">
 						<div class="inner split">
@@ -117,7 +161,7 @@
 									<h2>Acceso</h2>
 									<p>Iniciá sesión en la versión web.</p>
 									<ul class="actions">
-										<li><a href="/app.html" class="button primary open-app">Abrir app</a></li>
+										<li><a href="#acceso-panel" class="button primary open-app">Abrir app</a></li>
 										<li><a href="https://www.it360.com.ar/" class="button" target="_blank" rel="noopener noreferrer">IT360</a></li>
 									</ul>
 								</section>
@@ -138,13 +182,12 @@
 				(function () {
 					function goApp(e) {
 						if (e) e.preventDefault();
-						try {
-							if (window.top !== window.self) {
-								window.top.location.href = '/?app=1';
-								return;
-							}
-						} catch (err) {}
-						window.location.href = '/app.html';
+						var acceso = document.getElementById('acceso-panel');
+						if (acceso && acceso.scrollIntoView) {
+							acceso.scrollIntoView({ behavior: 'smooth', block: 'start' });
+							return;
+						}
+						window.location.hash = '#acceso-panel';
 					}
 					document.querySelectorAll('a.open-app').forEach(function (a) {
 						a.addEventListener('click', goApp);
