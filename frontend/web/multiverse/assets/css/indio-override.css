@@ -22,3 +22,983 @@ textarea {
 	line-height: 1.45;
 	opacity: 0.92;
 }
+
+/* ─── Indio: todo en una página (mismo sitio que Multiverse) ─── */
+#acceso-panel {
+	padding: 0 !important;
+	background: transparent !important;
+	color: inherit;
+}
+
+#acceso-panel .acceso-wrap {
+	max-width: none !important;
+	margin: 0;
+}
+
+.indio-native {
+	font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+	color: #e5e7eb;
+}
+
+.indio-native h2.indio-display,
+.indio-native .indio-display {
+	font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+	font-weight: 800;
+	letter-spacing: 0.02em;
+}
+
+.indio-hero {
+	position: relative;
+	min-height: 520px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3rem 1.25rem 4rem;
+	background: #0f172a url('/multiverse/images/fulls/01.png') center/cover no-repeat;
+}
+
+.indio-hero::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.82);
+}
+
+.indio-hero-inner {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	max-width: 520px;
+	text-align: center;
+}
+
+.indio-hero-inner .indio-paw {
+	font-size: 3rem;
+	margin-bottom: 0.5rem;
+}
+
+.indio-hero-inner .indio-title {
+	font-size: clamp(2.5rem, 8vw, 3.5rem);
+	font-weight: 900;
+	color: #fff;
+	margin: 0 0 0.25rem;
+	text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+
+.indio-hero-inner .indio-slogan {
+	font-size: 1.35rem;
+	font-style: italic;
+	color: #f1f5f9;
+	margin: 0 0 1rem;
+}
+
+.indio-hero-inner .indio-desc {
+	font-size: 1.15rem;
+	color: #fff;
+	line-height: 1.5;
+	margin: 0 0 1.5rem;
+	text-shadow: 0 1px 8px rgba(0,0,0,0.45);
+}
+
+.indio-form-box {
+	background: rgba(2, 6, 23, 0.65);
+	border: 1px solid rgba(255,255,255,0.22);
+	border-radius: 16px;
+	padding: 1.25rem;
+	text-align: left;
+}
+
+.indio-form-box label {
+	display: block;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #e2e8f0;
+	margin-bottom: 0.35rem;
+}
+
+.indio-form-box input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.9rem 1rem;
+	border-radius: 12px;
+	border: 1px solid rgba(255,255,255,0.45);
+	background: rgba(15, 23, 42, 0.85);
+	color: #fff;
+	font-size: 1.05rem;
+	margin-bottom: 0.85rem;
+	font-family: inherit;
+}
+
+.indio-form-box input::placeholder {
+	color: rgba(255,255,255,0.55);
+}
+
+.indio-btn-primary {
+	display: block;
+	width: 100%;
+	padding: 1rem;
+	border: 0;
+	border-radius: 12px;
+	background: #fff;
+	color: #6200ea;
+	font-weight: 800;
+	font-size: 1.1rem;
+	cursor: pointer;
+	font-family: inherit;
+	margin-top: 0.25rem;
+}
+
+.indio-btn-secondary {
+	display: block;
+	width: 100%;
+	padding: 0.95rem;
+	border: 2px solid rgba(255,255,255,0.65);
+	border-radius: 12px;
+	background: transparent;
+	color: #fff;
+	font-weight: 700;
+	font-size: 1rem;
+	cursor: pointer;
+	font-family: inherit;
+	margin-top: 0.65rem;
+	text-align: center;
+	text-decoration: none;
+}
+
+.indio-link-more {
+	display: block;
+	text-align: center;
+	margin-top: 1rem;
+	color: rgba(255,255,255,0.95);
+	font-weight: 700;
+	font-size: 1rem;
+	cursor: pointer;
+	text-decoration: none;
+	border: 0;
+	background: none;
+	width: 100%;
+	font-family: inherit;
+}
+
+.indio-msg {
+	margin-top: 0.75rem;
+	font-size: 0.9rem;
+	text-align: center;
+	min-height: 1.25rem;
+}
+
+.indio-msg.error { color: #fca5a5; }
+.indio-msg.ok { color: #86efac; }
+
+.indio-section {
+	padding: 2.75rem 1.25rem;
+	background: #f8fafc;
+	color: #0f172a;
+}
+
+.indio-section.indio-dark {
+	background: #1a1a2e;
+	color: #e5e7eb;
+}
+
+.indio-section-inner {
+	max-width: 640px;
+	margin: 0 auto;
+}
+
+.indio-tag {
+	text-align: center;
+	font-size: 0.8rem;
+	font-weight: 800;
+	letter-spacing: 0.18em;
+	color: #5b21b6;
+	margin-bottom: 0.35rem;
+}
+
+.indio-section.indio-dark .indio-tag {
+	color: #e9d5ff;
+}
+
+.indio-section-title {
+	text-align: center;
+	font-size: clamp(1.5rem, 4vw, 1.85rem);
+	font-weight: 800;
+	margin: 0 0 1.75rem;
+	line-height: 1.2;
+	color: #0f172a;
+}
+
+.indio-section.indio-dark .indio-section-title {
+	color: #fff;
+}
+
+.indio-feature {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin-bottom: 1.35rem;
+}
+
+.indio-feature:nth-child(even) {
+	flex-direction: row-reverse;
+}
+
+.indio-feature-icon {
+	width: 64px;
+	height: 64px;
+	border-radius: 18px;
+	background: #f3edff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.75rem;
+	flex-shrink: 0;
+}
+
+.indio-feature h3 {
+	margin: 0 0 0.25rem;
+	font-size: 1.15rem;
+	font-weight: 700;
+	font-family: 'Outfit', sans-serif;
+}
+
+.indio-feature p {
+	margin: 0;
+	font-size: 1rem;
+	color: #334155;
+	line-height: 1.45;
+}
+
+.indio-section.indio-dark .indio-feature p {
+	color: #cbd5e1;
+}
+
+.indio-gallery-scroll {
+	display: flex;
+	gap: 14px;
+	overflow-x: auto;
+	padding-bottom: 0.5rem;
+	-webkit-overflow-scrolling: touch;
+}
+
+.indio-gallery-card {
+	flex: 0 0 220px;
+	border-radius: 16px;
+	overflow: hidden;
+	background: #2a2a4e;
+}
+
+.indio-gallery-card img {
+	width: 220px;
+	height: 150px;
+	object-fit: cover;
+	display: block;
+}
+
+.indio-gallery-cap {
+	background: rgba(15, 23, 42, 0.92);
+	padding: 0.65rem 0.85rem;
+	font-weight: 700;
+	font-size: 0.95rem;
+	color: #fff;
+}
+
+.indio-steps {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.indio-step {
+	flex: 1 1 160px;
+	max-width: 200px;
+	background: #fff;
+	border-radius: 16px;
+	padding: 1.1rem;
+	text-align: center;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.indio-step-num {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: #6200ea;
+	color: #fff;
+	font-weight: 900;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto 0.5rem;
+	font-family: 'Outfit', sans-serif;
+}
+
+.indio-step h3 {
+	margin: 0 0 0.35rem;
+	font-size: 1rem;
+	font-weight: 800;
+}
+
+.indio-step p {
+	margin: 0;
+	font-size: 0.88rem;
+	color: #475569;
+	line-height: 1.35;
+}
+
+.indio-mid {
+	background: rgba(98, 0, 234, 0.82);
+	padding: 2.5rem 1.25rem;
+	text-align: center;
+	color: #fff;
+}
+
+.indio-mid h2 {
+	margin: 0 0 1.25rem;
+	font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+	font-weight: 800;
+	line-height: 1.35;
+	font-family: 'Outfit', sans-serif;
+	text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+}
+
+.indio-install-row {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.indio-install-card {
+	flex: 1 1 200px;
+	max-width: 280px;
+	background: #fff;
+	border-radius: 16px;
+	padding: 1.25rem;
+	text-align: center;
+	border: 1px solid #e2e8f0;
+}
+
+.indio-install-card h3 {
+	margin: 0.5rem 0 0.35rem;
+	font-size: 1.05rem;
+}
+
+.indio-install-card p {
+	margin: 0;
+	font-size: 0.92rem;
+	color: #334155;
+	line-height: 1.4;
+}
+
+.indio-install-micro {
+	text-align: center;
+	margin-top: 1rem;
+	font-size: 0.95rem;
+	color: #475569;
+}
+
+.indio-extra-card {
+	max-width: 520px;
+	margin: 0 auto;
+	background: #fff;
+	border-radius: 20px;
+	padding: 1.5rem;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.indio-extra-card h2 {
+	margin: 0 0 0.5rem;
+	text-align: center;
+	font-size: 1.5rem;
+	color: #0f172a;
+}
+
+.indio-extra-card > p {
+	text-align: center;
+	color: #334155;
+	margin: 0 0 1.25rem;
+	font-size: 1rem;
+}
+
+.indio-btn-google {
+	display: block;
+	width: 100%;
+	padding: 0.9rem;
+	border: 1px solid #cbd5e1;
+	border-radius: 12px;
+	background: #fff;
+	color: #0f172a;
+	font-weight: 600;
+	cursor: pointer;
+	font-family: inherit;
+	margin-bottom: 0.75rem;
+}
+
+/* Anular estilos globales de Multiverse (button: texto blanco !important, caja vacía) */
+#indio-login {
+	scroll-margin-top: 5.5rem;
+}
+
+#acceso-panel.indio-native button,
+#acceso-panel.indio-native input[type="submit"] {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	font-weight: 700 !important;
+	line-height: 1.35 !important;
+	height: auto !important;
+	min-height: 3rem;
+	white-space: normal !important;
+	padding: 0.95rem 1.15rem !important;
+	border-radius: 12px !important;
+}
+
+#acceso-panel.indio-native .indio-btn-primary {
+	background: #6200ea !important;
+	background-color: #6200ea !important;
+	color: #ffffff !important;
+	box-shadow: 0 4px 14px rgba(98, 0, 234, 0.45) !important;
+	border: none !important;
+}
+
+#acceso-panel.indio-native .indio-hero .indio-btn-primary,
+#acceso-panel.indio-native .indio-form-box .indio-btn-primary {
+	background: #ffffff !important;
+	background-color: #ffffff !important;
+	color: #4c1d95 !important;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+#acceso-panel.indio-native .indio-mid .indio-btn-primary {
+	background: #ffffff !important;
+	background-color: #ffffff !important;
+	color: #4c1d95 !important;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+#acceso-panel.indio-native .indio-btn-secondary {
+	background: transparent !important;
+	background-color: transparent !important;
+	color: #ffffff !important;
+	box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9) !important;
+	border: none !important;
+}
+
+#acceso-panel.indio-native .indio-link-more {
+	background: transparent !important;
+	background-color: transparent !important;
+	color: rgba(255, 255, 255, 0.98) !important;
+	box-shadow: none !important;
+	border: none !important;
+	text-decoration: underline !important;
+	text-underline-offset: 4px;
+	min-height: auto !important;
+	padding: 0.5rem !important;
+}
+
+#acceso-panel.indio-native .indio-btn-google {
+	background: #f8fafc !important;
+	background-color: #f8fafc !important;
+	color: #0f172a !important;
+	border: 2px solid #475569 !important;
+	box-shadow: none !important;
+	font-size: 1rem !important;
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+}
+
+.indio-g-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 4px;
+	background: #fff;
+	color: #4285f4;
+	font-weight: 900;
+	font-size: 0.95rem;
+	border: 1px solid #dadce0;
+}
+
+/* Registro: campos claros y texto oscuro (alto contraste) */
+.indio-extra-lead,
+.indio-extra-sub {
+	text-align: center;
+	color: #334155;
+	margin: 0 0 0.75rem;
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.indio-extra-card > h2 {
+	color: #0f172a !important;
+}
+
+.indio-inline-link {
+	color: #6200ea !important;
+	font-weight: 800 !important;
+	border-bottom: none !important;
+	text-decoration: underline !important;
+	text-underline-offset: 3px;
+}
+
+.indio-inline-link:hover {
+	color: #4c1d95 !important;
+}
+
+.indio-reg-divider {
+	text-align: center;
+	font-weight: 800;
+	color: #475569;
+	margin: 0.75rem 0 1rem;
+	font-size: 0.95rem;
+}
+
+.indio-reg-label {
+	display: block;
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: #0f172a !important;
+	margin-bottom: 0.4rem;
+}
+
+#acceso-panel.indio-native .indio-reg-input,
+#acceso-panel.indio-native .indio-extra-card input.indio-reg-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.9rem 1rem !important;
+	border-radius: 12px !important;
+	border: 2px solid #475569 !important;
+	background: #f8fafc !important;
+	background-color: #f8fafc !important;
+	color: #0f172a !important;
+	-webkit-text-fill-color: #0f172a !important;
+	font-size: 1.05rem !important;
+	font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+	margin-bottom: 0.85rem !important;
+}
+
+#acceso-panel.indio-native .indio-reg-input::placeholder {
+	color: #64748b !important;
+	opacity: 1 !important;
+}
+
+#acceso-panel.indio-native .indio-reg-input:focus {
+	outline: none !important;
+	border-color: #6200ea !important;
+	box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.25) !important;
+}
+
+.indio-msg-reg {
+	color: #0f172a !important;
+	min-height: 1.35rem;
+	margin-top: 0.75rem;
+	text-align: center;
+	font-weight: 600;
+}
+
+.indio-msg-reg.error {
+	color: #b91c1c !important;
+}
+
+.indio-btn-registro-submit {
+	margin-top: 0.25rem;
+}
+
+/* Instalación: texto aclaratorio y botón APK visible */
+.indio-install-intro {
+	text-align: center;
+	font-size: 1rem;
+	line-height: 1.55;
+	color: #334155;
+	margin: 0 0 1.25rem;
+	max-width: 36rem;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.indio-install-emoji {
+	font-size: 2rem;
+	display: block;
+	margin-bottom: 0.25rem;
+}
+
+.indio-install-steps {
+	text-align: left;
+	font-size: 0.92rem;
+	line-height: 1.55;
+	color: #1e293b;
+	margin: 0.5rem 0 0;
+}
+
+.indio-apk-box {
+	margin-top: 0.85rem;
+	padding: 1rem 1rem 0.25rem;
+	background: #f1f5f9;
+	border-radius: 12px;
+	border: 1px solid #cbd5e1;
+	text-align: left;
+}
+
+.indio-apk-box p {
+	font-size: 0.9rem !important;
+	color: #1e293b !important;
+	line-height: 1.5 !important;
+	margin: 0 0 0.65rem !important;
+}
+
+.indio-apk-title {
+	font-weight: 800 !important;
+	color: #0f172a !important;
+}
+
+.indio-apk-steps {
+	margin: 0 0 0.5rem 1.1rem;
+	padding: 0;
+	color: #1e293b;
+	font-size: 0.88rem;
+	line-height: 1.55;
+}
+
+.indio-apk-steps li {
+	margin-bottom: 0.35rem;
+}
+
+.indio-install-apk-wrap {
+	margin: 1rem 0 0.35rem !important;
+	text-align: center;
+}
+
+#acceso-panel.indio-native a.indio-install-apk {
+	display: inline-block !important;
+	background: #6200ea !important;
+	background-color: #6200ea !important;
+	color: #ffffff !important;
+	padding: 0.85rem 1.35rem !important;
+	border-radius: 12px !important;
+	font-weight: 800 !important;
+	font-size: 0.95rem !important;
+	text-decoration: none !important;
+	border: none !important;
+	border-bottom: none !important;
+	box-shadow: 0 4px 14px rgba(98, 0, 234, 0.4) !important;
+	line-height: 1.3 !important;
+}
+
+#acceso-panel.indio-native a.indio-install-apk:hover {
+	color: #ffffff !important;
+	filter: brightness(1.08);
+}
+
+.indio-install-note {
+	font-size: 0.8rem !important;
+	color: #64748b !important;
+	margin: 0.5rem 0 0 !important;
+	word-break: break-all;
+}
+
+.indio-code {
+	display: inline-block;
+	background: #e2e8f0;
+	padding: 0.15rem 0.4rem;
+	border-radius: 6px;
+	font-size: 0.75rem;
+	color: #0f172a;
+}
+
+/* Contacto (email + WhatsApp) */
+#indio-contacto {
+	scroll-margin-top: 5.5rem;
+}
+
+.indio-contacto {
+	padding: 2.5rem 1.25rem 2rem;
+	background: linear-gradient(180deg, #1e1b4b 0%, #312e81 55%, #1e1b4b 100%);
+	color: #e0e7ff;
+	text-align: center;
+	border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.indio-contacto-tag {
+	font-size: 0.75rem;
+	font-weight: 800;
+	letter-spacing: 0.2em;
+	color: #c4b5fd;
+	margin: 0 0 0.35rem;
+}
+
+.indio-contacto-title {
+	margin: 0 0 0.5rem;
+	font-size: clamp(1.5rem, 4vw, 1.85rem);
+	color: #fff;
+}
+
+.indio-contacto-desc {
+	margin: 0 auto 1.5rem;
+	max-width: 22rem;
+	font-size: 1rem;
+	line-height: 1.5;
+	color: #c7d2fe;
+}
+
+.indio-contacto-list {
+	list-style: none;
+	margin: 0 auto;
+	padding: 0;
+	max-width: 420px;
+	text-align: left;
+}
+
+.indio-contacto-list li {
+	display: flex;
+	gap: 1rem;
+	align-items: flex-start;
+	background: rgba(15, 23, 42, 0.45);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 16px;
+	padding: 1rem 1.15rem;
+	margin-bottom: 0.85rem;
+}
+
+.indio-contacto-label {
+	font-size: 1.5rem;
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.indio-contacto-list strong {
+	display: block;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: #a5b4fc;
+	margin-bottom: 0.25rem;
+}
+
+#acceso-panel.indio-native a.indio-contacto-link {
+	display: inline-block;
+	color: #fff !important;
+	font-weight: 700;
+	font-size: 1.05rem;
+	border-bottom: none !important;
+	text-decoration: underline !important;
+	text-underline-offset: 3px;
+	word-break: break-all;
+}
+
+#acceso-panel.indio-native a.indio-contacto-link:hover {
+	color: #fef08a !important;
+}
+
+#acceso-panel.indio-native a.indio-wa {
+	color: #86efac !important;
+}
+
+#acceso-panel.indio-native a.indio-wa:hover {
+	color: #bbf7d0 !important;
+}
+
+.indio-contacto-note {
+	margin: 1.25rem auto 0;
+	max-width: 26rem;
+	font-size: 0.85rem;
+	line-height: 1.45;
+	color: #a5b4fc;
+	opacity: 0.95;
+}
+
+.indio-brand-footer {
+	text-align: center;
+	padding: 2rem 1rem 2.5rem;
+	background: #1a1a2e;
+	color: #94a3b8;
+	font-size: 0.95rem;
+}
+
+.indio-brand-footer strong {
+	color: #f1f5f9;
+	display: block;
+	margin-bottom: 0.35rem;
+	font-size: 1.05rem;
+}
+
+/* Widget flotante WhatsApp (avatar + panel tipo “agente”) */
+.indio-wa-widget {
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	z-index: 100050;
+	font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.indio-wa-fab {
+	position: relative;
+	width: 4.25rem;
+	height: 4.25rem;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	background: #25d366;
+	box-shadow: 0 6px 24px rgba(37, 211, 102, 0.55), 0 2px 8px rgba(0, 0, 0, 0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: visible;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.indio-wa-fab:hover {
+	transform: scale(1.06);
+	box-shadow: 0 8px 28px rgba(37, 211, 102, 0.65), 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.indio-wa-fab:focus-visible {
+	outline: 3px solid #fff;
+	outline-offset: 3px;
+}
+
+.indio-wa-fab-avatar {
+	width: 3.5rem;
+	height: 3.5rem;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 3px solid #fff;
+	display: block;
+}
+
+.indio-wa-fab-ring {
+	position: absolute;
+	inset: -4px;
+	border-radius: 50%;
+	border: 2px solid rgba(37, 211, 102, 0.5);
+	animation: indio-wa-pulse 2s ease-out infinite;
+	pointer-events: none;
+}
+
+.indio-wa-fab-badge {
+	position: absolute;
+	bottom: 2px;
+	right: 2px;
+	width: 14px;
+	height: 14px;
+	background: #25d366;
+	border: 2px solid #fff;
+	border-radius: 50%;
+}
+
+@keyframes indio-wa-pulse {
+	0% { transform: scale(1); opacity: 0.9; }
+	70% { transform: scale(1.15); opacity: 0; }
+	100% { transform: scale(1.15); opacity: 0; }
+}
+
+.indio-wa-panel {
+	position: absolute;
+	right: 0;
+	bottom: calc(4.25rem + 0.85rem);
+	width: min(18.5rem, calc(100vw - 2rem));
+	background: #fff;
+	border-radius: 16px;
+	box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+	padding: 1rem 1rem 1.1rem;
+	text-align: left;
+	color: #0f172a;
+}
+
+.indio-wa-panel[hidden] {
+	display: none !important;
+}
+
+.indio-wa-close {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	width: 2rem;
+	height: 2rem;
+	border: none;
+	background: transparent;
+	font-size: 1.5rem;
+	line-height: 1;
+	color: #64748b;
+	cursor: pointer;
+	border-radius: 8px;
+}
+
+.indio-wa-close:hover {
+	background: #f1f5f9;
+	color: #0f172a;
+}
+
+.indio-wa-panel-head {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+	padding-right: 1.5rem;
+}
+
+.indio-wa-panel-avatar {
+	border-radius: 50%;
+	object-fit: cover;
+	border: 2px solid #e2e8f0;
+	flex-shrink: 0;
+}
+
+.indio-wa-panel-name {
+	display: block;
+	font-size: 1.05rem;
+	color: #0f172a;
+}
+
+.indio-wa-panel-status {
+	font-size: 0.8rem;
+	color: #16a34a;
+	font-weight: 600;
+}
+
+.indio-wa-panel-msg {
+	margin: 0 0 1rem;
+	font-size: 0.92rem;
+	line-height: 1.45;
+	color: #334155;
+}
+
+.indio-wa-panel-cta {
+	display: block !important;
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+	padding: 0.75rem 1rem !important;
+	background: #25d366 !important;
+	color: #fff !important;
+	font-weight: 800 !important;
+	font-size: 0.95rem !important;
+	border-radius: 12px !important;
+	text-decoration: none !important;
+	border: none !important;
+	border-bottom: none !important;
+}
+
+.indio-wa-panel-cta:hover {
+	filter: brightness(1.05);
+	color: #fff !important;
+}
+
+@media (max-width: 600px) {
+	.indio-hero { min-height: 480px; padding: 2rem 1rem 3rem; }
+	.indio-feature:nth-child(even) { flex-direction: row; }
+	.indio-wa-widget {
+		right: 0.75rem;
+		bottom: 0.75rem;
+	}
+}

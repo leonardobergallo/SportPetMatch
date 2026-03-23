@@ -10,42 +10,10 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
+		<!-- Opcional: forzar URL del API. Si está vacío, se detecta solo (igual que la app React: local → :3000, producción → /api) -->
+		<meta name="indio-api-base" content="" />
 		<link rel="stylesheet" href="/multiverse/assets/css/main.css" />
 		<link rel="stylesheet" href="/multiverse/assets/css/indio-override.css" />
-		<style>
-			#acceso-panel {
-				padding: 2.5rem 1.25rem 3rem;
-				background: #111827;
-				color: #e5e7eb;
-			}
-			#acceso-panel .acceso-wrap {
-				max-width: 1080px;
-				margin: 0 auto;
-			}
-			#acceso-panel h2 {
-				margin: 0 0 0.65rem;
-				font-size: 2rem;
-				color: #ffffff;
-			}
-			#acceso-panel p {
-				margin: 0 0 1.1rem;
-				color: #cbd5e1;
-			}
-			#acceso-panel .app-embed {
-				border-radius: 16px;
-				overflow: hidden;
-				border: 1px solid rgba(255,255,255,0.16);
-				background: #000;
-				box-shadow: 0 14px 34px rgba(0,0,0,0.35);
-			}
-			#acceso-panel iframe {
-				width: 100%;
-				min-height: 900px;
-				border: 0;
-				display: block;
-				background: #fff;
-			}
-		</style>
 		<noscript><link rel="stylesheet" href="/multiverse/assets/css/noscript.css" /></noscript>
 	</head>
 	<body class="is-preload">
@@ -58,7 +26,8 @@
 						<h1><a href="/"><strong>Indio</strong> · gratis · próximamente en tiendas</a></h1>
 						<nav>
 							<ul>
-								<li><a href="#acceso-panel" class="open-app"><span class="icon solid fa-mobile-alt"></span> Entrar</a></li>
+								<li><a href="#indio-login" class="open-app"><span class="icon solid fa-mobile-alt"></span> Entrar / login</a></li>
+								<li><a href="#indio-contacto"><span class="icon solid fa-envelope"></span> Contacto</a></li>
 								<li><a href="#footer" class="icon solid fa-info-circle">Info</a></li>
 							</ul>
 						</nav>
@@ -128,12 +97,167 @@
 						</article>
 					</div>
 
-				<section id="acceso-panel">
+				<section id="acceso-panel" class="indio-native">
 					<div class="acceso-wrap">
-						<h2>Indio · mi mejor amigo</h2>
-						<p>App gratis: eventos, matching y chat con tu mascota. Desde acá mismo puedes iniciar sesión y usar la app, sin abrir otra página.</p>
-						<div class="app-embed">
-							<iframe src="/app.html" title="Indio app"></iframe>
+						<!-- Hero + login (sin iframe) -->
+						<div class="indio-hero" id="indio-login">
+							<div class="indio-hero-inner">
+								<div class="indio-paw" aria-hidden="true">🐾</div>
+								<h2 class="indio-title indio-display">Indio</h2>
+								<p class="indio-slogan">Mi mejor amigo</p>
+								<p class="indio-desc"><strong>Acá iniciás sesión directo</strong> (email y contraseña). Eventos, matching y chat con tu mascota. <strong>Gratis.</strong> Si ya tenés cuenta en la app, usá los mismos datos.</p>
+								<form id="indio-form-login" class="indio-form-box" novalidate>
+									<label for="indio-email">Email</label>
+									<input id="indio-email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" required />
+									<label for="indio-password">Contraseña</label>
+									<input id="indio-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+									<button type="submit" class="indio-btn-primary" id="indio-btn-login">Iniciar sesión</button>
+									<button type="button" class="indio-btn-secondary" id="indio-scroll-registro">Crear cuenta gratis</button>
+									<button type="button" class="indio-link-more" id="indio-scroll-extra">Google y más opciones ↓</button>
+									<div id="indio-msg-login" class="indio-msg" role="status"></div>
+								</form>
+							</div>
+						</div>
+
+						<div class="indio-section">
+							<div class="indio-section-inner">
+								<p class="indio-tag">FUNCIONALIDADES</p>
+								<h2 class="indio-section-title indio-display">Todo lo que necesitás</h2>
+								<div class="indio-feature">
+									<div class="indio-feature-icon" aria-hidden="true">📅</div>
+									<div>
+										<h3>Eventos deportivos</h3>
+										<p>Descubrí y unite a eventos pet friendly cerca tuyo: carreras, caminatas y más.</p>
+									</div>
+								</div>
+								<div class="indio-feature">
+									<div class="indio-feature-icon" aria-hidden="true">💜</div>
+									<div>
+										<h3>Matching inteligente</h3>
+										<p>Encontrá personas y mascotas afines por deporte, nivel y ubicación.</p>
+									</div>
+								</div>
+								<div class="indio-feature">
+									<div class="indio-feature-icon" aria-hidden="true">💬</div>
+									<div>
+										<h3>Chat en tiempo real</h3>
+										<p>Coordiná salidas y conocé a otros dueños sin salir de la app.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="indio-section indio-dark">
+							<div class="indio-section-inner">
+								<p class="indio-tag">GALERÍA</p>
+								<h2 class="indio-section-title indio-display">Momentos con tu compañero</h2>
+								<div class="indio-gallery-scroll">
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/01.png" alt="Perro jugando" /><div class="indio-gallery-cap">Diversión al aire libre</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/02.jpg" alt="Labrador" /><div class="indio-gallery-cap">Labrador activo</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/03.jpg" alt="Husky" /><div class="indio-gallery-cap">Aventura en la montaña</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/04.jpg" alt="Grupo" /><div class="indio-gallery-cap">Comunidad deportiva</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/05.jpg" alt="Fútbol" /><div class="indio-gallery-cap">Fútbol en el parque</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/06.jpg" alt="Playa" /><div class="indio-gallery-cap">Carrera en la playa</div></div>
+								</div>
+							</div>
+						</div>
+
+						<div class="indio-section">
+							<div class="indio-section-inner">
+								<p class="indio-tag">CÓMO EMPEZAR</p>
+								<h2 class="indio-section-title indio-display">3 pasos simples</h2>
+								<div class="indio-steps">
+									<div class="indio-step"><div class="indio-step-num">1</div><h3>Registrate</h3><p>Creá tu perfil en segundos.</p></div>
+									<div class="indio-step"><div class="indio-step-num">2</div><h3>Agregá tu mascota</h3><p>Contanos sobre tu compañero.</p></div>
+									<div class="indio-step"><div class="indio-step-num">3</div><h3>Conectá</h3><p>Explorá eventos y matches.</p></div>
+								</div>
+							</div>
+						</div>
+
+						<div class="indio-mid">
+							<h2 class="indio-display">¿Listo para la próxima aventura con tu mascota?</h2>
+							<button type="button" class="indio-btn-primary" id="indio-mid-cta" style="max-width:320px;margin:0 auto;display:block;">Crear cuenta gratis</button>
+						</div>
+
+						<div class="indio-section">
+							<div class="indio-section-inner">
+								<p class="indio-tag">INSTALACIÓN</p>
+								<h2 class="indio-section-title indio-display">Usá Indio en tu teléfono</h2>
+								<p class="indio-install-intro">El <strong>login siempre es en la web</strong> (arriba, sección morada): mismo email y contraseña en la app instalada. El APK solo instala el programa en Android; no reemplaza el inicio de sesión.</p>
+								<div class="indio-install-row">
+									<div class="indio-install-card">
+										<span class="indio-install-emoji" aria-hidden="true">🍎</span>
+										<h3>iPhone (Safari)</h3>
+										<p class="indio-install-steps">1) Abrí esta web con <strong>Safari</strong>.<br />2) Tocá el botón <strong>Compartir</strong> (cuadrado con flecha hacia arriba).<br />3) Elegí <strong>Agregar a inicio</strong>.<br />4) Abrí el ícono: queda como app. Luego entrá con tu email y contraseña.</p>
+									</div>
+									<div class="indio-install-card">
+										<span class="indio-install-emoji" aria-hidden="true">🤖</span>
+										<h3>Android (archivo APK)</h3>
+										<p>Google Play aún no tiene la app; por eso el instalador está en <strong>GitHub</strong> (repositorio del proyecto). El botón de abajo <strong>baja el archivo directo</strong>: no tenés que navegar GitHub si no querés.</p>
+										<div class="indio-apk-box">
+											<p class="indio-apk-title">¿Qué es el APK?</p>
+											<p>Es el paquete que Android usa para instalar apps fuera de la tienda. Es seguro si confiás en el enlace oficial del proyecto.</p>
+											<ol class="indio-apk-steps">
+												<li>Tocá <strong>Descargar APK</strong> y esperá la descarga.</li>
+												<li>Abrí el archivo desde <strong>Descargas</strong> o la notificación.</li>
+												<li>Si pide permiso, permití instalar desde el navegador o archivos.</li>
+												<li>Abrí Indio e iniciá sesión con el mismo usuario que en la web.</li>
+											</ol>
+										</div>
+										<p class="indio-install-apk-wrap"><a class="indio-install-apk" href="https://github.com/leonardobergallo/SportPetMatch/releases/latest/download/indio-latest.apk" target="_blank" rel="noopener noreferrer">Descargar APK (última versión)</a></p>
+										<p class="indio-install-note">Enlace oficial: <code class="indio-code">github.com/…/releases/…/indio-latest.apk</code></p>
+									</div>
+								</div>
+								<p class="indio-install-micro">¿Solo querés usar el navegador? Iniciá sesión arriba y seguí en la web; no hace falta instalar nada.</p>
+							</div>
+						</div>
+
+						<div class="indio-section indio-dark" id="indio-extra">
+							<div class="indio-extra-card" id="indio-registro">
+								<h2 class="indio-display">Crear cuenta</h2>
+								<p class="indio-extra-lead">¿Ya tenés cuenta? <a href="#indio-login" class="indio-inline-link open-app">Ir al login arriba</a>.</p>
+								<p class="indio-extra-sub">Google llegará pronto. Por ahora registrate con email:</p>
+								<button type="button" class="indio-btn-google" id="indio-btn-google"><span class="indio-g-icon" aria-hidden="true">G</span> Continuar con Google (próximamente)</button>
+								<p class="indio-reg-divider">o con email</p>
+								<form id="indio-form-registro" class="indio-reg-form" novalidate>
+									<label class="indio-reg-label" for="indio-reg-nombre">Nombre</label>
+									<input class="indio-reg-input" id="indio-reg-nombre" name="nombre" type="text" autocomplete="name" placeholder="Ej.: María" required />
+									<label class="indio-reg-label" for="indio-reg-email">Email</label>
+									<input class="indio-reg-input" id="indio-reg-email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" required />
+									<label class="indio-reg-label" for="indio-reg-password">Contraseña (mín. 6 caracteres)</label>
+									<input class="indio-reg-input" id="indio-reg-password" name="password" type="password" autocomplete="new-password" placeholder="Elegí una contraseña" required minlength="6" />
+									<button type="submit" class="indio-btn-primary indio-btn-registro-submit" id="indio-btn-registro">Crear mi cuenta</button>
+									<div id="indio-msg-registro" class="indio-msg indio-msg-reg" role="status"></div>
+								</form>
+							</div>
+						</div>
+
+						<div class="indio-contacto" id="indio-contacto">
+							<p class="indio-contacto-tag">CONTACTO</p>
+							<h2 class="indio-contacto-title indio-display">Escribinos</h2>
+							<p class="indio-contacto-desc">Consultas, feedback o soporte sobre Indio.</p>
+							<ul class="indio-contacto-list">
+								<li>
+									<span class="indio-contacto-label" aria-hidden="true">✉️</span>
+									<div>
+										<strong>Email</strong>
+										<a class="indio-contacto-link" href="mailto:leonardobergallo@gmail.com?subject=Consulta%20Indio">leonardobergallo@gmail.com</a>
+									</div>
+								</li>
+								<li>
+									<span class="indio-contacto-label" aria-hidden="true">💬</span>
+									<div>
+										<strong>WhatsApp</strong>
+										<a class="indio-contacto-link indio-wa" href="https://wa.me/5493425089906?text=Hola%2C%20escribo%20por%20Indio%20%28SportPetMatch%29." target="_blank" rel="noopener noreferrer">+54 9 342 508-9906 — Chatear ahora</a>
+									</div>
+								</li>
+							</ul>
+							<p class="indio-contacto-note">Al tocar WhatsApp se abre la app o la web de WhatsApp con un mensaje listo para enviar.</p>
+						</div>
+
+						<div class="indio-brand-footer">
+							<strong>Indio · mi mejor amigo</strong>
+							App gratuita · IT360 · Plantilla <a href="https://html5up.net/multiverse" style="color:#cbd5e1;">HTML5 UP</a>
 						</div>
 					</div>
 				</section>
@@ -159,16 +283,42 @@
 							<div>
 								<section>
 									<h2>Acceso</h2>
-									<p>Iniciá sesión en la versión web.</p>
+									<p>Iniciá sesión arriba: tocá <strong>Entrar / login</strong> o el botón de acá.</p>
 									<ul class="actions">
-										<li><a href="#acceso-panel" class="button primary open-app">Abrir app</a></li>
+										<li><a href="#indio-login" class="button primary open-app">Ir al login</a></li>
 										<li><a href="https://www.it360.com.ar/" class="button" target="_blank" rel="noopener noreferrer">IT360</a></li>
 									</ul>
+								</section>
+								<section>
+									<h2>Contacto</h2>
+									<p><a href="mailto:leonardobergallo@gmail.com?subject=Consulta%20Indio">leonardobergallo@gmail.com</a></p>
+									<p><a href="https://wa.me/5493425089906?text=Hola%2C%20escribo%20por%20Indio." target="_blank" rel="noopener noreferrer">WhatsApp +54 9 342 508-9906</a></p>
 								</section>
 							</div>
 						</div>
 					</footer>
 
+			</div>
+
+		<!-- Asistente WhatsApp (avatar + panel) -->
+			<div class="indio-wa-widget" id="indio-wa-widget">
+				<div class="indio-wa-panel" id="indio-wa-panel" hidden>
+					<button type="button" class="indio-wa-close" id="indio-wa-close" aria-label="Cerrar">&times;</button>
+					<div class="indio-wa-panel-head">
+						<img class="indio-wa-panel-avatar" src="/multiverse/images/thumbs/08.png" width="48" height="48" alt="" decoding="async" />
+						<div>
+							<strong class="indio-wa-panel-name">Indio</strong>
+							<span class="indio-wa-panel-status">Soporte por WhatsApp</span>
+						</div>
+					</div>
+					<p class="indio-wa-panel-msg">¡Hola! ¿Consultas sobre la app, registro o el APK? Escribinos y te respondemos.</p>
+					<a class="indio-wa-panel-cta" href="https://wa.me/5493425089906?text=Hola%2C%20escribo%20desde%20la%20web%20de%20Indio." target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a>
+				</div>
+				<button type="button" class="indio-wa-fab" id="indio-wa-fab" aria-expanded="false" aria-controls="indio-wa-panel" aria-label="Abrir asistente de WhatsApp">
+					<span class="indio-wa-fab-ring" aria-hidden="true"></span>
+					<img class="indio-wa-fab-avatar" src="/multiverse/images/thumbs/08.png" width="56" height="56" alt="" decoding="async" />
+					<span class="indio-wa-fab-badge" aria-hidden="true"></span>
+				</button>
 			</div>
 
 		<!-- Scripts -->
@@ -180,18 +330,215 @@
 			<script src="/multiverse/assets/js/main.js"></script>
 			<script>
 				(function () {
-					function goApp(e) {
+					function scrollToLogin(e) {
 						if (e) e.preventDefault();
-						var acceso = document.getElementById('acceso-panel');
-						if (acceso && acceso.scrollIntoView) {
-							acceso.scrollIntoView({ behavior: 'smooth', block: 'start' });
+						var login = document.getElementById('indio-login');
+						if (login && login.scrollIntoView) {
+							login.scrollIntoView({ behavior: 'smooth', block: 'start' });
 							return;
 						}
-						window.location.hash = '#acceso-panel';
+						window.location.hash = '#indio-login';
 					}
 					document.querySelectorAll('a.open-app').forEach(function (a) {
-						a.addEventListener('click', goApp);
+						a.addEventListener('click', scrollToLogin);
 					});
+					function bootLoginHash() {
+						if (window.location.hash === '#login' || window.location.hash === '#indio-login') {
+							setTimeout(function () {
+								var login = document.getElementById('indio-login');
+								if (login && login.scrollIntoView) login.scrollIntoView({ behavior: 'smooth', block: 'start' });
+							}, 400);
+						}
+						try {
+							if (new URLSearchParams(window.location.search).get('login') === '1') {
+								setTimeout(function () {
+									var login = document.getElementById('indio-login');
+									if (login && login.scrollIntoView) login.scrollIntoView({ behavior: 'smooth', block: 'start' });
+								}, 400);
+							}
+						} catch (ignore) {}
+					}
+					if (document.readyState === 'loading') {
+						document.addEventListener('DOMContentLoaded', bootLoginHash);
+					} else {
+						bootLoginHash();
+					}
+				})();
+			</script>
+			<script>
+				(function () {
+					/** Misma lógica que frontend/src/utilidades/config.ts → getAPIBaseURL() en web */
+					function getApiBase() {
+						var el = document.querySelector('meta[name="indio-api-base"]');
+						var manual = el ? String(el.getAttribute('content') || '').trim() : '';
+						if (manual) return manual.replace(/\/+$/, '');
+						var h = window.location.hostname || '';
+						if (h === 'localhost' || h === '127.0.0.1') {
+							return 'http://localhost:3000/api';
+						}
+						/* Expo en LAN: la web corre en :8081 pero el backend sigue en :3000 de esta máquina */
+						if (/^192\.168\./.test(h) || /^10\./.test(h) || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) {
+							return 'http://' + h + ':3000/api';
+						}
+						/* Producción (Vercel, etc.): mismo dominio, /api reescribe al serverless */
+						return '/api';
+					}
+					var apiBase = getApiBase();
+					function parseApiResponse(r, text) {
+						var t = (text || '').trim();
+						if (t.charAt(0) === '<' || (t && t.charAt(0) !== '{' && t.charAt(0) !== '[')) {
+							throw new Error(
+								'Sin API en este sitio (llegó una página HTML, no el backend). ' +
+								'Solución: deploy desde la carpeta raíz del proyecto en Vercel, o en el head: ' +
+								'meta name=indio-api-base content=https://TU-API.vercel.app/api'
+							);
+						}
+						try {
+							return JSON.parse(t);
+						} catch (e) {
+							throw new Error('No se pudo conectar con el servidor (respuesta no válida).');
+						}
+					}
+					function mapUsuario(u) {
+						var nom = u && u.nombre ? String(u.nombre) : '';
+						var parts = nom.split(/\s+/).filter(Boolean);
+						return {
+							id: u.id,
+							nombre: parts[0] || nom || '',
+							apellido: parts.slice(1).join(' ') || '',
+							email: u.email,
+							fechaNacimiento: '',
+							genero: 'otro',
+							ciudad: '',
+							provincia: '',
+							pais: '',
+							deportesFavoritos: Array.isArray(u.intereses) ? u.intereses : [],
+							nivelActividad: 'intermedio',
+							disponibilidadSemanal: [],
+							foto: u.avatar || undefined,
+							tipoUsuario: u.tipoUsuario || undefined,
+							onboardingCompletado: !!u.onboardingCompletado
+						};
+					}
+					function persistAndGo(resp) {
+						var d = resp && resp.data;
+						if (!d || !d.token || !d.usuario) {
+							throw new Error('Respuesta inválida del servidor');
+						}
+						try {
+							localStorage.setItem('@SportPetMatch:token', d.token);
+							localStorage.setItem('@SportPetMatch:user', JSON.stringify(mapUsuario(d.usuario)));
+						} catch (e) {
+							throw new Error('No se pudo guardar la sesión en el navegador');
+						}
+						var dest = '/?app=1';
+						try {
+							if (window.top && window.top !== window) {
+								window.top.location.href = dest;
+								return;
+							}
+						} catch (ignore) {}
+						window.location.href = dest;
+					}
+					function scrollToId(id) {
+						var el = document.getElementById(id);
+						if (el && el.scrollIntoView) {
+							el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+						}
+					}
+					var formLogin = document.getElementById('indio-form-login');
+					var msgLogin = document.getElementById('indio-msg-login');
+					if (formLogin && msgLogin) {
+						formLogin.addEventListener('submit', function (e) {
+							e.preventDefault();
+							msgLogin.textContent = '';
+							msgLogin.className = 'indio-msg';
+							var email = (document.getElementById('indio-email').value || '').trim();
+							var password = document.getElementById('indio-password').value || '';
+							var btn = document.getElementById('indio-btn-login');
+							btn.disabled = true;
+							fetch(apiBase + '/auth/login', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ email: email, password: password })
+							})
+								.then(function (r) {
+									return r.text().then(function (t) { return parseApiResponse(r, t); });
+								})
+								.then(function (j) {
+									if (!j.success) throw new Error(j.message || 'Error al iniciar sesión');
+									persistAndGo(j);
+								})
+								.catch(function (err) {
+									msgLogin.textContent = err.message || 'Error';
+									msgLogin.className = 'indio-msg error';
+								})
+								.finally(function () {
+									btn.disabled = false;
+								});
+						});
+					}
+					var formReg = document.getElementById('indio-form-registro');
+					var msgReg = document.getElementById('indio-msg-registro');
+					if (formReg && msgReg) {
+						formReg.addEventListener('submit', function (e) {
+							e.preventDefault();
+							msgReg.textContent = '';
+							msgReg.className = 'indio-msg indio-msg-reg';
+							var nombre = (document.getElementById('indio-reg-nombre').value || '').trim();
+							var email = (document.getElementById('indio-reg-email').value || '').trim();
+							var password = document.getElementById('indio-reg-password').value || '';
+							var btn = document.getElementById('indio-btn-registro');
+							btn.disabled = true;
+							fetch(apiBase + '/auth/registro', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ nombre: nombre, email: email, password: password })
+							})
+								.then(function (r) {
+									return r.text().then(function (t) { return parseApiResponse(r, t); });
+								})
+								.then(function (j) {
+									if (!j.success) throw new Error(j.message || 'No se pudo registrar');
+									persistAndGo(j);
+								})
+								.catch(function (err) {
+									msgReg.textContent = err.message || 'Error';
+									msgReg.className = 'indio-msg indio-msg-reg error';
+								})
+								.finally(function () {
+									btn.disabled = false;
+								});
+						});
+					}
+					var sr = document.getElementById('indio-scroll-registro');
+					if (sr) sr.addEventListener('click', function () { scrollToId('indio-registro'); });
+					var mc = document.getElementById('indio-mid-cta');
+					if (mc) mc.addEventListener('click', function () { scrollToId('indio-registro'); });
+					var se = document.getElementById('indio-scroll-extra');
+					if (se) se.addEventListener('click', function () { scrollToId('indio-extra'); });
+					var g = document.getElementById('indio-btn-google');
+					if (g) g.addEventListener('click', function () {
+						alert('Continuar con Google estará disponible pronto.');
+					});
+					/* Widget WhatsApp */
+					(function () {
+						var fab = document.getElementById('indio-wa-fab');
+						var panel = document.getElementById('indio-wa-panel');
+						var closeBtn = document.getElementById('indio-wa-close');
+						if (!fab || !panel) return;
+						function setOpen(open) {
+							panel.hidden = !open;
+							fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+						}
+						fab.addEventListener('click', function () {
+							setOpen(panel.hidden);
+						});
+						if (closeBtn) closeBtn.addEventListener('click', function () { setOpen(false); });
+						document.addEventListener('keydown', function (e) {
+							if (e.key === 'Escape') setOpen(false);
+						});
+					})();
 				})();
 			</script>
 
