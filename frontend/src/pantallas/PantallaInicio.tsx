@@ -33,12 +33,9 @@ import { useAuth } from '@/contextos/ContextoAuth';
 
 // Rutas a imágenes
 const images = {
-  soccer: require('../../assets/soccer-tournament-park.jpg'),
-  running: require('../../assets/5k-running-race-beach.jpg'),
-  tennis: require('../../assets/tennis-group-game.jpg'),
   golden: require('../../assets/golden-retriever-playing.png'),
-  husky: require('../../assets/husky-running-mountain.jpg'),
-  labrador: require('../../assets/labrador-playing-tennis.jpg'),
+  huskyWalk: require('../../assets/husky-running-mountain.jpg'),
+  labradorPlay: require('../../assets/labrador-playing-tennis.jpg'),
   placeholder: require('../../assets/placeholder.jpg'),
 };
 
@@ -60,32 +57,32 @@ export default function PantallaInicio(): JSX.Element {
   const events = [
     {
       id: 'event1',
-      title: 'Torneo de Fútbol',
+      title: 'Encuentro en parque pet-friendly',
       location: 'Parque Central',
       date: 'Sáb, 15 Nov',
       distance: '2.5 km',
       pets: 12,
-      image: images.soccer,
+      image: images.golden,
       matched: true,
     },
     {
       id: 'event2',
-      title: 'Carrera 5K',
-      location: 'Playa Negra',
+      title: 'Caminata grupal con mascotas',
+      location: 'Costanera Norte',
       date: 'Dom, 16 Nov',
       distance: '5.2 km',
       pets: 8,
-      image: images.running,
+      image: images.huskyWalk,
       matched: false,
     },
     {
       id: 'event3',
-      title: 'Tenis en Grupo',
-      location: 'Club Deportivo',
+      title: 'Merienda pet-friendly',
+      location: 'Café Huellitas',
       date: 'Mié, 20 Nov',
       distance: '3.1 km',
       pets: 6,
-      image: images.tennis,
+      image: images.labradorPlay,
       matched: false,
     },
   ];
@@ -95,15 +92,15 @@ export default function PantallaInicio(): JSX.Element {
       id: 'match1',
       name: 'María González',
       pet: 'Golden Retriever',
-      matchDate: 'Hace 2 horas',
+      matchDate: 'Quiere ir a un parque este finde',
       image: images.golden,
     },
     {
       id: 'match2',
       name: 'Carlos Ruiz',
-      pet: 'Senderismo',
-      matchDate: 'Hace 4 horas',
-      image: images.husky,
+      pet: 'Husky',
+      matchDate: 'Busca compartir una salida pet-friendly',
+      image: images.huskyWalk,
     },
   ];
 
@@ -188,7 +185,7 @@ export default function PantallaInicio(): JSX.Element {
         {/* Upcoming Events */}
         <View style={estilos.seccion}>
           <View style={estilos.headerSeccion}>
-            <Text style={estilos.tituloSeccion}>Eventos Próximos</Text>
+            <Text style={estilos.tituloSeccion}>Eventos Pet-Friendly</Text>
             <View style={estilos.badge}>
               <Text style={estilos.badgeTexto}>{events.length} eventos</Text>
             </View>

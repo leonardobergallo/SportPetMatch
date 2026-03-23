@@ -1,7 +1,7 @@
 {
   "name": "Indio",
   "short_name": "Indio",
-  "description": "Indio - mi mejor amigo. Conecta personas y mascotas en eventos deportivos.",
+  "description": "Indio - mi mejor amigo. Conecta personas con mascotas, matches y eventos pet-friendly.",
   "start_url": "/app.html",
   "display": "standalone",
   "prefer_related_applications": false,

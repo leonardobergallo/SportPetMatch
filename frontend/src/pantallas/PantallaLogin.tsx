@@ -38,11 +38,8 @@ const fontDisplay = Platform.select({
 
 const IMGS = {
   golden: require('../../assets/golden-retriever-playing.png'),
-  husky: require('../../assets/husky-running-mountain.jpg'),
-  soccer: require('../../assets/soccer-tournament-park.jpg'),
-  running: require('../../assets/5k-running-race-beach.jpg'),
-  tennis: require('../../assets/tennis-group-game.jpg'),
-  labrador: require('../../assets/labrador-playing-tennis.jpg'),
+  huskyWalk: require('../../assets/husky-running-mountain.jpg'),
+  labradorPlay: require('../../assets/labrador-playing-tennis.jpg'),
 };
 
 const FEATURES = [
@@ -53,11 +50,11 @@ const FEATURES = [
 
 const GALLERY = [
   { img: IMGS.golden, caption: 'Tu mascota' },
-  { img: IMGS.soccer, caption: 'Eventos al aire libre' },
-  { img: IMGS.husky, caption: 'Salidas activas' },
-  { img: IMGS.tennis, caption: 'En grupo' },
-  { img: IMGS.labrador, caption: 'Diversión' },
-  { img: IMGS.running, caption: 'Caminatas y carreras' },
+  { img: IMGS.labradorPlay, caption: 'Eventos al aire libre' },
+  { img: IMGS.huskyWalk, caption: 'Paseos compartidos' },
+  { img: IMGS.golden, caption: 'En grupo' },
+  { img: IMGS.labradorPlay, caption: 'Diversión' },
+  { img: IMGS.huskyWalk, caption: 'Encuentros pet-friendly' },
 ];
 
 export default function PantallaLogin(): JSX.Element {
@@ -223,9 +220,9 @@ export default function PantallaLogin(): JSX.Element {
         </View>
 
         {/* ═══════════════ BANNER INTERMEDIO ═══════════════ */}
-        <ImageBackground source={IMGS.husky} style={st.midBanner} imageStyle={st.midBannerImg}>
+        <ImageBackground source={IMGS.huskyWalk} style={st.midBanner} imageStyle={st.midBannerImg}>
           <View style={st.midBannerOverlay}>
-            <Text style={st.midBannerTitle}>Más actividad para tu mascota.{'\n'}Comunidad para vos.</Text>
+            <Text style={st.midBannerTitle}>Más encuentros para tu mascota.{'\n'}Comunidad para vos.</Text>
             <Pressable style={st.heroCtaPrimary} onPress={goRegistro}>
               <Text style={st.heroCtaPrimaryTxt}>Crear cuenta gratis</Text>
             </Pressable>
@@ -272,7 +269,7 @@ export default function PantallaLogin(): JSX.Element {
         <View style={st.footer}>
           <MaterialIcons name="pets" size={20} color="rgba(255,255,255,0.6)" />
           <Text style={st.footerTxt}>{MARCA.nombre} · {MARCA.slogan}</Text>
-          <Text style={st.footerSub}>App social para personas y mascotas activas.</Text>
+          <Text style={st.footerSub}>App social para personas con mascotas, matches y eventos pet-friendly.</Text>
         </View>
 
       </ScrollView>

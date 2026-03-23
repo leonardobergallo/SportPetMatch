@@ -30,14 +30,14 @@ type EventosScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 // Imágenes de eventos
 const imagenesEventos: Record<string, any> = {
-  futbol: require('../../assets/soccer-tournament-park.jpg'),
-  carrera: require('../../assets/5k-running-race-beach.jpg'),
-  tenis: require('../../assets/tennis-group-game.jpg'),
-  default: require('../../assets/placeholder.jpg'),
+  golden: require('../../assets/golden-retriever-playing.png'),
+  husky: require('../../assets/husky-running-mountain.jpg'),
+  labrador: require('../../assets/labrador-playing-tennis.jpg'),
+  default: require('../../assets/golden-retriever-playing.png'),
 };
 
 /**
- * Pantalla de Eventos - Lista de eventos deportivos
+ * Pantalla de Eventos - Lista de eventos pet-friendly
  */
 export default function PantallaEventos(): JSX.Element {
   const navigation = useNavigation<EventosScreenNavigationProp>();
@@ -83,14 +83,14 @@ export default function PantallaEventos(): JSX.Element {
    */
   const obtenerImagenEvento = (tipo: string): any => {
     const tipoLower = tipo.toLowerCase();
-    if (tipoLower.includes('futbol') || tipoLower.includes('fútbol')) {
-      return imagenesEventos.futbol;
+    if (tipoLower.includes('parque') || tipoLower.includes('encuentro')) {
+      return imagenesEventos.golden;
     }
-    if (tipoLower.includes('carrera') || tipoLower.includes('running')) {
-      return imagenesEventos.carrera;
+    if (tipoLower.includes('paseo') || tipoLower.includes('caminata')) {
+      return imagenesEventos.husky;
     }
-    if (tipoLower.includes('tenis')) {
-      return imagenesEventos.tenis;
+    if (tipoLower.includes('cafe') || tipoLower.includes('merienda')) {
+      return imagenesEventos.labrador;
     }
     return imagenesEventos.default;
   };
@@ -163,19 +163,19 @@ export default function PantallaEventos(): JSX.Element {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[estilos.filtroChip, filtroTipo === 'carrera' && estilos.filtroChipActivo]}
-            onPress={() => setFiltroTipo('carrera')}
+            style={[estilos.filtroChip, filtroTipo === 'paseo' && estilos.filtroChipActivo]}
+            onPress={() => setFiltroTipo('paseo')}
           >
-            <Text style={[estilos.filtroTexto, filtroTipo === 'carrera' && estilos.filtroTextoActivo]}>
-              Carreras
+            <Text style={[estilos.filtroTexto, filtroTipo === 'paseo' && estilos.filtroTextoActivo]}>
+              Paseos
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[estilos.filtroChip, filtroTipo === 'futbol' && estilos.filtroChipActivo]}
-            onPress={() => setFiltroTipo('futbol')}
+            style={[estilos.filtroChip, filtroTipo === 'parque' && estilos.filtroChipActivo]}
+            onPress={() => setFiltroTipo('parque')}
           >
-            <Text style={[estilos.filtroTexto, filtroTipo === 'futbol' && estilos.filtroTextoActivo]}>
-              Fútbol
+            <Text style={[estilos.filtroTexto, filtroTipo === 'parque' && estilos.filtroTextoActivo]}>
+              Parques
             </Text>
           </TouchableOpacity>
         </View>

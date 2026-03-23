@@ -116,7 +116,7 @@ app.get('/api/salud', (req, res) => {
 // Ruta raíz de la API
 app.get('/api', (req, res) => {
   res.json({
-    mensaje: 'API SportPetMatch - Conecta personas y mascotas en eventos deportivos',
+    mensaje: 'API SportPetMatch - Conecta personas con mascotas, matches y eventos pet-friendly',
     version: '1.0.0',
     documentacion: '/api/documentacion',
     salud: '/api/salud',

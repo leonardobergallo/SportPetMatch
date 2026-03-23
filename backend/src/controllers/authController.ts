@@ -65,7 +65,7 @@ export const registro = async (req: Request, res: Response): Promise<void> => {
         nombre,
         fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
         telefono: telefono || null,
-        tipoUsuario: tipoUsuario || 'solo',
+        tipoUsuario: tipoUsuario || 'dueno',
         intereses: intereses || [],
         isActive: true,
         emailVerificado: false, // En producción, enviar email de verificación

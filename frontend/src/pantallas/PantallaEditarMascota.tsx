@@ -58,14 +58,14 @@ const PERSONALIDADES = [
   'Curioso',
 ];
 
-// Intereses deportivos
-const INTERESES_DEPORTIVOS = [
-  'Running',
-  'Caminatas',
-  'Juegos',
-  'Nadar',
-  'Agility',
-  'Frisbee',
+// Intereses de la mascota
+const INTERESES_MASCOTA = [
+  'Paseos',
+  'Jugar con otras mascotas',
+  'Parques',
+  'Cafés pet-friendly',
+  'Encuentros tranquilos',
+  'Eventos con mascotas',
 ];
 
 /**
@@ -491,9 +491,9 @@ export default function PantallaEditarMascota(): JSX.Element {
           </View>
 
           <View style={estilos.campoContainer}>
-            <Text style={estilos.label}>Intereses Deportivos</Text>
+            <Text style={estilos.label}>Intereses de tu mascota</Text>
             <View style={estilos.chipsContainer}>
-              {INTERESES_DEPORTIVOS.map((interes) => (
+              {INTERESES_MASCOTA.map((interes) => (
                 <TouchableOpacity
                   key={interes}
                   style={[
@@ -748,4 +748,3 @@ const estilos = StyleSheet.create({
     marginTop: espaciado.sm,
   },
 });
-

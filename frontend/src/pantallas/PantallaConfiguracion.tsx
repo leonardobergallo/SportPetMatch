@@ -99,7 +99,7 @@ export default function PantallaConfiguracion(): JSX.Element {
   const navegarAAcercaDe = () => {
     Alert.alert(
       'Acerca de',
-      'SportPetMatch v1.0.0\n\nConecta personas y mascotas en eventos deportivos.'
+      'Indio v1.0.0\n\nConecta personas con mascotas, matches y eventos pet-friendly.'
     );
   };
 

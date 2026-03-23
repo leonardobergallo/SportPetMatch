@@ -1,5 +1,5 @@
 // Pantalla de Crear Evento - SportPetMatch
-// Formulario para crear un nuevo evento deportivo
+// Formulario para crear un nuevo evento pet-friendly
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
@@ -176,7 +176,7 @@ export default function PantallaCrearEvento(): JSX.Element {
       return false;
     }
     if (!tipo) {
-      Alert.alert('Error', 'El tipo de evento es requerido');
+      Alert.alert('Error', 'La categoría del evento es requerida');
       return false;
     }
     if (!fechaInicio) {
@@ -397,8 +397,8 @@ export default function PantallaCrearEvento(): JSX.Element {
     >
         <Card style={[estilos.card, { maxWidth }]}>
           <CardContent>
-            <Text style={estilos.titulo}>Crear Nuevo Evento</Text>
-            <Text style={estilos.subtitulo}>Completa los datos del evento</Text>
+            <Text style={estilos.titulo}>Crear nuevo evento</Text>
+            <Text style={estilos.subtitulo}>Completa los datos de tu encuentro pet-friendly</Text>
 
             {/* Título */}
             <View style={estilos.campoContainer}>
@@ -408,7 +408,7 @@ export default function PantallaCrearEvento(): JSX.Element {
                 onChangeText={setTitulo}
                 mode="outlined"
                 style={estilos.campo}
-                placeholder="Ej: Carrera 5K en el Parque"
+                placeholder="Ej: Encuentro en parque pet-friendly"
                 disabled={cargando}
               />
             </View>
@@ -431,23 +431,23 @@ export default function PantallaCrearEvento(): JSX.Element {
             {/* Tipo */}
             <View style={estilos.campoContainer}>
               <TextInput
-                label="Tipo de evento *"
+                label="Categoría del evento *"
                 value={tipo}
                 onChangeText={setTipo}
                 mode="outlined"
                 style={estilos.campo}
-                placeholder="Ej: Carrera, Fútbol, Tenis..."
+                placeholder="Ej: paseo, parque, merienda, encuentro..."
                 disabled={cargando}
               />
               <Text style={estilos.hint}>
-                Ejemplos: Carrera, Fútbol, Tenis, Básquet, Vóley, Natación, Ciclismo, Yoga, Crossfit
+                Ejemplos: paseo, parque, cafetería pet-friendly, encuentro, adopción, socialización
               </Text>
             </View>
 
-            {/* Nivel de dificultad */}
+            {/* Ritmo sugerido */}
             <View style={estilos.campoContainer}>
               <TextInput
-                label="Nivel de dificultad (1-5)"
+                label="Ritmo sugerido (1-5)"
                 value={nivelDificultad}
                 onChangeText={setNivelDificultad}
                 mode="outlined"

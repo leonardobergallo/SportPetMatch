@@ -15,14 +15,58 @@ export const API_PORT = 3000;
 export const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
 export const isWeb = Platform.OS === 'web';
 
+function normalizeApiUrl(apiUrl: string): string {
+  const trimmed = apiUrl.trim();
+
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.includes('postgresql://') || trimmed.includes('psql')) {
+    console.warn('⚠️ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos.');
+    console.warn('⚠️ Ignorando variable y usando detección automática.');
+    return '';
+  }
+
+  if (trimmed.startsWith('/')) {
+    return trimmed.replace(/\/+$/, '');
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    if (isMobile && (trimmed.includes('localhost') || trimmed.includes('127.0.0.1'))) {
+      return trimmed.replace(/localhost|127\.0\.0\.1/g, LOCAL_IP).replace(/\/+$/, '');
+    }
+
+    return trimmed.replace(/\/+$/, '');
+  }
+
+  return `/${trimmed.replace(/^\/+/, '').replace(/\/+$/, '')}`;
+}
+
 /**
  * Obtener la URL base de la API según el entorno
  */
 export function getAPIBaseURL(): string {
+  const envApiUrl = normalizeApiUrl(process.env.EXPO_PUBLIC_API_URL || '');
+
   // Si estamos en web
   if (isWeb) {
+    if (envApiUrl) {
+      return envApiUrl;
+    }
+
     // En web, verificar si estamos en producción o desarrollo
     if (typeof window !== 'undefined') {
+      const metaApiUrl = normalizeApiUrl(
+        document
+          .querySelector('meta[name="indio-api-base"]')
+          ?.getAttribute('content') || ''
+      );
+
+      if (metaApiUrl) {
+        return metaApiUrl;
+      }
+
       // Detectar si estamos en producción (Vercel)
       const isProduction = window.location.hostname !== 'localhost' && 
                            window.location.hostname !== '127.0.0.1' &&
@@ -43,35 +87,8 @@ export function getAPIBaseURL(): string {
   }
 
   // Si hay una variable de entorno, validarla primero (solo para móvil)
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    const apiUrl = process.env.EXPO_PUBLIC_API_URL.trim();
-    
-    // Validar que sea una URL HTTP/HTTPS válida o una ruta relativa (para monorepo)
-    // Si contiene "postgresql://" o "psql", no es una URL válida del API
-    // En este caso, ignorar la variable y usar la detección automática
-    if (apiUrl.includes('postgresql://') || apiUrl.includes('psql')) {
-      console.warn('⚠️ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos.');
-      console.warn('⚠️ Ignorando variable y usando detección automática.');
-      // Continuar con la lógica de detección automática en lugar de retornar vacío
-    } else {
-      // Si es una ruta relativa (empieza con /), usarla directamente
-      if (apiUrl.startsWith('/')) {
-        return apiUrl;
-      }
-      
-      // Si es una URL completa (http/https), validarla y usarla (solo para móvil)
-      if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
-        // En móvil, localhost no funciona (apunta al teléfono). Usar IP de la PC.
-        if (isMobile && (apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1'))) {
-          return apiUrl.replace(/localhost|127\.0\.0\.1/g, LOCAL_IP);
-        }
-        return apiUrl;
-      }
-      
-      // Si no es ni ruta relativa ni URL completa, asumir que es relativa
-      return apiUrl.startsWith('/') ? apiUrl : `/${apiUrl}`;
-    }
-    
+  if (envApiUrl) {
+    return envApiUrl;
   }
 
   // Si estamos en móvil
@@ -106,5 +123,4 @@ export function getConfigInfo() {
     port: API_PORT,
   };
 }
-
 

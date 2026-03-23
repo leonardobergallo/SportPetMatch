@@ -35,8 +35,8 @@ type MascotasScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 // Imágenes de mascotas por tipo
 const imagenesMascotas: Record<string, any> = {
   perro: require('../../assets/golden-retriever-playing.png'),
-  gato: require('../../assets/labrador-playing-tennis.jpg'),
-  default: require('../../assets/placeholder.jpg'),
+  gato: require('../../assets/husky-running-mountain.jpg'),
+  default: require('../../assets/golden-retriever-playing.png'),
 };
 
 /**

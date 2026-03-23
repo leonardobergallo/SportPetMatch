@@ -173,17 +173,17 @@ function NavegadorTabs(): JSX.Element {
         component={PantallaMapa}
         options={{
           title: 'Mapa',
-          headerTitle: 'Mapa de SportPetMatch',
+          headerTitle: 'Mapa de Indio',
         }}
       />
       
-      {/* Tab de Eventos - Lista de eventos deportivos */}
+      {/* Tab de Eventos - Lista de eventos pet-friendly */}
       <Tab.Screen 
         name="Eventos" 
         component={PantallaEventos}
         options={{
           title: 'Eventos',
-          headerTitle: 'Eventos Deportivos',
+          headerTitle: 'Eventos Pet-Friendly',
         }}
       />
       

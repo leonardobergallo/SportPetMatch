@@ -41,25 +41,25 @@ type EditarPerfilNavigationProp = StackNavigationProp<RootStackParamList, 'Edita
 
 // Intereses disponibles
 const INTERESES_DISPONIBLES = [
-  'Running',
-  'Ciclismo',
-  'Fútbol',
-  'Tenis',
-  'Natación',
-  'Yoga',
-  'Crossfit',
-  'Senderismo',
-  'Basketball',
-  'Voleibol',
+  'Paseos',
+  'Parques pet-friendly',
+  'Cafés pet-friendly',
+  'Socialización',
+  'Eventos pet-friendly',
+  'Adopción',
+  'Charlas con otros dueños',
+  'Viajes con mascotas',
+  'Cuidados y bienestar',
+  'Rescate animal',
 ];
 
-// Niveles de deporte
+// Niveles de participación en la comunidad
 const NIVELES_DEPORTE = [
-  { valor: 1, label: 'Principiante' },
-  { valor: 2, label: 'Principiante-Intermedio' },
-  { valor: 3, label: 'Intermedio' },
-  { valor: 4, label: 'Intermedio-Avanzado' },
-  { valor: 5, label: 'Avanzado' },
+  { valor: 1, label: 'Recién empiezo' },
+  { valor: 2, label: 'Me estoy sumando' },
+  { valor: 3, label: 'Participación media' },
+  { valor: 4, label: 'Muy participativo' },
+  { valor: 5, label: 'Siempre organizo planes' },
 ];
 
 /**
@@ -287,9 +287,9 @@ export default function PantallaEditarPerfil(): JSX.Element {
             />
           </View>
 
-          {/* Nivel de Deporte */}
+          {/* Nivel de participación */}
           <View style={estilos.campoContainer}>
-            <Text style={estilos.label}>Nivel Deportivo</Text>
+            <Text style={estilos.label}>Nivel de participación</Text>
             <View style={estilos.nivelesContainer}>
               {NIVELES_DEPORTE.map((nivel) => (
                 <TouchableOpacity
@@ -315,7 +315,7 @@ export default function PantallaEditarPerfil(): JSX.Element {
 
           {/* Intereses */}
           <View style={estilos.campoContainer}>
-            <Text style={estilos.label}>Intereses Deportivos</Text>
+            <Text style={estilos.label}>Intereses</Text>
             <View style={estilos.interesesContainer}>
               {INTERESES_DISPONIBLES.map((interes) => (
                 <TouchableOpacity
@@ -498,4 +498,3 @@ const estilos = StyleSheet.create({
     marginTop: espaciado.sm,
   },
 });
-

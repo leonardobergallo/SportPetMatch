@@ -235,7 +235,7 @@ export default function PantallaDetalleMascota(): JSX.Element {
           {/* Intereses */}
           {mascota.intereses && mascota.intereses.length > 0 && (
             <View style={estilos.seccion}>
-              <Text style={estilos.seccionTitulo}>Intereses Deportivos</Text>
+              <Text style={estilos.seccionTitulo}>Intereses</Text>
               <View style={estilos.chipsContainer}>
                 {mascota.intereses.map((interes, index) => (
                   <View key={index} style={estilos.chip}>

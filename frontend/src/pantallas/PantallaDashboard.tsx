@@ -116,7 +116,7 @@ export default function PantallaDashboard(): JSX.Element {
 
       {/* Estadísticas */}
       <Card style={estilos.tarjeta}>
-        <Card.Title title="📊 Estadísticas" />
+        <Card.Title title="📊 Tu actividad" />
         <Card.Content>
           <View style={estilos.estadisticas}>
             <EstadisticaItem 
@@ -137,7 +137,7 @@ export default function PantallaDashboard(): JSX.Element {
             <EstadisticaItem 
               icono="star" 
               valor={datos.estadisticas.puntosGamificacion} 
-              etiqueta="Puntos" 
+              etiqueta="Actividad" 
             />
           </View>
         </Card.Content>
@@ -145,7 +145,7 @@ export default function PantallaDashboard(): JSX.Element {
 
       {/* Eventos Recientes */}
       <Card style={estilos.tarjeta}>
-        <Card.Title title="🏃‍♂️ Eventos Recientes" />
+        <Card.Title title="📅 Eventos recientes" />
         <Card.Content>
           {datos.eventosRecientes.map((evento, index) => (
             <View key={evento.id}>
@@ -162,7 +162,7 @@ export default function PantallaDashboard(): JSX.Element {
 
       {/* Mascotas Favoritas */}
       <Card style={estilos.tarjeta}>
-        <Card.Title title="🐾 Mascotas Populares" />
+        <Card.Title title="🐾 Mascotas destacadas" />
         <Card.Content>
           {datos.mascotasFavoritas.map((mascota, index) => (
             <View key={mascota.id}>

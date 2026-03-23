@@ -28,25 +28,23 @@ type OnboardingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'O
 
 const { width } = Dimensions.get('window');
 
-// Tipos de usuarios
+// Tipos de perfiles
 const TIPOS_USUARIO = [
-  { id: 'solo', label: 'Solo', icon: 'person', descripcion: 'Practico deporte sin mascota' },
-  { id: 'con_mascota', label: 'Con Mascota', icon: 'pets', descripcion: 'Practico deporte CON mi mascota' },
-  { id: 'ambos', label: 'Ambos', icon: 'people', descripcion: 'Hago ambas cosas' },
+  { id: 'dueno', label: 'Tengo mascota', icon: 'pets', descripcion: 'Quiero conocer personas con mascotas y sumarme a eventos pet-friendly' },
+  { id: 'familia', label: 'Familia pet', icon: 'group', descripcion: 'Salgo con mi mascota y también coordino planes con mi familia o amigos' },
+  { id: 'cuidador', label: 'Cuidador', icon: 'person', descripcion: 'Busco comunidad, matches y encuentros para compartir con mascotas' },
 ];
 
-// Deportes disponibles
-const DEPORTES_DISPONIBLES = [
-  { id: 'correr', label: 'Correr 🏃', icon: 'directions-run' },
-  { id: 'caminar', label: 'Caminar 🚶', icon: 'directions-walk' },
-  { id: 'ciclismo', label: 'Ciclismo 🚴', icon: 'pedal-bike' },
-  { id: 'senderismo', label: 'Senderismo ⛰️', icon: 'terrain' },
-  { id: 'yoga', label: 'Yoga 🧘', icon: 'self-improvement' },
-  { id: 'natacion', label: 'Natación 🏊', icon: 'pool' },
-  { id: 'tenis', label: 'Tenis 🎾', icon: 'sports-tennis' },
-  { id: 'futbol', label: 'Fútbol ⚽', icon: 'sports-soccer' },
-  { id: 'volleyball', label: 'Volleyball 🏐', icon: 'sports-volleyball' },
-  { id: 'patinaje', label: 'Patinaje 🛼', icon: 'sports-roller-skating' },
+// Intereses disponibles
+const INTERESES_COMUNIDAD = [
+  { id: 'paseos', label: 'Paseos diarios 🐾', icon: 'directions-walk' },
+  { id: 'parques', label: 'Parques pet-friendly 🌳', icon: 'park' },
+  { id: 'socializacion', label: 'Socialización 🐶', icon: 'groups' },
+  { id: 'cafes', label: 'Cafés pet-friendly ☕', icon: 'coffee' },
+  { id: 'eventos', label: 'Eventos con mascotas 🎉', icon: 'celebration' },
+  { id: 'adopcion', label: 'Adopción y rescate ❤️', icon: 'favorite' },
+  { id: 'viajes', label: 'Escapadas pet-friendly 🚗', icon: 'map' },
+  { id: 'chat', label: 'Nuevas amistades 💬', icon: 'chat' },
 ];
 
 // Tipos de mascotas
@@ -64,7 +62,7 @@ export default function PantallaOnboarding(): JSX.Element {
   const navigation = useNavigation<OnboardingScreenNavigationProp>();
   const [pasoActual, setPasoActual] = useState(1);
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null);
-  const [deportesSeleccionados, setDeportesSeleccionados] = useState<string[]>([]);
+  const [interesesSeleccionados, setInteresesSeleccionados] = useState<string[]>([]);
   const [tipoMascota, setTipoMascota] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
@@ -75,21 +73,17 @@ export default function PantallaOnboarding(): JSX.Element {
    */
   const manejarSeleccionarTipo = (tipo: string) => {
     setTipoUsuario(tipo);
-    // Si selecciona "solo", no necesita tipo de mascota
-    if (tipo === 'solo') {
-      setTipoMascota(null);
-    }
   };
 
   /**
-   * Manejar toggle de deportes
+   * Manejar toggle de intereses
    */
-  const manejarToggleDeporte = (deporteId: string) => {
-    setDeportesSeleccionados(prev => {
-      if (prev.includes(deporteId)) {
-        return prev.filter(d => d !== deporteId);
+  const manejarToggleInteres = (interesId: string) => {
+    setInteresesSeleccionados(prev => {
+      if (prev.includes(interesId)) {
+        return prev.filter(d => d !== interesId);
       } else {
-        return [...prev, deporteId];
+        return [...prev, interesId];
       }
     });
   };
@@ -101,17 +95,15 @@ export default function PantallaOnboarding(): JSX.Element {
     switch (paso) {
       case 1:
         if (tipoUsuario === null) {
-          return { valida: false, mensaje: 'Por favor selecciona cómo practicas deporte' };
+          return { valida: false, mensaje: 'Por favor selecciona cómo quieres usar la app' };
         }
         return { valida: true };
       case 2:
-        if (deportesSeleccionados.length < 1) {
-          return { valida: false, mensaje: 'Por favor selecciona al menos un deporte' };
+        if (interesesSeleccionados.length < 1) {
+          return { valida: false, mensaje: 'Por favor selecciona al menos un interés' };
         }
         return { valida: true };
       case 3:
-        // Solo validar tipo de mascota si no es "solo"
-        if (tipoUsuario === 'solo') return { valida: true };
         if (tipoMascota === null) {
           return { valida: false, mensaje: 'Por favor selecciona el tipo de mascota' };
         }
@@ -158,14 +150,14 @@ export default function PantallaOnboarding(): JSX.Element {
 
     // Validación final completa
     if (!tipoUsuario) {
-      Alert.alert('Error', 'Debes seleccionar cómo practicas deporte');
+      Alert.alert('Error', 'Debes seleccionar cómo quieres usar la app');
       return;
     }
-    if (deportesSeleccionados.length < 1) {
-      Alert.alert('Error', 'Debes seleccionar al menos un deporte');
+    if (interesesSeleccionados.length < 1) {
+      Alert.alert('Error', 'Debes seleccionar al menos un interés');
       return;
     }
-    if (tipoUsuario !== 'solo' && !tipoMascota) {
+    if (!tipoMascota) {
       Alert.alert('Error', 'Debes seleccionar el tipo de mascota');
       return;
     }
@@ -176,7 +168,7 @@ export default function PantallaOnboarding(): JSX.Element {
       // Guardar en el backend
       const usuarioActualizado = await actualizarMiPerfil({
         tipoUsuario: tipoUsuario || undefined,
-        intereses: deportesSeleccionados,
+        intereses: interesesSeleccionados,
         onboardingCompletado: true,
       });
 
@@ -215,13 +207,13 @@ export default function PantallaOnboarding(): JSX.Element {
   );
 
   /**
-   * Renderizar paso 1: Tipo de usuario
+   * Renderizar paso 1: Tipo de perfil
    */
   const renderPaso1 = () => (
     <View style={estilos.pasoContainer}>
-      <Text style={estilos.tituloPaso}>¿Cómo practicas deporte?</Text>
+      <Text style={estilos.tituloPaso}>¿Cómo quieres usar Indio?</Text>
       <Text style={estilos.descripcionPaso}>
-        Cuéntanos cómo prefieres hacer ejercicio
+        Queremos mostrarte mejores matches, eventos y personas con mascotas afines
       </Text>
 
       <View style={estilos.opcionesContainer}>
@@ -261,28 +253,28 @@ export default function PantallaOnboarding(): JSX.Element {
   );
 
   /**
-   * Renderizar paso 2: Deportes favoritos
+   * Renderizar paso 2: Intereses de comunidad
    */
   const renderPaso2 = () => (
     <View style={estilos.pasoContainer}>
-      <Text style={estilos.tituloPaso}>¿Qué deportes te gustan?</Text>
+      <Text style={estilos.tituloPaso}>¿Qué planes te interesan?</Text>
       <Text style={estilos.descripcionPaso}>
         Selecciona al menos uno (puedes elegir varios)
       </Text>
 
       <View style={estilos.chipsContainer}>
-        {DEPORTES_DISPONIBLES.map((deporte) => (
+        {INTERESES_COMUNIDAD.map((interes) => (
           <Chip
-            key={deporte.id}
-            selected={deportesSeleccionados.includes(deporte.id)}
-            onPress={() => manejarToggleDeporte(deporte.id)}
+            key={interes.id}
+            selected={interesesSeleccionados.includes(interes.id)}
+            onPress={() => manejarToggleInteres(interes.id)}
             style={[
               estilos.chip,
-              deportesSeleccionados.includes(deporte.id) && estilos.chipSeleccionado,
+              interesesSeleccionados.includes(interes.id) && estilos.chipSeleccionado,
             ]}
             textStyle={estilos.chipTexto}
           >
-            {deporte.label}
+            {interes.label}
           </Chip>
         ))}
       </View>
@@ -293,16 +285,11 @@ export default function PantallaOnboarding(): JSX.Element {
    * Renderizar paso 3: Tipo de mascota
    */
   const renderPaso3 = () => {
-    if (tipoUsuario === 'solo') {
-      // Si eligió "solo", no necesita este paso
-      return null;
-    }
-
     return (
       <View style={estilos.pasoContainer}>
         <Text style={estilos.tituloPaso}>¿Qué tipo de mascota tienes?</Text>
         <Text style={estilos.descripcionPaso}>
-          Esto nos ayudará a encontrar mejores matches
+          Esto nos ayuda a sugerirte personas y eventos más compatibles
         </Text>
 
         <View style={estilos.opcionesContainer}>

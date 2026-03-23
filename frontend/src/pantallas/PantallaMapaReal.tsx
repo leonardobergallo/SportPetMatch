@@ -125,8 +125,8 @@ export default function PantallaMapaReal() {
       const eventosPrueba = [
         {
           id: '1',
-          titulo: 'Running matutino en Costanera',
-          tipo: 'correr',
+          titulo: 'Paseo matutino en Costanera',
+          tipo: 'paseo',
           fechaInicio: '2025-11-01T07:00:00',
           ubicacionLat: -31.6280,
           ubicacionLng: -60.6900,
@@ -135,8 +135,8 @@ export default function PantallaMapaReal() {
         },
         {
           id: '2',
-          titulo: 'Yoga con mascotas en Parque Sur',
-          tipo: 'yoga',
+          titulo: 'Encuentro en Parque Sur',
+          tipo: 'parque',
           fechaInicio: '2025-11-02T09:00:00',
           ubicacionLat: -31.6450,
           ubicacionLng: -60.6950,
@@ -146,7 +146,7 @@ export default function PantallaMapaReal() {
         {
           id: '3',
           titulo: 'Caminata en Laguna Setúbal',
-          tipo: 'caminar',
+          tipo: 'caminata',
           fechaInicio: '2025-11-03T17:00:00',
           ubicacionLat: -31.6200,
           ubicacionLng: -60.6800,
@@ -155,8 +155,8 @@ export default function PantallaMapaReal() {
         },
         {
           id: '4',
-          titulo: 'Ciclismo por Boulevard Gálvez',
-          tipo: 'ciclismo',
+          titulo: 'Merienda pet-friendly por Boulevard Gálvez',
+          tipo: 'merienda',
           fechaInicio: '2025-11-04T08:00:00',
           ubicacionLat: -31.6350,
           ubicacionLng: -60.7000,
@@ -206,7 +206,7 @@ export default function PantallaMapaReal() {
       <Surface style={styles.container}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => navigation.goBack()} />
-          <Appbar.Content title="Mapa de SportPetMatch" />
+          <Appbar.Content title="Mapa de Indio" />
         </Appbar.Header>
         <View style={styles.centeredContainer}>
           <ActivityIndicator animating={true} size="large" />
@@ -225,7 +225,7 @@ export default function PantallaMapaReal() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Mapa de SportPetMatch" />
+        <Appbar.Content title="Mapa de Indio" />
         <Appbar.Action 
           icon="refresh" 
           onPress={cargarDatosCercanos}

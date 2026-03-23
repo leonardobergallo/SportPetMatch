@@ -4,6 +4,30 @@
 import { Request, Response } from 'express';
 import prisma from '../utilidades/prisma';
 
+function normalizarTipoUsuario(tipoUsuario?: string | null): string {
+  if (!tipoUsuario) return 'dueno';
+
+  const legacyMap: Record<string, string> = {
+    solo: 'cuidador',
+    con_mascota: 'dueno',
+    ambos: 'familia',
+  };
+
+  return legacyMap[tipoUsuario] || tipoUsuario;
+}
+
+function obtenerTiposCompatibles(tipoUsuario?: string | null): string[] {
+  const tipoNormalizado = normalizarTipoUsuario(tipoUsuario);
+
+  const compatibles: Record<string, string[]> = {
+    dueno: ['dueno', 'familia', 'cuidador'],
+    familia: ['dueno', 'familia', 'cuidador'],
+    cuidador: ['dueno', 'familia', 'cuidador'],
+  };
+
+  return compatibles[tipoNormalizado] || ['dueno', 'familia', 'cuidador'];
+}
+
 /**
  * Obtener usuarios recomendados basado en intereses, tipo y ubicación
  */
@@ -72,20 +96,10 @@ export const obtenerRecomendaciones = async (req: Request, res: Response): Promi
       onboardingCompletado: true, // Solo usuarios con onboarding completo
     };
 
-    // Filtrar por tipo de usuario compatible
-    if (usuarioActual.tipoUsuario === 'solo') {
-      // Si es "solo", solo buscar otros "solo"
-      where.tipoUsuario = 'solo';
-    } else if (usuarioActual.tipoUsuario === 'con_mascota') {
-      // Si es "con mascota", buscar "con_mascota" o "ambos"
-      where.OR = [
-        { tipoUsuario: 'con_mascota' },
-        { tipoUsuario: 'ambos' },
-      ];
-    } else if (usuarioActual.tipoUsuario === 'ambos') {
-      // Si es "ambos", puede matchear con cualquiera
-      where.tipoUsuario = { in: ['solo', 'con_mascota', 'ambos'] };
-    }
+    // Filtrar por perfiles compatibles, soportando valores legacy y los nuevos del onboarding
+    where.tipoUsuario = {
+      in: obtenerTiposCompatibles(usuarioActual.tipoUsuario),
+    };
 
     // Obtener usuarios potenciales
     const usuariosPotenciales = await prisma.usuario.findMany({
@@ -134,8 +148,8 @@ export const obtenerRecomendaciones = async (req: Request, res: Response): Promi
         score += interesesMascotasComunes.length * 5; // 5 puntos por interés de mascota común
       }
 
-      // Compatibilidad de tipo de usuario
-      if (usuarioActual.tipoUsuario === usuario.tipoUsuario) {
+      // Compatibilidad de perfil
+      if (normalizarTipoUsuario(usuarioActual.tipoUsuario) === normalizarTipoUsuario(usuario.tipoUsuario)) {
         score += 15; // Bonificación por ser exactamente iguales
       }
 
@@ -157,7 +171,7 @@ export const obtenerRecomendaciones = async (req: Request, res: Response): Promi
         }
       }
 
-      // Bonificación por nivel deportivo similar
+      // Bonificación por nivel de participación similar
       if (usuarioActual.nivelDeporte && usuario.nivelDeporte) {
         if (Math.abs(usuarioActual.nivelDeporte - usuario.nivelDeporte) <= 1) {
           score += 5;
@@ -564,11 +578,14 @@ export const obtenerRecomendacionesEventos = async (req: Request, res: Response)
         score += 20;
       }
 
-      // Compatibilidad con tipo de usuario
-      if (usuario.tipoUsuario === 'solo' && evento.esPetFriendly) {
-        score += 5; // No pet friendly para usuarios solo
-      } else if (usuario.tipoUsuario !== 'solo' && evento.esPetFriendly) {
-        score += 15; // Pet friendly para usuarios con mascota
+      // Compatibilidad con perfil del usuario
+      if (evento.esPetFriendly) {
+        score += 15;
+      }
+
+      const tipoUsuarioNormalizado = normalizarTipoUsuario(usuario.tipoUsuario);
+      if ((tipoUsuarioNormalizado === 'dueno' || tipoUsuarioNormalizado === 'familia') && evento.esPetFriendly) {
+        score += 5;
       }
 
       // Distancia (si está disponible)

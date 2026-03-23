@@ -1,5 +1,5 @@
 // Pantalla de Detalle de Evento - SportPetMatch
-// Muestra información completa de un evento deportivo
+// Muestra información completa de un evento pet-friendly
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -40,10 +40,10 @@ type DetalleEventoNavigationProp = StackNavigationProp<RootStackParamList, 'Deta
 
 // Imágenes de eventos
 const imagenesEventos: Record<string, any> = {
-  futbol: require('../../assets/soccer-tournament-park.jpg'),
-  carrera: require('../../assets/5k-running-race-beach.jpg'),
-  tenis: require('../../assets/tennis-group-game.jpg'),
-  default: require('../../assets/placeholder.jpg'),
+  golden: require('../../assets/golden-retriever-playing.png'),
+  husky: require('../../assets/husky-running-mountain.jpg'),
+  labrador: require('../../assets/labrador-playing-tennis.jpg'),
+  default: require('../../assets/golden-retriever-playing.png'),
 };
 
 /**
@@ -184,14 +184,14 @@ export default function PantallaDetalleEvento(): JSX.Element {
    */
   const obtenerImagenEvento = (tipo: string): any => {
     const tipoLower = tipo.toLowerCase();
-    if (tipoLower.includes('futbol') || tipoLower.includes('fútbol')) {
-      return imagenesEventos.futbol;
+    if (tipoLower.includes('parque') || tipoLower.includes('encuentro')) {
+      return imagenesEventos.golden;
     }
-    if (tipoLower.includes('carrera') || tipoLower.includes('running')) {
-      return imagenesEventos.carrera;
+    if (tipoLower.includes('paseo') || tipoLower.includes('caminata')) {
+      return imagenesEventos.husky;
     }
-    if (tipoLower.includes('tenis')) {
-      return imagenesEventos.tenis;
+    if (tipoLower.includes('cafe') || tipoLower.includes('merienda')) {
+      return imagenesEventos.labrador;
     }
     return imagenesEventos.default;
   };
@@ -231,7 +231,7 @@ export default function PantallaDetalleEvento(): JSX.Element {
    * Obtener nivel de dificultad en texto
    */
   const obtenerNivelDificultad = (nivel: number): string => {
-    const niveles = ['Principiante', 'Fácil', 'Intermedio', 'Avanzado', 'Experto'];
+    const niveles = ['Muy relajado', 'Relajado', 'Intermedio', 'Activo', 'Muy activo'];
     return niveles[nivel - 1] || 'Desconocido';
   };
 
@@ -326,9 +326,9 @@ export default function PantallaDetalleEvento(): JSX.Element {
             )}
 
             <View style={estilos.infoItem}>
-              <MaterialIcons name="fitness-center" size={20} color={temaApp.colors.primary} />
+              <MaterialIcons name="pets" size={20} color={temaApp.colors.primary} />
               <View style={estilos.infoTextoContainer}>
-                <Text style={estilos.infoLabel}>Dificultad</Text>
+                <Text style={estilos.infoLabel}>Ritmo sugerido</Text>
                 <Text style={estilos.infoValor}>
                   {obtenerNivelDificultad(evento.nivelDificultad)}
                 </Text>
