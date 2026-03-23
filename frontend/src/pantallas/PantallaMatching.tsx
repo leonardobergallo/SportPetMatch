@@ -8,7 +8,8 @@ import {
   Dimensions, 
   PanResponder,
   Animated,
-  Alert 
+  Alert,
+  Platform,
 } from 'react-native';
 import { 
   Text, 
@@ -55,7 +56,9 @@ interface UsuarioPotencial {
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.75;
+const CARD_HEIGHT = Platform.OS === 'web'
+  ? Math.min(SCREEN_HEIGHT * 0.64, 620)
+  : SCREEN_HEIGHT * 0.75;
 const SWIPE_THRESHOLD = 120;
 
 /**
@@ -437,10 +440,13 @@ export default function PantallaMatching(): JSX.Element {
         { scale },
       ],
       opacity,
+      zIndex: 3,
     } : isNextCard ? {
       transform: [{ scale: nextCardScale }],
+      zIndex: 2,
     } : {
       transform: [{ scale: 0.8 }],
+      zIndex: 1,
     };
     
     return (
@@ -574,7 +580,14 @@ export default function PantallaMatching(): JSX.Element {
       
       {/* Stack de cards */}
       <View style={estilos.cardsContainer}>
-        {usuarios.map((usuario, index) => renderUsuarioCard(usuario, index))}
+        {(Platform.OS === 'web'
+          ? usuarios
+              .map((usuario, index) => ({ usuario, index }))
+              .filter(({ index }) => index === usuarioActual)
+          : usuarios
+              .map((usuario, index) => ({ usuario, index }))
+              .filter(({ index }) => index === usuarioActual || index === usuarioActual + 1)
+        ).map(({ usuario, index }) => renderUsuarioCard(usuario, index))}
       </View>
       
       {/* Botones de acción */}
@@ -665,10 +678,12 @@ const estilos = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 12,
+    overflow: 'hidden',
   },
   card: {
     position: 'absolute',
-    width: SCREEN_WIDTH - 40,
+    width: Platform.OS === 'web' ? Math.min(SCREEN_WIDTH - 40, 940) : SCREEN_WIDTH - 40,
     height: CARD_HEIGHT,
   },
   usuarioCard: {
@@ -681,13 +696,15 @@ const estilos = StyleSheet.create({
     shadowRadius: 8,
   },
   avatar: {
-    height: CARD_HEIGHT * 0.6,
+    height: Platform.OS === 'web' ? CARD_HEIGHT * 0.44 : CARD_HEIGHT * 0.56,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   cardContent: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === 'web' ? 12 : 16,
   },
   headerCard: {
     flexDirection: 'row',
@@ -722,7 +739,7 @@ const estilos = StyleSheet.create({
     marginBottom: 4,
   },
   mascotasContainer: {
-    marginTop: 8,
+    marginTop: 4,
   },
   mascotasTitle: {
     marginBottom: 8,
@@ -748,7 +765,7 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 30,
+    paddingVertical: 18,
     paddingHorizontal: 40,
     gap: 20,
   },

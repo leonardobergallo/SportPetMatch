@@ -104,6 +104,7 @@
 
     .btn-primary { background: var(--green); color: #fff; }
     .btn-secondary { background: #fff; color: var(--green-dark); border: 1px solid var(--line); }
+    .hidden { display: none !important; }
 
     .micro {
       color: var(--muted);
@@ -265,18 +266,18 @@
     <section id="instalar">
       <h2>Instala en celular sin App Store o Play Store</h2>
       <div class="install">
-        <article class="card">
-          <h3>Opcion 1: PWA (recomendada)</h3>
-          <p><strong>Android (Chrome):</strong> abre la app web, toca menu y elige <em>Agregar a pantalla de inicio</em>.</p>
-          <p><strong>iPhone (Safari):</strong> abre la app web, toca compartir y elige <em>Agregar a inicio</em>.</p>
-          <p class="micro">Se instala como app, con icono y pantalla completa.</p>
-          <a class="btn btn-primary" href="/">Abrir app para instalar</a>
+        <article class="card" id="ios-install-card">
+          <h3>Instalar en iPhone (Safari)</h3>
+          <p>1) Toca <strong>Compartir</strong> en Safari.</p>
+          <p>2) Elige <strong>Agregar a pantalla de inicio</strong>.</p>
+          <p class="micro">En 10 segundos queda instalada con icono.</p>
+          <a class="btn btn-primary" href="/?app=1">Abrir app para instalar</a>
         </article>
-        <article class="card">
-          <h3>Opcion 2: APK directa (Android)</h3>
-          <p>Si quieres instalacion como app nativa de prueba, descarga el APK firmado y habilita instalar desde origen desconocido.</p>
-          <p class="micro">Puedes generar el APK con EAS Build usando el script del proyecto.</p>
-          <a class="btn btn-secondary" href="https://expo.dev" target="_blank" rel="noreferrer">Ver EAS Build</a>
+        <article class="card" id="android-apk-card">
+          <h3>Instalar en Android</h3>
+          <p>Toca el boton y descarga el APK oficial.</p>
+          <p class="micro">Si Android lo pide, habilita "Instalar apps desconocidas" para tu navegador.</p>
+          <a class="btn btn-primary" id="apk-download-link" href="https://github.com/leonardobergallo/SportPetMatch/releases/latest/download/indio-latest.apk" target="_blank" rel="noreferrer">Descargar APK</a>
         </article>
       </div>
     </section>
@@ -311,5 +312,22 @@
       App social para personas y mascotas activas.
     </div>
   </footer>
+  <script>
+    (function () {
+      var ua = navigator.userAgent || '';
+      var isAndroid = /Android/i.test(ua);
+      var isIOS = /iPhone|iPad|iPod/i.test(ua);
+      var apkUrl = 'https://github.com/leonardobergallo/SportPetMatch/releases/latest/download/indio-latest.apk';
+
+      var apkLink = document.getElementById('apk-download-link');
+      if (apkLink) apkLink.setAttribute('href', apkUrl);
+
+      var iosCard = document.getElementById('ios-install-card');
+      var apkCard = document.getElementById('android-apk-card');
+
+      if (isIOS && apkCard) apkCard.classList.add('hidden');
+      if (isAndroid && iosCard) iosCard.classList.add('hidden');
+    })();
+  </script>
 </body>
 </html>

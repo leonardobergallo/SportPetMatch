@@ -728,7 +728,7 @@ const estilos = StyleSheet.create({
     backgroundColor: temaApp.colors.background,
     ...(isWeb && {
       height: '100vh',
-      overflow: 'hidden', // Evitar scroll en el contenedor, solo en ScrollView
+      overflow: 'hidden',
     }),
   },
   scrollView: {
@@ -736,8 +736,7 @@ const estilos = StyleSheet.create({
     ...(isWeb && {
       width: '100%',
       height: '100%',
-      maxHeight: '100%',
-      overflowY: 'scroll',
+      overflowY: 'auto',
       overflowX: 'hidden',
     }),
   } as any,

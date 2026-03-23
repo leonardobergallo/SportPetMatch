@@ -16,7 +16,6 @@ import {
   TextInput,
   Button,
   Card,
-  ActivityIndicator,
   Switch,
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -88,6 +87,8 @@ export default function PantallaAgregarMascota(): JSX.Element {
   const [veterinario, setVeterinario] = useState('');
   const [fotos, setFotos] = useState<string[]>([]);
 
+  const normalizarDecimal = (valor: string): string => valor.trim().replace(',', '.');
+
   /**
    * Seleccionar imagen
    */
@@ -111,7 +112,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        const nuevasFotos = result.assets.map((asset) => asset.uri).filter(uri => uri);
+        const nuevasFotos = result.assets.map((asset) => asset.uri).filter(Boolean);
         setFotos([...fotos, ...nuevasFotos]);
       }
     } catch (error) {
@@ -154,25 +155,29 @@ export default function PantallaAgregarMascota(): JSX.Element {
    */
   const guardarMascota = async () => {
     if (!nombre.trim()) {
-      Alert.alert('Error', mensajesError.campoRequerido('El nombre'));
+      Alert.alert('Error de validación', 'Solo el nombre es obligatorio.');
       return;
     }
 
+    const edadLimpia = edad.trim();
+    const pesoLimpio = normalizarDecimal(peso);
+    const alturaLimpia = normalizarDecimal(altura);
+
     // Validar edad si se proporciona
-    if (edad && !validarNumeroEntero(edad, 0, 30)) {
-      Alert.alert('Error', mensajesError.numeroFueraDeRango(0, 30));
+    if (edadLimpia && !validarNumeroEntero(edadLimpia, 0, 30)) {
+      Alert.alert('Error de validación', `Edad inválida. ${mensajesError.numeroFueraDeRango(0, 30)}`);
       return;
     }
 
     // Validar peso si se proporciona
-    if (peso && !validarNumeroDecimal(peso, 0.1, 200)) {
-      Alert.alert('Error', mensajesError.numeroFueraDeRango(0.1, 200));
+    if (pesoLimpio && !validarNumeroDecimal(pesoLimpio, 0.1, 200)) {
+      Alert.alert('Error de validación', `Peso inválido. ${mensajesError.numeroFueraDeRango(0.1, 200)}`);
       return;
     }
 
     // Validar altura si se proporciona
-    if (altura && !validarNumeroDecimal(altura, 0.1, 200)) {
-      Alert.alert('Error', mensajesError.numeroFueraDeRango(0.1, 200));
+    if (alturaLimpia && !validarNumeroDecimal(alturaLimpia, 0.1, 200)) {
+      Alert.alert('Error de validación', `Altura inválida. ${mensajesError.numeroFueraDeRango(0.1, 200)}`);
       return;
     }
 
@@ -186,9 +191,9 @@ export default function PantallaAgregarMascota(): JSX.Element {
         nombre: nombre.trim(),
         tipo,
         raza: raza.trim() || undefined,
-        edad: edad ? parseInt(edad) : undefined,
-        peso: peso ? parseFloat(peso) : undefined,
-        altura: altura ? parseFloat(altura) : undefined,
+        edad: edadLimpia ? Number.parseInt(edadLimpia, 10) : undefined,
+        peso: pesoLimpio ? Number.parseFloat(pesoLimpio) : undefined,
+        altura: alturaLimpia ? Number.parseFloat(alturaLimpia) : undefined,
         color: color.trim() || undefined,
         genero,
         esterilizado,
@@ -235,7 +240,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
     } catch (error: any) {
       console.error('Error guardando mascota:', error);
       const mensajeError = error.response?.data?.message || error.message || 'No se pudo agregar la mascota';
-      Alert.alert('Error', mensajeError);
+      Alert.alert('Error de validación', mensajeError);
     } finally {
       setGuardando(false);
     }
@@ -252,6 +257,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
         <Card.Content>
           {/* Información Básica */}
           <Text style={estilos.seccionTitulo}>Información Básica</Text>
+          <Text style={estilos.ayudaValidacion}>Solo el campo Nombre es obligatorio. El resto es opcional.</Text>
 
           <View style={estilos.campoContainer}>
             <Text style={estilos.label}>Nombre *</Text>
@@ -456,7 +462,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
           <Text style={estilos.seccionTitulo}>Fotos</Text>
           <View style={estilos.fotosContainer}>
             {fotos.map((foto, index) => (
-              <View key={index} style={estilos.fotoContainer}>
+              <View key={foto} style={estilos.fotoContainer}>
                 <Image source={{ uri: foto }} style={estilos.foto} />
                 <TouchableOpacity
                   style={estilos.fotoEliminar}
@@ -548,6 +554,11 @@ const estilos = StyleSheet.create({
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
     marginTop: espaciado.lg,
+    marginBottom: espaciado.md,
+  },
+  ayudaValidacion: {
+    fontSize: 13,
+    color: temaApp.colors.onSurfaceVariant,
     marginBottom: espaciado.md,
   },
   campoContainer: {

@@ -12,6 +12,7 @@ import {
   Image,
   ImageBackground,
   Pressable,
+  TextInput as RNTextInput,
 } from 'react-native';
 import {
   TextInput,
@@ -29,6 +30,16 @@ import { iniciarSesion as servicioIniciarSesion } from '../servicios/servicioAut
 
 type Nav = StackNavigationProp<RootStackParamList, 'Login'>;
 
+/** Tipografía web (Plus Jakarta / Outfit cargadas en web/index.html) */
+const fontSans = Platform.select({
+  web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif',
+  default: undefined,
+});
+const fontDisplay = Platform.select({
+  web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif',
+  default: undefined,
+});
+
 const IMGS = {
   golden: require('../../assets/golden-retriever-playing.png'),
   husky: require('../../assets/husky-running-mountain.jpg'),
@@ -39,19 +50,18 @@ const IMGS = {
 };
 
 const FEATURES = [
-  { icon: 'event' as const, title: 'Eventos Pet-Friendly', desc: 'Crea y participa en actividades deportivas con tu mascota. Filtros por tipo, ubicacion y nivel.' },
-  { icon: 'favorite' as const, title: 'Matching Inteligente', desc: 'Encontra personas y mascotas compatibles por intereses, ubicacion y estilo de vida.' },
-  { icon: 'chat' as const, title: 'Chat Integrado', desc: 'Coordina salidas, planifica encuentros y organizate en minutos con tus matches.' },
-  { icon: 'map' as const, title: 'Mapa Interactivo', desc: 'Descubri eventos, usuarios y actividades cerca tuyo con geolocalizacion en tiempo real.' },
+  { icon: 'event' as const, title: 'Eventos pet-friendly', desc: 'Actividades con tu mascota, por zona y tipo.' },
+  { icon: 'favorite' as const, title: 'Matching', desc: 'Personas y mascotas compatibles cerca tuyo.' },
+  { icon: 'chat' as const, title: 'Chat', desc: 'Coordiná salidas en segundos.' },
 ];
 
 const GALLERY = [
-  { img: IMGS.golden, caption: 'Perfil completo de tu mascota' },
-  { img: IMGS.soccer, caption: 'Eventos deportivos pet-friendly' },
-  { img: IMGS.husky, caption: 'Actividades al aire libre' },
-  { img: IMGS.tennis, caption: 'Deportes en grupo' },
-  { img: IMGS.labrador, caption: 'Diversion para todos' },
-  { img: IMGS.running, caption: 'Carreras y caminatas' },
+  { img: IMGS.golden, caption: 'Tu mascota' },
+  { img: IMGS.soccer, caption: 'Eventos al aire libre' },
+  { img: IMGS.husky, caption: 'Salidas activas' },
+  { img: IMGS.tennis, caption: 'En grupo' },
+  { img: IMGS.labrador, caption: 'Diversión' },
+  { img: IMGS.running, caption: 'Caminatas y carreras' },
 ];
 
 export default function PantallaLogin(): JSX.Element {
@@ -65,17 +75,17 @@ export default function PantallaLogin(): JSX.Element {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const scrollToLogin = () => {
+  const scrollToExtraLogin = () => {
     loginRef.current?.measureLayout(
-      scrollRef.current?.getInnerViewNode?.() as any,
-      (_x: number, y: number) => scrollRef.current?.scrollTo({ y: y - 20, animated: true }),
+      scrollRef.current?.getInnerViewNode?.() as never,
+      (_x: number, y: number) => scrollRef.current?.scrollTo({ y: Math.max(0, y - 24), animated: true }),
       () => {},
     );
   };
 
   const handleLogin = async () => {
-    if (!email.trim() || !pw.trim()) { Alert.alert('Error', 'Completa todos los campos'); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Alert.alert('Error', 'Email invalido'); return; }
+    if (!email.trim() || !pw.trim()) { Alert.alert('Error', 'Completá correo y contraseña'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Alert.alert('Error', 'Correo no válido'); return; }
     setLoading(true);
     try {
       const r = await servicioIniciarSesion({ email: email.trim(), password: pw });
@@ -120,15 +130,42 @@ export default function PantallaLogin(): JSX.Element {
               <MaterialIcons name="pets" size={48} color="#fff" />
               <Text style={st.heroTitle}>{MARCA.nombre}</Text>
               <Text style={st.heroSlogan}>{MARCA.slogan}</Text>
-              <Text style={st.heroDesc}>
-                La app gratis que conecta personas y mascotas{'\n'}en eventos, salidas y actividades pet-friendly.
-              </Text>
-              <View style={st.heroBtns}>
-                <Pressable style={st.heroCtaPrimary} onPress={goRegistro}>
-                  <Text style={st.heroCtaPrimaryTxt}>Empezar gratis</Text>
+              <Text style={st.heroDesc}>App gratis: eventos, matching y chat con tu mascota.</Text>
+
+              <View style={st.heroForm}>
+                <RNTextInput
+                  style={st.heroInput}
+                  placeholder="Correo o usuario"
+                  placeholderTextColor="rgba(255,255,255,0.88)"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  editable={!loading}
+                />
+                <RNTextInput
+                  style={st.heroInput}
+                  placeholder="Contraseña"
+                  placeholderTextColor="rgba(255,255,255,0.88)"
+                  value={pw}
+                  onChangeText={setPw}
+                  secureTextEntry={!showPw}
+                  autoComplete="password"
+                  editable={!loading}
+                />
+                <Pressable style={st.heroLoginBtn} onPress={handleLogin} disabled={loading}>
+                  {loading ? (
+                    <ActivityIndicator color="#6200ea" />
+                  ) : (
+                    <Text style={st.heroLoginBtnTxt}>Iniciar sesión</Text>
+                  )}
                 </Pressable>
-                <Pressable style={st.heroCtaSecondary} onPress={scrollToLogin}>
-                  <Text style={st.heroCtaSecondaryTxt}>Ya tengo cuenta</Text>
+                <Pressable style={st.heroCtaSecondary} onPress={goRegistro}>
+                  <Text style={st.heroCtaSecondaryTxt}>Crear cuenta gratis</Text>
+                </Pressable>
+                <Pressable onPress={scrollToExtraLogin} style={st.heroLinkMore}>
+                  <Text style={st.heroLinkMoreTxt}>Google y más opciones ↓</Text>
                 </Pressable>
               </View>
             </View>
@@ -138,7 +175,7 @@ export default function PantallaLogin(): JSX.Element {
         {/* ═══════════════ FEATURES ═══════════════ */}
         <View style={st.section}>
           <Text style={st.sectionTag}>FUNCIONALIDADES</Text>
-          <Text style={st.sectionTitle}>Todo lo que necesitas en un solo lugar</Text>
+          <Text style={st.sectionTitle}>Todo en un solo lugar</Text>
 
           {FEATURES.map((f, i) => (
             <View key={f.title} style={[st.featureRow, i % 2 === 1 && st.featureRowReverse]}>
@@ -155,8 +192,8 @@ export default function PantallaLogin(): JSX.Element {
 
         {/* ═══════════════ GALERIA ═══════════════ */}
         <View style={st.gallerySection}>
-          <Text style={st.sectionTagOnDark}>GALERIA</Text>
-          <Text style={st.sectionTitleOnDark}>Asi se vive con Indio</Text>
+          <Text style={st.sectionTagOnDark}>GALERÍA</Text>
+          <Text style={st.sectionTitleOnDark}>Con Indio</Text>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.galleryScroll}>
             {GALLERY.map((g) => (
@@ -173,13 +210,13 @@ export default function PantallaLogin(): JSX.Element {
         {/* ═══════════════ COMO FUNCIONA ═══════════════ */}
         <View style={st.section}>
           <Text style={st.sectionTag}>3 PASOS</Text>
-          <Text style={st.sectionTitle}>Empeza en minutos</Text>
+          <Text style={st.sectionTitle}>Empezá en minutos</Text>
 
           <View style={st.stepsRow}>
             {[
-              { n: '1', t: 'Registrate', d: 'Crea tu cuenta gratis y agrega el perfil de tu mascota.', icon: 'person-add' as const },
-              { n: '2', t: 'Explora', d: 'Descubri eventos, matches y actividades cerca tuyo.', icon: 'explore' as const },
-              { n: '3', t: 'Conecta', d: 'Habla por chat, organiza salidas y disfruten juntos.', icon: 'chat' as const },
+              { n: '1', t: 'Perfil', d: 'Alta gratis y tu mascota.', icon: 'person-add' as const },
+              { n: '2', t: 'Explorá', d: 'Eventos y matches cerca.', icon: 'explore' as const },
+              { n: '3', t: 'Chateá', d: 'Salidas y encuentros.', icon: 'chat' as const },
             ].map((s) => (
               <View key={s.n} style={st.stepCard}>
                 <View style={st.stepNum}><Text style={st.stepNumTxt}>{s.n}</Text></View>
@@ -194,7 +231,7 @@ export default function PantallaLogin(): JSX.Element {
         {/* ═══════════════ BANNER INTERMEDIO ═══════════════ */}
         <ImageBackground source={IMGS.husky} style={st.midBanner} imageStyle={st.midBannerImg}>
           <View style={st.midBannerOverlay}>
-            <Text style={st.midBannerTitle}>Tu mascota necesita mas actividad.{'\n'}Vos necesitas una comunidad.</Text>
+            <Text style={st.midBannerTitle}>Más actividad para tu mascota.{'\n'}Comunidad para vos.</Text>
             <Pressable style={st.heroCtaPrimary} onPress={goRegistro}>
               <Text style={st.heroCtaPrimaryTxt}>Crear cuenta gratis</Text>
             </Pressable>
@@ -203,22 +240,22 @@ export default function PantallaLogin(): JSX.Element {
 
         {/* ═══════════════ INSTALAR ═══════════════ */}
         <View style={st.section}>
-          <Text style={st.sectionTag}>INSTALACION</Text>
-          <Text style={st.sectionTitle}>Llevala en tu celular sin tiendas</Text>
+          <Text style={st.sectionTag}>INSTALACIÓN</Text>
+          <Text style={st.sectionTitle}>En el celular (PWA)</Text>
 
           <View style={st.installRow}>
             <View style={st.installCard}>
               <MaterialIcons name="phone-android" size={32} color="#6200ea" />
               <Text style={st.installTitle}>Android</Text>
-              <Text style={st.installDesc}>Abre en Chrome, toca menu (tres puntos) y elige "Agregar a pantalla de inicio".</Text>
+              <Text style={st.installDesc}>Chrome → menú → Agregar a pantalla de inicio.</Text>
             </View>
             <View style={st.installCard}>
               <MaterialIcons name="phone-iphone" size={32} color="#6200ea" />
               <Text style={st.installTitle}>iPhone</Text>
-              <Text style={st.installDesc}>Abre en Safari, toca compartir y elige "Agregar a inicio".</Text>
+              <Text style={st.installDesc}>Safari → compartir → Agregar a inicio.</Text>
             </View>
           </View>
-          <Text style={st.installMicro}>Se instala como app nativa, con icono y pantalla completa. Sin App Store ni Play Store.</Text>
+          <Text style={st.installMicro}>Icono en escritorio, pantalla completa.</Text>
         </View>
 
         {/* ═══════════════ LOGIN ═══════════════ */}
@@ -231,11 +268,11 @@ export default function PantallaLogin(): JSX.Element {
 
             <Card style={st.loginCard}>
               <Card.Content>
-                <Text style={st.loginTitle}>Iniciar Sesion</Text>
-                <Text style={st.loginSub}>Ingresa tus datos para continuar</Text>
+                <Text style={st.loginTitle}>Iniciar sesión</Text>
+                <Text style={st.loginSub}>Correo y contraseña (o usá Google)</Text>
 
                 <TextInput
-                  label="Email"
+                  label="Correo o usuario"
                   value={email}
                   onChangeText={setEmail}
                   mode="outlined"
@@ -273,7 +310,7 @@ export default function PantallaLogin(): JSX.Element {
                 />
 
                 <Button mode="text" onPress={() => {
-                  if (!email.trim()) { Alert.alert('Error', 'Ingresa tu email primero'); return; }
+                  if (!email.trim()) { Alert.alert('Error', 'Ingresá tu correo primero'); return; }
                   Alert.alert('Recuperar', `Enviar enlace a ${email}?`, [
                     { text: 'Cancelar', style: 'cancel' },
                     { text: 'Enviar', onPress: () => Alert.alert('Listo', 'Revisa tu email') },
@@ -282,12 +319,12 @@ export default function PantallaLogin(): JSX.Element {
 
                 <Button mode="contained" onPress={handleLogin} style={st.loginBtn}
                   contentStyle={st.loginBtnInner} disabled={loading}>
-                  {loading ? <ActivityIndicator color="#fff" /> : 'Iniciar Sesion'}
+                  {loading ? <ActivityIndicator color="#fff" /> : 'Iniciar sesión'}
                 </Button>
 
                 <View style={st.dividerRow}>
                   <Divider style={st.dividerLine} />
-                  <Text style={st.dividerTxt}>o continua con</Text>
+                  <Text style={st.dividerTxt}>o seguí con</Text>
                   <Divider style={st.dividerLine} />
                 </View>
 
@@ -297,7 +334,7 @@ export default function PantallaLogin(): JSX.Element {
             </Card>
 
             <View style={st.regRow}>
-              <Text style={st.regTxt}>¿No tenes cuenta? </Text>
+              <Text style={st.regTxt}>¿No tenés cuenta? </Text>
               <Button mode="text" onPress={goRegistro} disabled={loading} compact>Registrate</Button>
             </View>
           </View>
@@ -322,47 +359,103 @@ const st = StyleSheet.create({
   // Hero
   hero: { width: '100%', minHeight: 440 },
   heroImg: { resizeMode: 'cover' },
-  heroOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.78)', justifyContent: 'center', paddingVertical: 60 },
+  heroOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.84)', justifyContent: 'center', paddingVertical: 64 },
   heroContent: { alignItems: 'center', paddingHorizontal: 24, maxWidth: 560, alignSelf: 'center', width: '100%' },
   heroTitle: {
-    fontSize: 42,
+    fontSize: 52,
     fontWeight: '900',
     color: '#ffffff',
-    marginTop: 8,
+    marginTop: 10,
     letterSpacing: 1,
     textShadowColor: 'rgba(0,0,0,0.85)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   heroSlogan: {
-    fontSize: 17,
+    fontSize: 22,
     color: '#f8fafc',
-    marginTop: 2,
+    marginTop: 4,
     fontStyle: 'italic',
     textShadowColor: 'rgba(0,0,0,0.8)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 6,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   heroDesc: {
-    fontSize: 16,
+    fontSize: 20,
     color: '#ffffff',
     textAlign: 'center',
-    marginTop: 18,
-    lineHeight: 24,
+    marginTop: 16,
+    lineHeight: 28,
     textShadowColor: 'rgba(0,0,0,0.85)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 6,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
-  heroBtns: { flexDirection: 'row', gap: 12, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center' },
-  heroCtaPrimary: { backgroundColor: '#fff', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 28 },
-  heroCtaPrimaryTxt: { color: '#6200ea', fontWeight: '800', fontSize: 15 },
-  heroCtaSecondary: { borderWidth: 2, borderColor: 'rgba(255,255,255,0.5)', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 28 },
-  heroCtaSecondaryTxt: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  heroForm: {
+    width: '100%',
+    maxWidth: 420,
+    marginTop: 24,
+    gap: 12,
+    backgroundColor: 'rgba(2,6,23,0.58)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.24)',
+    padding: 14,
+  },
+  heroInput: {
+    backgroundColor: 'rgba(15,23,42,0.78)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.6)',
+    borderRadius: 12,
+    paddingHorizontal: 18,
+    paddingVertical: Platform.OS === 'web' ? 15 : 16,
+    fontSize: 19,
+    color: '#fff',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  heroLoginBtn: {
+    backgroundColor: '#fff',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  heroLoginBtnTxt: { color: '#6200ea', fontWeight: '800', fontSize: 20, ...(fontSans ? { fontFamily: fontSans } : {}) },
+  heroCtaSecondary: {
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.75)',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  heroCtaSecondaryTxt: { color: '#fff', fontWeight: '700', fontSize: 18, ...(fontSans ? { fontFamily: fontSans } : {}) },
+  heroLinkMore: { paddingVertical: 8, alignItems: 'center' },
+  heroLinkMoreTxt: { color: 'rgba(255,255,255,0.96)', fontSize: 16, fontWeight: '700', ...(fontSans ? { fontFamily: fontSans } : {}) },
 
   // Sections
   section: { paddingHorizontal: 20, paddingVertical: 36, maxWidth: 600, alignSelf: 'center', width: '100%' },
-  sectionTag: { fontSize: 11, fontWeight: '800', color: '#5b21b6', letterSpacing: 2, textAlign: 'center', marginBottom: 6 },
-  sectionTitle: { fontSize: 24, fontWeight: '800', color: '#0f172a', textAlign: 'center', marginBottom: 24, lineHeight: 30 },
+  sectionTag: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#5b21b6',
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: 6,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#0f172a',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 30,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
+  },
   sectionTagOnDark: { fontSize: 11, fontWeight: '800', color: '#e9d5ff', letterSpacing: 2, textAlign: 'center', marginBottom: 6 },
   sectionTitleOnDark: { fontSize: 24, fontWeight: '800', color: '#ffffff', textAlign: 'center', marginBottom: 24, lineHeight: 30 },
 
@@ -371,8 +464,14 @@ const st = StyleSheet.create({
   featureRowReverse: { flexDirection: 'row-reverse' },
   featureIcon: { width: 64, height: 64, borderRadius: 18, backgroundColor: '#f3edff', justifyContent: 'center', alignItems: 'center' },
   featureText: { flex: 1 },
-  featureTitle: { fontSize: 16, fontWeight: '700', color: '#0f172a', marginBottom: 4 },
-  featureDesc: { fontSize: 14, color: '#334155', lineHeight: 21 },
+  featureTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 4,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
+  },
+  featureDesc: { fontSize: 14, color: '#334155', lineHeight: 20, ...(fontSans ? { fontFamily: fontSans } : {}) },
 
   // Gallery
   gallerySection: { backgroundColor: '#1a1a2e', paddingVertical: 36 },
