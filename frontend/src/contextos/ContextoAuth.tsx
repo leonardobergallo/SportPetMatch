@@ -2,8 +2,19 @@
 // Maneja el estado global de autenticación del usuario
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setOnUnauthorized } from '../utilidades/onUnauthorized';
+
+/** En web, volver a la portada principal (Multiverse), no quedar en /?app=1 con login viejo */
+function irALandingPrincipalSiWeb(): void {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+  try {
+    window.location.replace(`${window.location.origin}/`);
+  } catch {
+    window.location.href = '/';
+  }
+}
 
 // Tipo para el usuario autenticado
 export interface Usuario {
@@ -147,8 +158,10 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
 
       // Limpiar estado
       setUsuario(null);
+      irALandingPrincipalSiWeb();
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
+      irALandingPrincipalSiWeb();
     }
   };
 
