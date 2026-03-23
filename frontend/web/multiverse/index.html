@@ -24,7 +24,7 @@
 						<h1><a href="/"><strong>Indio</strong> · gratis · próximamente en tiendas</a></h1>
 						<nav>
 							<ul>
-								<li><a href="/app.html" class="open-app"><span class="icon solid fa-mobile-alt"></span> Entrar</a></li>
+								<li><a href="/?app=1" class="open-app"><span class="icon solid fa-mobile-alt"></span> Entrar</a></li>
 								<li><a href="#footer" class="icon solid fa-info-circle">Info</a></li>
 							</ul>
 						</nav>
@@ -117,7 +117,7 @@
 									<h2>Acceso</h2>
 									<p>Iniciá sesión en la versión web.</p>
 									<ul class="actions">
-										<li><a href="/app.html" class="button primary open-app">Abrir app</a></li>
+										<li><a href="/?app=1" class="button primary open-app">Abrir app</a></li>
 										<li><a href="https://www.it360.com.ar/" class="button" target="_blank" rel="noopener noreferrer">IT360</a></li>
 									</ul>
 								</section>
@@ -144,7 +144,7 @@
 								return;
 							}
 						} catch (err) {}
-						window.location.href = '/app.html';
+						window.location.href = '/?app=1';
 					}
 					document.querySelectorAll('a.open-app').forEach(function (a) {
 						a.addEventListener('click', goApp);
