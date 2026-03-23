@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+body,
+input,
+button,
+select,
+textarea {
+	font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+#header h1 a,
+.thumb h2,
+#footer h2,
+#footer h3,
+#footer .button {
+	font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+	letter-spacing: 0.02em;
+}
+
+.thumb p {
+	font-size: 0.9rem;
+	line-height: 1.45;
+	opacity: 0.92;
+}

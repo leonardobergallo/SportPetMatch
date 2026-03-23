@@ -15,10 +15,6 @@ import {
   TextInput as RNTextInput,
 } from 'react-native';
 import {
-  TextInput,
-  Button,
-  Card,
-  Divider,
   ActivityIndicator,
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -72,7 +68,6 @@ export default function PantallaLogin(): JSX.Element {
 
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
-  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const scrollToExtraLogin = () => {
@@ -150,7 +145,7 @@ export default function PantallaLogin(): JSX.Element {
                   placeholderTextColor="rgba(255,255,255,0.88)"
                   value={pw}
                   onChangeText={setPw}
-                  secureTextEntry={!showPw}
+                  secureTextEntry
                   autoComplete="password"
                   editable={!loading}
                 />
@@ -258,85 +253,19 @@ export default function PantallaLogin(): JSX.Element {
           <Text style={st.installMicro}>Icono en escritorio, pantalla completa.</Text>
         </View>
 
-        {/* ═══════════════ LOGIN ═══════════════ */}
-        <View ref={loginRef} style={st.loginSection}>
-          <View style={st.loginInner}>
-            <View style={st.loginLogo}>
-              <MaterialIcons name="pets" size={36} color="#6200ea" />
-              <Text style={st.loginLogoTxt}>{MARCA.nombre}</Text>
-            </View>
+        {/* ═══════════════ ACCESO EXTRA (SIN DUPLICAR LOGIN) ═══════════════ */}
+        <View ref={loginRef} style={st.extraSection}>
+          <View style={st.extraCard}>
+            <Text style={st.extraTitle}>Más opciones de acceso</Text>
+            <Text style={st.extraSub}>Si prefieres, también puedes continuar con Google o crear una cuenta nueva.</Text>
 
-            <Card style={st.loginCard}>
-              <Card.Content>
-                <Text style={st.loginTitle}>Iniciar sesión</Text>
-                <Text style={st.loginSub}>Correo y contraseña (o usá Google)</Text>
+            <Pressable style={st.extraGoogleBtn} onPress={handleGoogle} disabled={loading}>
+              {loading ? <ActivityIndicator color="#fff" /> : <Text style={st.extraGoogleTxt}>Continuar con Google</Text>}
+            </Pressable>
 
-                <TextInput
-                  label="Correo o usuario"
-                  value={email}
-                  onChangeText={setEmail}
-                  mode="outlined"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  style={st.input}
-                  left={<TextInput.Icon icon="email" />}
-                  disabled={loading}
-                  outlineStyle={st.inputOutline}
-                  textColor="#0f172a"
-                  activeOutlineColor="#6200ea"
-                  outlineColor="#64748b"
-                  placeholderTextColor="#64748b"
-                  theme={{ colors: { onSurfaceVariant: '#334155', onSurface: '#0f172a' } }}
-                />
-
-                <TextInput
-                  label="Contraseña"
-                  value={pw}
-                  onChangeText={setPw}
-                  mode="outlined"
-                  secureTextEntry={!showPw}
-                  autoComplete="password"
-                  style={st.input}
-                  left={<TextInput.Icon icon="lock" />}
-                  right={<TextInput.Icon icon={showPw ? 'eye-off' : 'eye'} onPress={() => setShowPw(!showPw)} />}
-                  disabled={loading}
-                  outlineStyle={st.inputOutline}
-                  textColor="#0f172a"
-                  activeOutlineColor="#6200ea"
-                  outlineColor="#64748b"
-                  placeholderTextColor="#64748b"
-                  theme={{ colors: { onSurfaceVariant: '#334155', onSurface: '#0f172a' } }}
-                />
-
-                <Button mode="text" onPress={() => {
-                  if (!email.trim()) { Alert.alert('Error', 'Ingresá tu correo primero'); return; }
-                  Alert.alert('Recuperar', `Enviar enlace a ${email}?`, [
-                    { text: 'Cancelar', style: 'cancel' },
-                    { text: 'Enviar', onPress: () => Alert.alert('Listo', 'Revisa tu email') },
-                  ]);
-                }} style={st.forgot} disabled={loading}>¿Olvidaste tu contraseña?</Button>
-
-                <Button mode="contained" onPress={handleLogin} style={st.loginBtn}
-                  contentStyle={st.loginBtnInner} disabled={loading}>
-                  {loading ? <ActivityIndicator color="#fff" /> : 'Iniciar sesión'}
-                </Button>
-
-                <View style={st.dividerRow}>
-                  <Divider style={st.dividerLine} />
-                  <Text style={st.dividerTxt}>o seguí con</Text>
-                  <Divider style={st.dividerLine} />
-                </View>
-
-                <Button mode="outlined" onPress={handleGoogle} style={st.googleBtn}
-                  contentStyle={st.loginBtnInner} icon="google" disabled={loading}>Google</Button>
-              </Card.Content>
-            </Card>
-
-            <View style={st.regRow}>
-              <Text style={st.regTxt}>¿No tenés cuenta? </Text>
-              <Button mode="text" onPress={goRegistro} disabled={loading} compact>Registrate</Button>
-            </View>
+            <Pressable style={st.extraRegisterBtn} onPress={goRegistro} disabled={loading}>
+              <Text style={st.extraRegisterTxt}>Crear cuenta gratis</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -362,7 +291,7 @@ const st = StyleSheet.create({
   heroOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.84)', justifyContent: 'center', paddingVertical: 64 },
   heroContent: { alignItems: 'center', paddingHorizontal: 24, maxWidth: 560, alignSelf: 'center', width: '100%' },
   heroTitle: {
-    fontSize: 52,
+    fontSize: 58,
     fontWeight: '900',
     color: '#ffffff',
     marginTop: 10,
@@ -373,7 +302,7 @@ const st = StyleSheet.create({
     ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   heroSlogan: {
-    fontSize: 22,
+    fontSize: 24,
     color: '#f8fafc',
     marginTop: 4,
     fontStyle: 'italic',
@@ -383,7 +312,7 @@ const st = StyleSheet.create({
     ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   heroDesc: {
-    fontSize: 20,
+    fontSize: 22,
     color: '#ffffff',
     textAlign: 'center',
     marginTop: 16,
@@ -395,7 +324,7 @@ const st = StyleSheet.create({
   },
   heroForm: {
     width: '100%',
-    maxWidth: 420,
+    maxWidth: 460,
     marginTop: 24,
     gap: 12,
     backgroundColor: 'rgba(2,6,23,0.58)',
@@ -411,7 +340,7 @@ const st = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 18,
     paddingVertical: Platform.OS === 'web' ? 15 : 16,
-    fontSize: 19,
+    fontSize: 21,
     color: '#fff',
     ...(fontSans ? { fontFamily: fontSans } : {}),
   },
@@ -432,14 +361,14 @@ const st = StyleSheet.create({
     alignItems: 'center',
     marginTop: 4,
   },
-  heroCtaSecondaryTxt: { color: '#fff', fontWeight: '700', fontSize: 18, ...(fontSans ? { fontFamily: fontSans } : {}) },
+  heroCtaSecondaryTxt: { color: '#fff', fontWeight: '700', fontSize: 20, ...(fontSans ? { fontFamily: fontSans } : {}) },
   heroLinkMore: { paddingVertical: 8, alignItems: 'center' },
-  heroLinkMoreTxt: { color: 'rgba(255,255,255,0.96)', fontSize: 16, fontWeight: '700', ...(fontSans ? { fontFamily: fontSans } : {}) },
+  heroLinkMoreTxt: { color: 'rgba(255,255,255,0.96)', fontSize: 18, fontWeight: '700', ...(fontSans ? { fontFamily: fontSans } : {}) },
 
   // Sections
   section: { paddingHorizontal: 20, paddingVertical: 36, maxWidth: 600, alignSelf: 'center', width: '100%' },
   sectionTag: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '800',
     color: '#5b21b6',
     letterSpacing: 2,
@@ -448,7 +377,7 @@ const st = StyleSheet.create({
     ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: '800',
     color: '#0f172a',
     textAlign: 'center',
@@ -456,8 +385,24 @@ const st = StyleSheet.create({
     lineHeight: 30,
     ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
-  sectionTagOnDark: { fontSize: 11, fontWeight: '800', color: '#e9d5ff', letterSpacing: 2, textAlign: 'center', marginBottom: 6 },
-  sectionTitleOnDark: { fontSize: 24, fontWeight: '800', color: '#ffffff', textAlign: 'center', marginBottom: 24, lineHeight: 30 },
+  sectionTagOnDark: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#e9d5ff',
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: 6,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  sectionTitleOnDark: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#ffffff',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 30,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
+  },
 
   // Features
   featureRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, gap: 16 },
@@ -465,13 +410,13 @@ const st = StyleSheet.create({
   featureIcon: { width: 64, height: 64, borderRadius: 18, backgroundColor: '#f3edff', justifyContent: 'center', alignItems: 'center' },
   featureText: { flex: 1 },
   featureTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '700',
     color: '#0f172a',
     marginBottom: 4,
     ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
-  featureDesc: { fontSize: 14, color: '#334155', lineHeight: 20, ...(fontSans ? { fontFamily: fontSans } : {}) },
+  featureDesc: { fontSize: 17, color: '#334155', lineHeight: 24, ...(fontSans ? { fontFamily: fontSans } : {}) },
 
   // Gallery
   gallerySection: { backgroundColor: '#1a1a2e', paddingVertical: 36 },
@@ -479,22 +424,22 @@ const st = StyleSheet.create({
   galleryCard: { width: 220, borderRadius: 16, overflow: 'hidden', backgroundColor: '#2a2a4e' },
   galleryImg: { width: 220, height: 150, resizeMode: 'cover' },
   galleryCaptionWrap: { backgroundColor: 'rgba(15,23,42,0.92)', paddingVertical: 10, paddingHorizontal: 12 },
-  galleryCaption: { color: '#ffffff', fontSize: 14, fontWeight: '700', lineHeight: 20 },
+  galleryCaption: { color: '#ffffff', fontSize: 16, fontWeight: '700', lineHeight: 22, ...(fontSans ? { fontFamily: fontSans } : {}) },
 
   // Steps
   stepsRow: { flexDirection: 'row', gap: 12 },
   stepCard: { flex: 1, backgroundColor: '#fff', borderRadius: 16, padding: 16, alignItems: 'center', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, borderWidth: 1, borderColor: '#f0f0f0' },
-  stepNum: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#6200ea', justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
-  stepNumTxt: { color: '#fff', fontWeight: '900', fontSize: 15 },
-  stepTitle: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 4, textAlign: 'center' },
-  stepDesc: { fontSize: 12, color: '#475569', textAlign: 'center', lineHeight: 17 },
+  stepNum: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#6200ea', justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+  stepNumTxt: { color: '#fff', fontWeight: '900', fontSize: 17, ...(fontDisplay ? { fontFamily: fontDisplay } : {}) },
+  stepTitle: { fontSize: 17, fontWeight: '800', color: '#0f172a', marginBottom: 4, textAlign: 'center', ...(fontDisplay ? { fontFamily: fontDisplay } : {}) },
+  stepDesc: { fontSize: 14, color: '#475569', textAlign: 'center', lineHeight: 20, ...(fontSans ? { fontFamily: fontSans } : {}) },
 
   // Mid banner
   midBanner: { width: '100%', minHeight: 280 },
   midBannerImg: { resizeMode: 'cover' },
   midBannerOverlay: { flex: 1, backgroundColor: 'rgba(98,0,234,0.75)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 40 },
   midBannerTitle: {
-    fontSize: 22,
+    fontSize: 27,
     fontWeight: '800',
     color: '#ffffff',
     textAlign: 'center',
@@ -503,37 +448,28 @@ const st = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.35)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
 
   // Install
   installRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
   installCard: { flex: 1, backgroundColor: '#fff', borderRadius: 16, padding: 20, alignItems: 'center', elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, borderWidth: 1, borderColor: '#f0f0f0' },
-  installTitle: { fontSize: 15, fontWeight: '700', color: '#0f172a', marginTop: 8, marginBottom: 6 },
-  installDesc: { fontSize: 13, color: '#334155', textAlign: 'center', lineHeight: 19 },
-  installMicro: { fontSize: 13, color: '#475569', textAlign: 'center' },
+  installTitle: { fontSize: 19, fontWeight: '700', color: '#0f172a', marginTop: 8, marginBottom: 6, ...(fontDisplay ? { fontFamily: fontDisplay } : {}) },
+  installDesc: { fontSize: 16, color: '#334155', textAlign: 'center', lineHeight: 23, ...(fontSans ? { fontFamily: fontSans } : {}) },
+  installMicro: { fontSize: 15, color: '#475569', textAlign: 'center', ...(fontSans ? { fontFamily: fontSans } : {}) },
 
-  // Login
-  loginSection: { backgroundColor: '#f0ecf8', paddingVertical: 36, paddingHorizontal: 20 },
-  loginInner: { maxWidth: 420, alignSelf: 'center', width: '100%' },
-  loginLogo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 18 },
-  loginLogoTxt: { fontSize: 24, fontWeight: '900', color: '#4c1d95' },
-  loginCard: { borderRadius: 20, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, backgroundColor: '#fff' },
-  loginTitle: { fontSize: 22, fontWeight: '700', color: '#0f172a', marginBottom: 4 },
-  loginSub: { fontSize: 15, color: '#334155', marginBottom: 20 },
-  input: { marginBottom: 14, backgroundColor: '#fff' },
-  inputOutline: { borderRadius: 12 },
-  forgot: { alignSelf: 'flex-end', marginBottom: 8 },
-  loginBtn: { borderRadius: 12, marginBottom: 4 },
-  loginBtnInner: { paddingVertical: 6 },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 16 },
-  dividerLine: { flex: 1 },
-  dividerTxt: { paddingHorizontal: 12, fontSize: 13, color: '#475569' },
-  googleBtn: { borderRadius: 12, borderColor: '#ddd' },
-  regRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 14, marginBottom: 8 },
-  regTxt: { color: '#334155', fontSize: 15 },
+  // Extra access
+  extraSection: { backgroundColor: '#f0ecf8', paddingVertical: 30, paddingHorizontal: 20 },
+  extraCard: { maxWidth: 520, alignSelf: 'center', width: '100%', backgroundColor: '#fff', borderRadius: 20, borderWidth: 1, borderColor: '#ddd', padding: 20 },
+  extraTitle: { fontSize: 28, fontWeight: '800', color: '#0f172a', textAlign: 'center', ...(fontDisplay ? { fontFamily: fontDisplay } : {}) },
+  extraSub: { fontSize: 17, color: '#334155', textAlign: 'center', marginTop: 8, marginBottom: 16, ...(fontSans ? { fontFamily: fontSans } : {}) },
+  extraGoogleBtn: { backgroundColor: '#6200ea', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 10 },
+  extraGoogleTxt: { color: '#fff', fontSize: 18, fontWeight: '700', ...(fontSans ? { fontFamily: fontSans } : {}) },
+  extraRegisterBtn: { borderWidth: 1, borderColor: '#6200ea', borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
+  extraRegisterTxt: { color: '#6200ea', fontSize: 18, fontWeight: '700', ...(fontSans ? { fontFamily: fontSans } : {}) },
 
   // Footer
   footer: { backgroundColor: '#1a1a2e', paddingVertical: 28, paddingHorizontal: 20, alignItems: 'center' },
-  footerTxt: { color: '#f1f5f9', fontSize: 15, fontWeight: '700', marginTop: 6 },
-  footerSub: { color: '#cbd5e1', fontSize: 13, marginTop: 4 },
+  footerTxt: { color: '#f1f5f9', fontSize: 17, fontWeight: '700', marginTop: 6, ...(fontDisplay ? { fontFamily: fontDisplay } : {}) },
+  footerSub: { color: '#cbd5e1', fontSize: 15, marginTop: 4, ...(fontSans ? { fontFamily: fontSans } : {}) },
 });
