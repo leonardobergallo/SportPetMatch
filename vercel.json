@@ -1,14 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm install --prefix backend && npm run --prefix backend build && npm install --prefix frontend && npm run --prefix frontend build && node scripts/copiar-api.js",
+  "installCommand": "npm install",
   "outputDirectory": "public",
   "framework": null,
   "functions": {
-    "api/index.js": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
+    "api/index.js": {"memory": 1024, "maxDuration": 60}
   },
   "rewrites": [
     {"source": "/api/(.*)", "destination": "/api/index.js"},
