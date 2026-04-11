@@ -1,27 +1,7 @@
-// Controlador para subida de imágenes - SportPetMatch
 import { Request, Response } from 'express';
-import multer from 'multer';
 import { subirImagen, estaConfigurado } from '../utilidades/cloudinary';
-
-// Declarar tipo multer.File
-declare module 'multer' {
-  interface File {
-    fieldname: string;
-    originalname: string;
-    encoding: string;
-    mimetype: string;
-    size: number;
-    destination: string;
-    filename: string;
-    path: string;
-    buffer: Buffer;
-  }
-}
 import prisma from '../utilidades/prisma';
 
-/**
- * Subir avatar del usuario
- */
 export const subirAvatar = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.usuario) {
@@ -42,22 +22,18 @@ export const subirAvatar = async (req: Request, res: Response): Promise<void> =>
 
     const usuarioId = req.usuario.usuarioId;
 
-    // Si Cloudinary está configurado, subir allí
     let imageUrl: string;
     if (estaConfigurado()) {
       try {
         imageUrl = await subirImagen(req.file.buffer, 'avatars', `avatar_${usuarioId}`);
       } catch (error) {
         console.error('Error subiendo a Cloudinary:', error);
-        // Si falla Cloudinary, usar base64 como fallback
         imageUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
       }
     } else {
-      // Si no está configurado Cloudinary, usar base64
       imageUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
-    // Actualizar avatar del usuario
     const usuarioActualizado = await prisma.usuario.update({
       where: { id: usuarioId },
       data: { avatar: imageUrl },
@@ -83,9 +59,6 @@ export const subirAvatar = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-/**
- * Subir fotos de mascota
- */
 export const subirFotosMascota = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.usuario) {
@@ -105,7 +78,7 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
     }
 
     const usuarioId = req.usuario.usuarioId;
-    const { id: mascotaId } = req.params; // Obtener ID de los parámetros de la ruta
+    const { id: mascotaId } = req.params;
 
     if (!mascotaId) {
       res.status(400).json({
@@ -115,7 +88,6 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Verificar que la mascota pertenece al usuario
     const mascota = await prisma.mascota.findFirst({
       where: {
         id: mascotaId,
@@ -131,16 +103,12 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Normalizar archivos: req.files puede ser array, objeto con campos, o undefined
-    let archivos: multer.File[] = [];
+    let archivos: any[] = [];
     
     if (Array.isArray(req.files)) {
-      // Caso: upload.array() - req.files es un array
       archivos = req.files;
     } else if (req.files && typeof req.files === 'object') {
-      // Caso: upload.fields() - req.files es un objeto { [fieldname]: File[] }
-      // Extraer todos los archivos de todos los campos
-      const filesObj = req.files as { [fieldname: string]: multer.File[] };
+      const filesObj = req.files as { [fieldname: string]: any[] };
       archivos = Object.values(filesObj).flat();
     }
     
@@ -154,7 +122,6 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
 
     const fotosUrls: string[] = [];
 
-    // Subir cada imagen
     for (const archivo of archivos) {
       let imageUrl: string;
       if (estaConfigurado()) {
@@ -166,17 +133,14 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
           );
         } catch (error) {
           console.error('Error subiendo a Cloudinary:', error);
-          // Fallback a base64
           imageUrl = `data:${archivo.mimetype};base64,${archivo.buffer.toString('base64')}`;
         }
       } else {
-        // Fallback a base64 si no hay Cloudinary
         imageUrl = `data:${archivo.mimetype};base64,${archivo.buffer.toString('base64')}`;
       }
       fotosUrls.push(imageUrl);
     }
 
-    // Actualizar fotos de la mascota (agregar a las existentes)
     const fotosExistentes = mascota.fotos || [];
     const todasLasFotos = [...fotosExistentes, ...fotosUrls];
 
@@ -204,4 +168,3 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
     });
   }
 };
-
