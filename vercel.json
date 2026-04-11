@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
+  "buildCommand": "cd backend && npm install && npm run build && cd ../frontend && npm install && npm run build && cd .. && node scripts/copiar-api.js",
+  "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "public",
   "framework": null,
   "functions": {
