@@ -77,24 +77,26 @@ if (fs.existsSync(sourceDist)) {
   console.warn('⚠️  Advertencia: backend/dist no existe. Asegúrate de que el build del backend se haya completado.');
 }
 
-// Copiar frontend/dist a la raíz (para que Vercel sirva el frontend)
+// Copiar frontend/dist a public/ (para que Vercel sirva el frontend)
 const sourceFrontendDist = path.join(__dirname, '../frontend/dist');
-const destRoot = path.join(__dirname, '..');
+const destPublic = path.join(__dirname, '../public');
+
+if (!fs.existsSync(destPublic)) {
+  fs.mkdirSync(destPublic, { recursive: true });
+}
 
 if (fs.existsSync(sourceFrontendDist)) {
   try {
-    // Copiar archivos del frontend a la raíz
     const files = fs.readdirSync(sourceFrontendDist);
     files.forEach(file => {
       const srcPath = path.join(sourceFrontendDist, file);
-      const destPath = path.join(destRoot, file);
+      const destPath = path.join(destPublic, file);
       const stat = fs.statSync(srcPath);
       
       if (stat.isDirectory()) {
         if (!fs.existsSync(destPath)) {
           fs.mkdirSync(destPath, { recursive: true });
         }
-        // Copiar recursivamente
         function copyDir(src, dest) {
           const entries = fs.readdirSync(src, { withFileTypes: true });
           for (const entry of entries) {
@@ -115,7 +117,7 @@ if (fs.existsSync(sourceFrontendDist)) {
         fs.copyFileSync(srcPath, destPath);
       }
     });
-    console.log('✅ Copiado: frontend/dist → raíz del proyecto');
+    console.log('✅ Copiado: frontend/dist → public/');
   } catch (error) {
     console.error('❌ Error copiando frontend/dist:', error.message);
     process.exit(1);
@@ -130,5 +132,5 @@ console.log('🎉 Proceso completado exitosamente!');
 console.log('📁 Estructura lista para Vercel:');
 console.log('   - api/index.js (función serverless del backend)');
 console.log('   - api/dist/ (build del backend)');
-console.log('   - index.html y archivos del frontend en la raíz');
+console.log('   - public/ (archivos del frontend)');
 

@@ -2,6 +2,7 @@
   "version": 2,
   "buildCommand": "npm run vercel-build",
   "installCommand": "npm install",
+  "outputDirectory": ".",
   "framework": null,
   "functions": {
     "api/index.js": {
@@ -62,4 +63,3 @@
     }
   ]
 }
-
