@@ -7,7 +7,7 @@
     "dev": "node start-dev.js",
     "dev:direct": "nodemon src/index.ts",
     "dev:clean": "node scripts/liberar-puerto.js",
-    "build": "prisma generate && tsc",
+    "build": "prisma generate && npx tsc",
     "start": "node dist/src/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
