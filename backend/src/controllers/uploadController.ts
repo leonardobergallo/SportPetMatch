@@ -1,6 +1,22 @@
 // Controlador para subida de imágenes - SportPetMatch
 import { Request, Response } from 'express';
+import multer from 'multer';
 import { subirImagen, estaConfigurado } from '../utilidades/cloudinary';
+
+// Declarar tipo multer.File
+declare module 'multer' {
+  interface File {
+    fieldname: string;
+    originalname: string;
+    encoding: string;
+    mimetype: string;
+    size: number;
+    destination: string;
+    filename: string;
+    path: string;
+    buffer: Buffer;
+  }
+}
 import prisma from '../utilidades/prisma';
 
 /**
@@ -116,7 +132,7 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
     }
 
     // Normalizar archivos: req.files puede ser array, objeto con campos, o undefined
-    let archivos: Express.Multer.File[] = [];
+    let archivos: multer.File[] = [];
     
     if (Array.isArray(req.files)) {
       // Caso: upload.array() - req.files es un array
@@ -124,7 +140,7 @@ export const subirFotosMascota = async (req: Request, res: Response): Promise<vo
     } else if (req.files && typeof req.files === 'object') {
       // Caso: upload.fields() - req.files es un objeto { [fieldname]: File[] }
       // Extraer todos los archivos de todos los campos
-      const filesObj = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const filesObj = req.files as { [fieldname: string]: multer.File[] };
       archivos = Object.values(filesObj).flat();
     }
     

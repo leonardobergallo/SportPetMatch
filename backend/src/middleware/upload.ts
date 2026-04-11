@@ -2,6 +2,21 @@
 import multer from 'multer';
 import { Request } from 'express';
 
+// Declarar tipo multer.File
+declare module 'multer' {
+  interface File {
+    fieldname: string;
+    originalname: string;
+    encoding: string;
+    mimetype: string;
+    size: number;
+    destination: string;
+    filename: string;
+    path: string;
+    buffer: Buffer;
+  }
+}
+
 // Configuración de tipos de archivo permitidos
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -10,7 +25,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const storage = multer.memoryStorage();
 
 // Filtro de archivos
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: Request, file: multer.File, cb: multer.FileFilterCallback) => {
   if (ALLOWED_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {

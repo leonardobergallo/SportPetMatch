@@ -115,8 +115,11 @@ app.use(express.json({ limit: '10mb' }));
 // Middleware para parsear URL-encoded (límite de 10MB)
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Importar tipos de express
+import { Request, Response } from 'express';
+
 // Ruta de salud del servidor
-app.get('/api/salud', (req, res) => {
+app.get('/api/salud', (req: Request, res: Response) => {
   res.json({
     mensaje: '¡Servidor SportPetMatch funcionando correctamente! 🐕‍🦺',
     version: '1.0.0',
@@ -127,7 +130,7 @@ app.get('/api/salud', (req, res) => {
 });
 
 // Ruta raíz de la API
-app.get('/api', (req, res) => {
+app.get('/api', (req: Request, res: Response) => {
   res.json({
     mensaje: 'API SportPetMatch - Conecta personas con mascotas, matches y eventos pet-friendly',
     version: '1.0.0',
@@ -153,7 +156,7 @@ app.use('/api/matches', rutasMatches);
 app.use('/api/mensajes', rutasMensajes);
 
 // Middleware para rutas no encontradas (404)
-app.use('*', (req, res) => {
+app.use('*', (req: Request, res: Response) => {
   res.status(404).json({
     error: 'Endpoint no encontrado',
     mensaje: `La ruta ${req.originalUrl} no existe en esta API`,
