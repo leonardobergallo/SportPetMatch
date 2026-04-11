@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "npm run vercel-build",
+  "buildCommand": "cd backend && npm install && npm run build && cd ../frontend && npm install && npm run build && node ../scripts/copiar-api.js",
   "installCommand": "npm install",
   "outputDirectory": "public",
   "framework": null,
   "functions": {
     "api/index.js": {
       "memory": 1024,
-      "maxDuration": 30
+      "maxDuration": 60
     }
   },
   "rewrites": [
