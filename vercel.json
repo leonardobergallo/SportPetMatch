@@ -1,14 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "bash scripts/vercel-build.sh",
+  "buildCommand": "cd backend && npm install && npm run build",
   "installCommand": "npm install",
-  "outputDirectory": "public",
+  "outputDirectory": "backend/dist",
   "framework": null,
   "functions": {
     "api/index.js": {"memory": 1024, "maxDuration": 60}
   },
   "rewrites": [
-    {"source": "/api/(.*)", "destination": "/api/index.js"},
-    {"source": "/(.*)", "destination": "/index.html"}
+    {"source": "/api/(.*)", "destination": "/api/index.js"}
   ]
 }
