@@ -1,19 +1,20 @@
 // Cliente API centralizado para SportPetMatch
 // Maneja todas las peticiones HTTP con interceptores y manejo de tokens
 
-import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAPIBaseURL, getConfigInfo, isMobile } from '../utilidades/config';
 import { getOnUnauthorized } from '../utilidades/onUnauthorized';
 
-// URL base de la API (se obtiene de la configuración centralizada)
+// URL base de la API (se obtiene de la configuracion centralizada)
 const API_BASE_URL = getAPIBaseURL();
 const TOKEN_KEY = '@SportPetMatch:token';
+const USER_KEY = '@SportPetMatch:user';
 
 // Log para debugging
 if (__DEV__) {
   const configInfo = getConfigInfo();
-  console.log('🌐 Configuración de API:');
+  console.log('Configuracion de API:');
   console.log('  - URL:', configInfo.apiURL);
   console.log('  - Platform:', configInfo.platform);
   console.log('  - Is Mobile:', configInfo.isMobile);
@@ -22,17 +23,17 @@ if (__DEV__) {
   console.log('  - Port:', configInfo.port);
 }
 
-// Validar que la URL esté configurada
+// Validar que la URL este configurada
 if (!API_BASE_URL || API_BASE_URL === '') {
-  console.warn('⚠️ API_BASE_URL no está configurada. Las peticiones al backend fallarán.');
+  console.warn('API_BASE_URL no esta configurada. Las peticiones al backend fallaran.');
 }
 
 /**
- * Crear instancia de Axios con configuración
+ * Crear instancia de Axios con configuracion
  */
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL || 'http://localhost:3000/api', // Fallback para evitar errores
-  timeout: 30000, // 30 segundos
+  baseURL: API_BASE_URL || 'http://localhost:3000/api',
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,13 +44,12 @@ const apiClient: AxiosInstance = axios.create({
  */
 apiClient.interceptors.request.use(
   async (config) => {
-    // Si no hay URL configurada, rechazar la petición inmediatamente
     if (!API_BASE_URL || API_BASE_URL === '') {
       const error = new Error('Backend no configurado. Por favor, configura EXPO_PUBLIC_API_URL en Vercel.');
-      console.warn('⚠️', error.message);
+      console.warn(error.message);
       return Promise.reject(error);
     }
-    
+
     try {
       const token = await AsyncStorage.getItem(TOKEN_KEY);
       if (token) {
@@ -58,57 +58,54 @@ apiClient.interceptors.request.use(
     } catch (error) {
       console.error('Error obteniendo token:', error);
     }
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 /**
  * Interceptor para manejar respuestas y errores
  */
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
-  },
+  (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    // Manejar errores de autenticación
-    if (error.response?.status === 401) {
-      // Token inválido o expirado: limpiar storage y notificar al contexto para mostrar Login
+    const responseStatus = error.response?.status;
+    const responseMessage =
+      (error.response?.data as any)?.message ||
+      (error.response?.data as any)?.error ||
+      '';
+    const sessionMismatch =
+      responseStatus === 404 &&
+      responseMessage === 'El usuario autenticado no existe en la base de datos actual. Inicia sesión nuevamente.';
+
+    if (responseStatus === 401 || sessionMismatch) {
       try {
         await AsyncStorage.removeItem(TOKEN_KEY);
-        await AsyncStorage.removeItem('@SportPetMatch:user');
+        await AsyncStorage.removeItem(USER_KEY);
       } catch (storageError) {
         console.error('Error limpiando storage:', storageError);
       }
+
       getOnUnauthorized()?.();
     }
 
-    // Manejar errores de red
     if (!error.response) {
       const configInfo = getConfigInfo();
-      
-      // Si no hay URL configurada en producción, mostrar mensaje claro
+
       if (!configInfo.apiURL || configInfo.apiURL === '') {
         const errorMessage = 'Backend no configurado. Por favor, configura EXPO_PUBLIC_API_URL en Vercel.';
-        console.warn('⚠️', errorMessage);
+        console.warn(errorMessage);
         throw new Error(errorMessage);
       }
-      
+
       const errorMessage = isMobile
-        ? `Error de conexión. Verifica que:\n1. El backend esté corriendo en ${configInfo.apiURL}\n2. Tu dispositivo y computadora estén en la misma red WiFi\n3. El firewall no esté bloqueando el puerto ${configInfo.port}\n4. La IP local (${configInfo.localIP}) sea correcta`
-        : `Error de conexión. Verifica que:\n1. El backend esté corriendo en ${configInfo.apiURL}\n2. Tu conexión a internet funcione\n3. El backend esté desplegado y accesible`;
+        ? `Error de conexion. Verifica que:\n1. El backend este corriendo en ${configInfo.apiURL}\n2. Tu dispositivo y computadora esten en la misma red WiFi\n3. El firewall no este bloqueando el puerto ${configInfo.port}\n4. La IP local (${configInfo.localIP}) sea correcta`
+        : `Error de conexion. Verifica que:\n1. El backend este corriendo en ${configInfo.apiURL}\n2. Tu conexion a internet funcione\n3. El backend este desplegado y accesible`;
       throw new Error(errorMessage);
     }
 
-    // Retornar error con mensaje del servidor
-    const errorMessage =
-      (error.response.data as any)?.message ||
-      (error.response.data as any)?.error ||
-      'Ha ocurrido un error';
-
-    throw new Error(errorMessage);
+    throw new Error(responseMessage || 'Ha ocurrido un error');
   }
 );
 

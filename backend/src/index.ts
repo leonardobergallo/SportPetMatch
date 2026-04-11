@@ -82,10 +82,18 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined')); // Log básico en producción
 }
 
+// Rate limiting para prevenir abuso de la API.
+// En desarrollo local usamos un umbral mucho mas alto para no bloquear
+// el polling de la app mientras estamos probando flujos.
+const rateLimitMax =
+  process.env.NODE_ENV === 'development'
+    ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS_DEV || '1000')
+    : parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100');
+
 // Rate limiting para prevenir abuso de la API
 const limitador = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutos
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // máximo 100 requests por ventana
+  max: rateLimitMax,
   message: {
     error: 'Demasiadas solicitudes desde esta IP, intenta de nuevo más tarde.',
     codigo: 'RATE_LIMIT_EXCEDIDO'

@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
   Image,
+  Pressable,
   TouchableOpacity,
   Alert,
 } from 'react-native';
@@ -41,7 +42,7 @@ const imagenesEventos: Record<string, any> = {
  */
 export default function PantallaEventos(): JSX.Element {
   const navigation = useNavigation<EventosScreenNavigationProp>();
-  const { estaAutenticado } = useAuth();
+  const { estaAutenticado, usuario } = useAuth();
 
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -95,6 +96,13 @@ export default function PantallaEventos(): JSX.Element {
     return imagenesEventos.default;
   };
 
+  const resolverImagenEvento = (evento: Evento): any => {
+    if (evento.imagenUrl && (/^https?:\/\//i.test(evento.imagenUrl) || /^data:image\//i.test(evento.imagenUrl))) {
+      return { uri: evento.imagenUrl };
+    }
+    return obtenerImagenEvento(evento.tipo);
+  };
+
   /**
    * Formatear fecha
    */
@@ -111,6 +119,12 @@ export default function PantallaEventos(): JSX.Element {
   const manejarParticipar = async (eventoId: string) => {
     if (!estaAutenticado) {
       Alert.alert('Autenticación requerida', 'Debes iniciar sesión para participar en eventos');
+      return;
+    }
+
+    const evento = eventos.find((item) => item.id === eventoId);
+    if (evento && usuario && evento.organizadorId === usuario.id) {
+      Alert.alert('Este es tu evento', 'Como organizador no necesitas unirte como participante.');
       return;
     }
 
@@ -213,15 +227,14 @@ export default function PantallaEventos(): JSX.Element {
           </View>
         ) : (
           eventos.map((evento) => (
-            <TouchableOpacity
-              key={evento.id}
-              onPress={() => navegarADetalle(evento.id)}
-              activeOpacity={0.7}
-            >
-              <Card style={estilos.cardEvento}>
+            <Card key={evento.id} style={estilos.cardEvento}>
+              <Pressable
+                onPress={() => navegarADetalle(evento.id)}
+                style={estilos.cardPressable}
+              >
                 <View style={estilos.imagenContainer}>
                   <Image
-                    source={obtenerImagenEvento(evento.tipo)}
+                    source={resolverImagenEvento(evento)}
                     style={estilos.imagenEvento}
                     resizeMode="cover"
                   />
@@ -254,19 +267,21 @@ export default function PantallaEventos(): JSX.Element {
                       </Text>
                     </View>
                   </View>
-                  {estaAutenticado && (
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onPress={() => manejarParticipar(evento.id)}
-                      style={estilos.botonParticipar}
-                    >
-                      Unirse
-                    </Button>
-                  )}
                 </CardContent>
-      </Card>
-            </TouchableOpacity>
+              </Pressable>
+              {estaAutenticado && (
+                <View style={estilos.footerAcciones}>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onPress={() => manejarParticipar(evento.id)}
+                    style={estilos.botonParticipar}
+                  >
+                    Unirse
+                  </Button>
+                </View>
+              )}
+            </Card>
           ))
         )}
       </ScrollView>
@@ -329,6 +344,9 @@ const estilos = StyleSheet.create({
     marginBottom: espaciado.md,
     overflow: 'hidden',
     ...sombras.media,
+  },
+  cardPressable: {
+    width: '100%',
   },
   imagenContainer: {
     height: 200,
@@ -395,7 +413,11 @@ const estilos = StyleSheet.create({
     color: temaApp.colors.onSurfaceVariant,
   },
   botonParticipar: {
-    marginTop: espaciado.sm,
+    width: '100%',
+  },
+  footerAcciones: {
+    paddingHorizontal: espaciado.md,
+    paddingBottom: espaciado.md,
   },
   vacio: {
     flex: 1,

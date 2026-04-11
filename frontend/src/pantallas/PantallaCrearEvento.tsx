@@ -10,9 +10,10 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
-  Modal,
   Dimensions,
+  Image,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Text, TextInput, Portal, Dialog, Button as PaperButton } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -42,6 +43,7 @@ export default function PantallaCrearEvento(): JSX.Element {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [tipo, setTipo] = useState('');
+  const [imagenUrl, setImagenUrl] = useState('');
   const [nivelDificultad, setNivelDificultad] = useState('1');
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
@@ -51,12 +53,19 @@ export default function PantallaCrearEvento(): JSX.Element {
   const [esPetFriendly, setEsPetFriendly] = useState(true);
   const [esPremium, setEsPremium] = useState(false);
   const [cargando, setCargando] = useState(false);
+  const [cargandoImagen, setCargandoImagen] = useState(false);
 
   // Estados para selectores de fecha
   const [mostrarFechaInicio, setMostrarFechaInicio] = useState(false);
   const [mostrarFechaFin, setMostrarFechaFin] = useState(false);
   const [fechaTemp, setFechaTemp] = useState({ fecha: '', hora: '' });
   const [campoFechaActivo, setCampoFechaActivo] = useState<'inicio' | 'fin' | null>(null);
+
+  const obtenerMinFechaHora = (): string => {
+    const ahora = new Date();
+    const timezoneOffset = ahora.getTimezoneOffset() * 60000;
+    return new Date(ahora.getTime() - timezoneOffset).toISOString().slice(0, 16);
+  };
 
   /**
    * Formatear fecha para mostrar
@@ -163,6 +172,73 @@ export default function PantallaCrearEvento(): JSX.Element {
     setFechaTemp({ fecha: '', hora: '' });
   };
 
+  const seleccionarImagenEvento = async () => {
+    try {
+      setCargandoImagen(true);
+
+      if (Platform.OS === 'web' && typeof document !== 'undefined') {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+
+        input.onchange = () => {
+          const file = input.files?.[0];
+          if (!file) {
+            setCargandoImagen(false);
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = typeof reader.result === 'string' ? reader.result : '';
+            if (result) {
+              setImagenUrl(result);
+            }
+            setCargandoImagen(false);
+          };
+          reader.onerror = () => {
+            setCargandoImagen(false);
+            Alert.alert('Error', 'No se pudo leer la imagen seleccionada.');
+          };
+          reader.readAsDataURL(file);
+        };
+
+        input.click();
+        return;
+      }
+
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería para elegir una imagen.');
+        setCargandoImagen(false);
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets?.[0]) {
+        const asset = result.assets[0];
+        if (asset.base64) {
+          const mimeType = asset.mimeType || 'image/jpeg';
+          setImagenUrl(`data:${mimeType};base64,${asset.base64}`);
+        } else if (asset.uri) {
+          setImagenUrl(asset.uri);
+        }
+      }
+    } catch (error) {
+      console.error('Error seleccionando imagen:', error);
+      Alert.alert('Error', 'No se pudo seleccionar la imagen.');
+    } finally {
+      setCargandoImagen(false);
+    }
+  };
+
   /**
    * Validar formulario
    */
@@ -228,6 +304,7 @@ export default function PantallaCrearEvento(): JSX.Element {
         titulo: titulo.trim(),
         descripcion: descripcion.trim(),
         tipo,
+        imagenUrl: imagenUrl.trim() || undefined,
         nivelDificultad: parseInt(nivelDificultad) || 1,
         fechaInicio,
         fechaFin: fechaFin || undefined,
@@ -444,6 +521,50 @@ export default function PantallaCrearEvento(): JSX.Element {
               </Text>
             </View>
 
+            {/* Imagen opcional */}
+            <View style={estilos.campoContainer}>
+              <TextInput
+                label="URL de imagen (opcional)"
+                value={imagenUrl}
+                onChangeText={setImagenUrl}
+                mode="outlined"
+                style={estilos.campo}
+                placeholder="https://... para diferenciar este evento"
+                disabled={cargando}
+              />
+              <Text style={estilos.hint}>
+                Si no agregas una imagen, usamos una portada de ejemplo según el tipo de evento.
+              </Text>
+              <View style={estilos.accionesImagen}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onPress={seleccionarImagenEvento}
+                  loading={cargandoImagen}
+                >
+                  Buscar imagen
+                </Button>
+                {!!imagenUrl && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onPress={() => setImagenUrl('')}
+                  >
+                    Quitar
+                  </Button>
+                )}
+              </View>
+              {!!imagenUrl && (
+                <View style={estilos.previewContainer}>
+                  <Image
+                    source={{ uri: imagenUrl }}
+                    style={estilos.previewImagen}
+                    resizeMode="cover"
+                  />
+                </View>
+              )}
+            </View>
+
             {/* Ritmo sugerido */}
             <View style={estilos.campoContainer}>
               <TextInput
@@ -464,8 +585,11 @@ export default function PantallaCrearEvento(): JSX.Element {
                 <input
                   type="datetime-local"
                   value={fechaInicio}
-                  onChange={(e) => setFechaInicio(e.target.value)}
-                  min={format(addDays(new Date(), 1), "yyyy-MM-dd'T'HH:mm")}
+                  onChange={(e) => {
+                    setFechaInicio(e.target.value);
+                    e.currentTarget.blur();
+                  }}
+                  min={obtenerMinFechaHora()}
                   style={{
                     width: '100%',
                     padding: '14px 16px',
@@ -515,8 +639,11 @@ export default function PantallaCrearEvento(): JSX.Element {
                 <input
                   type="datetime-local"
                   value={fechaFin}
-                  onChange={(e) => setFechaFin(e.target.value)}
-                  min={fechaInicio || format(addDays(new Date(), 1), "yyyy-MM-dd'T'HH:mm")}
+                  onChange={(e) => {
+                    setFechaFin(e.target.value);
+                    e.currentTarget.blur();
+                  }}
+                  min={fechaInicio || obtenerMinFechaHora()}
                   style={{
                     width: '100%',
                     padding: '14px 16px',
@@ -754,7 +881,9 @@ const estilos = StyleSheet.create({
     ...sombras.media,
     width: '100%',
     ...(isWeb && {
-      margin: SCREEN_WIDTH >= 768 ? '20px auto' : '0 auto',
+      alignSelf: 'center',
+      marginTop: SCREEN_WIDTH >= 768 ? 20 : 0,
+      marginBottom: 0,
       maxWidth: SCREEN_WIDTH >= 768 ? 800 : '100%',
       padding: SCREEN_WIDTH >= 768 ? espaciado.xl : espaciado.lg,
     }),
@@ -797,6 +926,24 @@ const estilos = StyleSheet.create({
     color: temaApp.colors.onSurfaceVariant,
     marginTop: espaciado.xs,
     fontStyle: 'italic',
+  },
+  accionesImagen: {
+    flexDirection: 'row',
+    gap: espaciado.sm,
+    marginTop: espaciado.sm,
+    flexWrap: 'wrap',
+  },
+  previewContainer: {
+    marginTop: espaciado.md,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: temaApp.colors.border,
+  },
+  previewImagen: {
+    width: '100%',
+    height: 180,
+    backgroundColor: temaApp.colors.surfaceVariant,
   },
   opcionesContainer: {
     flexDirection: 'row',

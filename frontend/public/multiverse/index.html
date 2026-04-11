@@ -6,7 +6,7 @@
 -->
 <html lang="es-AR">
 	<head>
-		<title>Indio — Personas y mascotas activas</title>
+		<title>Indio — Personas con mascotas</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
@@ -53,19 +53,19 @@
 							<p>Coordiná salidas al instante.</p>
 						</article>
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/04.jpg" class="image"><img src="/multiverse/images/thumbs/04.jpg" alt="Grupo deportivo" /></a>
+							<a href="/multiverse/images/fulls/08.png" class="image"><img src="/multiverse/images/thumbs/08.png" alt="Mascota feliz" /></a>
 							<h2>Gamificación</h2>
 							<p>Metas y hábitos con tu mascota.</p>
 						</article>
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/05.jpg" class="image"><img src="/multiverse/images/thumbs/05.jpg" alt="Fútbol en el parque" /></a>
-							<h2>Deporte</h2>
-							<p>Eventos al aire libre pet friendly.</p>
+							<a href="/multiverse/images/fulls/01.png" class="image"><img src="/multiverse/images/thumbs/01.png" alt="Perro en el parque" /></a>
+							<h2>Encuentros</h2>
+							<p>Planes al aire libre pet-friendly.</p>
 						</article>
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/06.jpg" class="image"><img src="/multiverse/images/thumbs/06.jpg" alt="Carrera en la playa" /></a>
+							<a href="/multiverse/images/fulls/02.jpg" class="image"><img src="/multiverse/images/thumbs/02.jpg" alt="Labrador" /></a>
 							<h2>Salidas</h2>
-							<p>Caminatas y carreras juntos.</p>
+							<p>Paseos y encuentros juntos.</p>
 						</article>
 						<article class="thumb">
 							<a href="/multiverse/images/fulls/07.jpg" class="image"><img src="/multiverse/images/thumbs/07.jpg" alt="Usuario" /></a>
@@ -129,7 +129,7 @@
 									<div class="indio-feature-icon" aria-hidden="true">📅</div>
 									<div>
 										<h3>Eventos</h3>
-										<p>Descubrí y sumate a caminatas, running, encuentros y actividades pet friendly cerca tuyo.</p>
+										<p>Descubrí personas con mascotas, sumate a encuentros y encontrá eventos pet-friendly cerca tuyo.</p>
 									</div>
 								</div>
 								<div class="indio-feature">
@@ -157,7 +157,7 @@
 									<div class="indio-feature-icon" aria-hidden="true">🐾</div>
 									<div>
 										<h3>Comunidad</h3>
-										<p>Sumate a una comunidad pensada para personas activas y sus mascotas.</p>
+										<p>Sumate a una comunidad pensada para personas con mascotas, matches y salidas compartidas.</p>
 									</div>
 								</div>
 								<div class="indio-feature">
@@ -177,10 +177,10 @@
 								<div class="indio-gallery-scroll">
 									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/01.png" alt="Perro jugando" /><div class="indio-gallery-cap">Diversión al aire libre</div></div>
 									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/02.jpg" alt="Labrador" /><div class="indio-gallery-cap">Labrador activo</div></div>
-									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/03.jpg" alt="Husky" /><div class="indio-gallery-cap">Aventura en la montaña</div></div>
-									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/04.jpg" alt="Grupo" /><div class="indio-gallery-cap">Comunidad deportiva</div></div>
-									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/05.jpg" alt="Fútbol" /><div class="indio-gallery-cap">Fútbol en el parque</div></div>
-									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/06.jpg" alt="Playa" /><div class="indio-gallery-cap">Carrera en la playa</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/03.jpg" alt="Husky" /><div class="indio-gallery-cap">Paseo y exploración</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/08.png" alt="Mascota feliz" /><div class="indio-gallery-cap">Comunidad pet-friendly</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/01.png" alt="Perro en el parque" /><div class="indio-gallery-cap">Encuentro en el parque</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/02.jpg" alt="Labrador" /><div class="indio-gallery-cap">Salida pet-friendly</div></div>
 								</div>
 							</div>
 						</div>
@@ -395,10 +395,22 @@
 			<script>
 				(function () {
 					/** Misma lógica que frontend/src/utilidades/config.ts → getAPIBaseURL() en web */
+					function normalizeApiUrl(value) {
+						var apiUrl = String(value || '').trim();
+						if (!apiUrl) return '';
+						if (apiUrl.indexOf('postgresql://') >= 0 || apiUrl.indexOf('psql') >= 0) return '';
+						if (apiUrl.charAt(0) === '/') return apiUrl.replace(/\/+$/, '');
+						if (/^https?:\/\//.test(apiUrl)) return apiUrl.replace(/\/+$/, '');
+						return '/' + apiUrl.replace(/^\/+/, '').replace(/\/+$/, '');
+					}
 					function getApiBase() {
 						var el = document.querySelector('meta[name="indio-api-base"]');
-						var manual = el ? String(el.getAttribute('content') || '').trim() : '';
-						if (manual) return manual.replace(/\/+$/, '');
+						var manual = normalizeApiUrl(el ? el.getAttribute('content') : '');
+						if (manual) return manual;
+						if (window.EXPO_PUBLIC_API_URL) {
+							var envUrl = normalizeApiUrl(window.EXPO_PUBLIC_API_URL);
+							if (envUrl) return envUrl;
+						}
 						var h = window.location.hostname || '';
 						if (h === 'localhost' || h === '127.0.0.1') {
 							return 'http://localhost:3000/api';
@@ -416,7 +428,7 @@
 						if (t.charAt(0) === '<' || (t && t.charAt(0) !== '{' && t.charAt(0) !== '[')) {
 							throw new Error(
 								'Sin API en este sitio (llegó una página HTML, no el backend). ' +
-								'Solución: deploy desde la carpeta raíz del proyecto en Vercel, o en el head: ' +
+								'Usá un deploy monorepo desde la raíz o configurá el backend separado en ' +
 								'meta name=indio-api-base content=https://TU-API.vercel.app/api'
 							);
 						}

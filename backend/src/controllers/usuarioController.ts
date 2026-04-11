@@ -36,6 +36,8 @@ export const obtenerMiPerfil = async (req: Request, res: Response): Promise<void
         ubicacionPais: true,
         nivelDeporte: true,
         intereses: true,
+        tipoUsuario: true,
+        onboardingCompletado: true,
         esPremium: true,
         createdAt: true,
         updatedAt: true,
@@ -126,6 +128,8 @@ export const actualizarMiPerfil = async (req: Request, res: Response): Promise<v
         ubicacionPais: true,
         nivelDeporte: true,
         intereses: true,
+        tipoUsuario: true,
+        onboardingCompletado: true,
         esPremium: true,
         updatedAt: true,
       },
@@ -138,6 +142,15 @@ export const actualizarMiPerfil = async (req: Request, res: Response): Promise<v
     });
   } catch (error) {
     console.error('Error actualizando perfil:', error);
+
+    if ((error as any)?.code === 'P2025') {
+      res.status(404).json({
+        success: false,
+        message: 'El usuario autenticado no existe en la base de datos actual. Inicia sesión nuevamente.',
+      });
+      return;
+    }
+
     res.status(500).json({
       success: false,
       message: 'Error al actualizar perfil',

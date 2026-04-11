@@ -1,7 +1,7 @@
 // Pantalla de Matches de SportPetMatch
 // Conversaciones con usuarios que han hecho match
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -35,7 +35,6 @@ import {
 
 type MatchesScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
-// Tipo para la conversación con información completa
 interface Conversacion {
   match: Match;
   otroUsuario: {
@@ -59,69 +58,69 @@ export default function PantallaMatches(): JSX.Element {
   const [mensajesNoLeidos, setMensajesNoLeidos] = useState<MensajesNoLeidos[]>([]);
 
   useEffect(() => {
-    cargarDatos();
+    cargarDatos({ mostrarError: true });
   }, []);
 
-  // Auto-refrescar cada 10 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       if (!cargando && !refrescando) {
-        cargarDatos();
+        cargarDatos({ mostrarError: false });
       }
-    }, 10000);
+    }, 30000);
 
     return () => clearInterval(interval);
-  }, [cargando, refrescando]);
+  }, [cargando, refrescando, mensajesNoLeidos.length]);
 
-  /**
-   * Cargar datos de matches y mensajes
-   */
-  const cargarDatos = async () => {
+  const cargarDatos = async ({ mostrarError = false }: { mostrarError?: boolean } = {}) => {
     try {
       setCargando(true);
-      await Promise.all([cargarMatches(), cargarMensajesNoLeidos()]);
-    } catch (error) {
+      const noLeidos = await cargarMensajesNoLeidos();
+      await cargarMatches(noLeidos);
+    } catch (error: any) {
       console.error('Error cargando datos:', error);
-      Alert.alert('Error', 'No se pudieron cargar las conversaciones');
+      const mensaje = error?.message || '';
+
+      if (
+        mostrarError &&
+        !mensaje.includes('Demasiadas solicitudes') &&
+        !mensaje.includes('Error de conexion')
+      ) {
+        Alert.alert('Error', 'No se pudieron cargar las conversaciones');
+      }
     } finally {
       setCargando(false);
       setRefrescando(false);
     }
   };
 
-  /**
-   * Cargar matches y construir conversaciones
-   */
-  const cargarMatches = async () => {
+  const cargarMatches = async (noLeidosActuales: MensajesNoLeidos[] = mensajesNoLeidos) => {
     try {
       const matches = await obtenerMisMatches();
+      const noLeidosPorMatch = new Map(
+        noLeidosActuales.map((item) => [item.matchId, item.noLeidos])
+      );
 
-      // Filtrar solo matches aceptados y eliminar duplicados
-      const matchesAceptados = matches.filter(match => match.estado === 'aceptado');
-      
-      // Eliminar duplicados basándose en el par de usuarios (usuarioId + usuarioMatchId)
+      const matchesAceptados = matches.filter((match) => match.estado === 'aceptado');
+
       const matchesUnicos = matchesAceptados.reduce((acc, match) => {
         const parUsuarios = [match.usuario.id, match.usuarioMatch.id].sort().join('-');
-        const existe = acc.find(m => {
-          const parExistente = [m.usuario.id, m.usuarioMatch.id].sort().join('-');
+        const existe = acc.find((actual) => {
+          const parExistente = [actual.usuario.id, actual.usuarioMatch.id].sort().join('-');
           return parExistente === parUsuarios;
         });
+
         if (!existe) {
           acc.push(match);
         }
+
         return acc;
       }, [] as Match[]);
 
-      // Construir conversaciones con información del otro usuario y último mensaje
       const conversacionesData = await Promise.all(
         matchesUnicos.map(async (match) => {
-          // Determinar quién es el otro usuario
           const otroUsuario =
-            match.usuarioId === usuario?.id
-              ? match.usuarioMatch
-              : match.usuario;
+            match.usuarioId === usuario?.id ? match.usuarioMatch : match.usuario;
 
-          // Obtener último mensaje del match
           let ultimoMensaje: Mensaje | null = null;
           try {
             const mensajes = await obtenerMensajes(match.id);
@@ -132,7 +131,6 @@ export default function PantallaMatches(): JSX.Element {
             console.error('Error obteniendo mensajes:', error);
           }
 
-          // Determinar si es un match nuevo (creado en las últimas 24 horas)
           const fechaMatch = new Date(match.fechaMatch);
           const ahora = new Date();
           const horasDesdeMatch = (ahora.getTime() - fechaMatch.getTime()) / (1000 * 60 * 60);
@@ -142,13 +140,12 @@ export default function PantallaMatches(): JSX.Element {
             match,
             otroUsuario,
             ultimoMensaje,
-            noLeidos: 0, // Se actualizará con mensajesNoLeidos
+            noLeidos: noLeidosPorMatch.get(match.id) || 0,
             esNuevoMatch,
           };
         })
       );
 
-      // Ordenar conversaciones: primero las que tienen mensajes no leídos, luego por fecha del último mensaje
       conversacionesData.sort((a, b) => {
         if (a.noLeidos > 0 && b.noLeidos === 0) return -1;
         if (a.noLeidos === 0 && b.noLeidos > 0) return 1;
@@ -160,10 +157,7 @@ export default function PantallaMatches(): JSX.Element {
         }
         if (a.ultimoMensaje) return -1;
         if (b.ultimoMensaje) return 1;
-        return (
-          new Date(b.match.fechaMatch).getTime() -
-          new Date(a.match.fechaMatch).getTime()
-        );
+        return new Date(b.match.fechaMatch).getTime() - new Date(a.match.fechaMatch).getTime();
       });
 
       setConversaciones(conversacionesData);
@@ -173,47 +167,37 @@ export default function PantallaMatches(): JSX.Element {
     }
   };
 
-  /**
-   * Cargar mensajes no leídos
-   */
-  const cargarMensajesNoLeidos = async () => {
+  const cargarMensajesNoLeidos = async (): Promise<MensajesNoLeidos[]> => {
     try {
       const noLeidos = await obtenerMensajesNoLeidos();
       setMensajesNoLeidos(noLeidos);
 
-      // Actualizar conversaciones con cantidad de mensajes no leídos
       setConversaciones((prev) =>
         prev.map((conv) => {
-          const noLeidosMatch = noLeidos.find((n) => n.matchId === conv.match.id);
+          const noLeidosMatch = noLeidos.find((item) => item.matchId === conv.match.id);
           return {
             ...conv,
             noLeidos: noLeidosMatch?.noLeidos || 0,
           };
         })
       );
+
+      return noLeidos;
     } catch (error) {
-      console.error('Error cargando mensajes no leídos:', error);
+      console.error('Error cargando mensajes no leidos:', error);
+      return [];
     }
   };
 
-  /**
-   * Manejar refresh manual
-   */
   const manejarRefresh = () => {
     setRefrescando(true);
-    cargarDatos();
+    cargarDatos({ mostrarError: true });
   };
 
-  /**
-   * Filtrar conversaciones por búsqueda
-   */
   const conversacionesFiltradas = conversaciones.filter((conv) =>
     conv.otroUsuario.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  /**
-   * Formatear tiempo relativo
-   */
   const formatearTiempo = (fecha: string | Date): string => {
     const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
     const ahora = new Date();
@@ -232,31 +216,18 @@ export default function PantallaMatches(): JSX.Element {
     });
   };
 
-  /**
-   * Abrir chat con usuario
-   */
   const abrirChat = (conversacion: Conversacion) => {
     navigation.navigate('Chat', { matchId: conversacion.match.id });
   };
 
-  /**
-   * Ver detalle del match
-   */
   const verDetalleMatch = (matchId: string) => {
     navigation.navigate('DetalleMatch', { matchId });
   };
 
-  /**
-   * Ir a pantalla de matching
-   */
   const irAMatching = () => {
-    // Navegar a la pantalla de matching desde tabs
     navigation.navigate('Matching');
   };
 
-  /**
-   * Renderizar elemento de conversación
-   */
   const renderizarConversacion = ({ item }: { item: Conversacion }) => (
     <TouchableOpacity
       style={estilos.conversacionItem}
@@ -271,28 +242,21 @@ export default function PantallaMatches(): JSX.Element {
         ]}
       >
         <Card.Content style={estilos.contenidoConversacion}>
-          {/* Avatar del usuario */}
           <View style={estilos.avatarContainer}>
             {item.otroUsuario.avatar ? (
-              <Avatar.Image
-                size={60}
-                source={{ uri: item.otroUsuario.avatar }}
-              />
+              <Avatar.Image size={60} source={{ uri: item.otroUsuario.avatar }} />
             ) : (
               <Avatar.Text
                 size={60}
                 label={item.otroUsuario.nombre.charAt(0).toUpperCase()}
               />
             )}
-            {item.esNuevoMatch && (
-              <Badge style={estilos.badgeNuevo}>NUEVO</Badge>
-            )}
+            {item.esNuevoMatch && <Badge style={estilos.badgeNuevo}>NUEVO</Badge>}
             {item.noLeidos > 0 && (
               <Badge style={estilos.badgeNoLeidos}>{item.noLeidos}</Badge>
             )}
           </View>
 
-          {/* Información de la conversación */}
           <View style={estilos.infoConversacion}>
             <View style={estilos.headerConversacion}>
               <Text variant="titleMedium" style={estilos.nombreUsuario}>
@@ -308,7 +272,7 @@ export default function PantallaMatches(): JSX.Element {
             {item.match.eventoPropuesto && (
               <View style={estilos.detallesUsuario}>
                 <Text variant="bodySmall" style={estilos.eventoPropuesto}>
-                  📅 {item.match.eventoPropuesto.titulo}
+                  {`Evento: ${item.match.eventoPropuesto.titulo}`}
                 </Text>
               </View>
             )}
@@ -350,17 +314,15 @@ export default function PantallaMatches(): JSX.Element {
 
   return (
     <View style={estilos.contenedor}>
-      {/* Barra de búsqueda */}
       <Searchbar
         placeholder="Buscar conversaciones..."
         onChangeText={setBusqueda}
         value={busqueda}
         style={estilos.barraBusqueda}
-        icon="search"
+        icon="magnify"
         clearIcon="close"
       />
 
-      {/* Lista de conversaciones */}
       <FlatList
         data={conversacionesFiltradas}
         renderItem={renderizarConversacion}
@@ -385,15 +347,14 @@ export default function PantallaMatches(): JSX.Element {
               Sin conversaciones
             </Text>
             <Text variant="bodyMedium" style={estilos.subtextoVacio}>
-              ¡Comienza a hacer matches para chatear!
+              Comienza a hacer matches para chatear.
             </Text>
           </View>
         }
       />
 
-      {/* FAB para ir a matching */}
       <FAB
-        icon="favorite"
+        icon="heart"
         style={[estilos.fab, { backgroundColor: temaApp.colors.like }]}
         color="#FFFFFF"
         onPress={irAMatching}
@@ -424,7 +385,7 @@ const estilos = StyleSheet.create({
   },
   listaConversaciones: {
     paddingHorizontal: espaciado.md,
-    paddingBottom: 100, // Espacio para el FAB
+    paddingBottom: 100,
   },
   conversacionItem: {
     marginBottom: espaciado.sm,

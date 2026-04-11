@@ -90,6 +90,7 @@ model Evento {
   titulo          String // Título del evento
   descripcion     String // Descripción detallada
   tipo            String // Tipo de evento (carrera, caminata, etc.)
+  imagenUrl       String? // Imagen opcional del evento
   nivelDificultad Int      @default(1) // Nivel de dificultad (1-5)
   fechaInicio     DateTime // Fecha y hora de inicio
   fechaFin        DateTime? // Fecha y hora de fin (opcional)

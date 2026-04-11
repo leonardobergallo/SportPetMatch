@@ -8,6 +8,7 @@ export interface Evento {
   titulo: string;
   descripcion: string;
   tipo: string;
+  imagenUrl?: string | null;
   nivelDificultad: number;
   fechaInicio: string;
   fechaFin?: string | null;
@@ -33,6 +34,7 @@ export interface DatosCrearEvento {
   titulo: string;
   descripcion: string;
   tipo: string;
+  imagenUrl?: string;
   nivelDificultad?: number;
   fechaInicio: string;
   fechaFin?: string;

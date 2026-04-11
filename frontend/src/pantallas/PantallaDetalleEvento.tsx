@@ -46,6 +46,24 @@ const imagenesEventos: Record<string, any> = {
   default: require('../../assets/golden-retriever-playing.png'),
 };
 
+function resolverImagenEvento(evento: Evento): any {
+  if (evento.imagenUrl && (/^https?:\/\//i.test(evento.imagenUrl) || /^data:image\//i.test(evento.imagenUrl))) {
+    return { uri: evento.imagenUrl };
+  }
+
+  const tipoLower = evento.tipo.toLowerCase();
+  if (tipoLower.includes('parque') || tipoLower.includes('encuentro')) {
+    return imagenesEventos.golden;
+  }
+  if (tipoLower.includes('paseo') || tipoLower.includes('caminata')) {
+    return imagenesEventos.husky;
+  }
+  if (tipoLower.includes('cafe') || tipoLower.includes('merienda')) {
+    return imagenesEventos.labrador;
+  }
+  return imagenesEventos.default;
+}
+
 /**
  * Pantalla de Detalle de Evento
  */
@@ -75,9 +93,7 @@ export default function PantallaDetalleEvento(): JSX.Element {
       setEvento(datosEvento);
       
       // Verificar si el usuario es participante
-      if (estaAutenticado && usuario && datosEvento.participantesIds) {
-        setEsParticipante(datosEvento.participantesIds.includes(usuario.id));
-      }
+      setEsParticipante(!!(estaAutenticado && usuario && datosEvento.participantesIds?.includes(usuario.id)));
     } catch (error: any) {
       console.error('Error cargando evento:', error);
       Alert.alert('Error', 'No se pudo cargar la información del evento');
@@ -102,6 +118,11 @@ export default function PantallaDetalleEvento(): JSX.Element {
   const manejarParticipar = async () => {
     if (!estaAutenticado) {
       Alert.alert('Autenticación requerida', 'Debes iniciar sesión para participar en eventos');
+      return;
+    }
+
+    if (evento && usuario && evento.organizadorId === usuario.id) {
+      Alert.alert('Este es tu evento', 'Como organizador no necesitas unirte como participante.');
       return;
     }
 
@@ -177,23 +198,6 @@ export default function PantallaDetalleEvento(): JSX.Element {
         },
       ]
     );
-  };
-
-  /**
-   * Obtener imagen del evento según su tipo
-   */
-  const obtenerImagenEvento = (tipo: string): any => {
-    const tipoLower = tipo.toLowerCase();
-    if (tipoLower.includes('parque') || tipoLower.includes('encuentro')) {
-      return imagenesEventos.golden;
-    }
-    if (tipoLower.includes('paseo') || tipoLower.includes('caminata')) {
-      return imagenesEventos.husky;
-    }
-    if (tipoLower.includes('cafe') || tipoLower.includes('merienda')) {
-      return imagenesEventos.labrador;
-    }
-    return imagenesEventos.default;
   };
 
   /**
@@ -279,7 +283,7 @@ export default function PantallaDetalleEvento(): JSX.Element {
       {/* Imagen del evento */}
       <View style={estilos.imagenContainer}>
         <Image
-          source={obtenerImagenEvento(evento.tipo)}
+          source={resolverImagenEvento(evento)}
           style={estilos.imagenEvento}
           resizeMode="cover"
         />

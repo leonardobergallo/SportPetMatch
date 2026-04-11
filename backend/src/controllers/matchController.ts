@@ -251,7 +251,7 @@ export const crearMatch = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    // Verificar si ya existe un match
+    // Verificar si ya existe un match entre ambos usuarios
     const matchExistente = await prisma.match.findFirst({
       where: {
         OR: [
@@ -262,6 +262,50 @@ export const crearMatch = async (req: Request, res: Response): Promise<void> => 
     });
 
     if (matchExistente) {
+      const esLikeReciprocoPendiente =
+        matchExistente.usuarioId === usuarioMatchId &&
+        matchExistente.usuarioMatchId === usuarioId &&
+        matchExistente.estado === 'pendiente';
+
+      if (esLikeReciprocoPendiente) {
+        const matchAceptado = await prisma.match.update({
+          where: { id: matchExistente.id },
+          data: {
+            estado: 'aceptado',
+          },
+          include: {
+            usuario: {
+              select: {
+                id: true,
+                nombre: true,
+                avatar: true,
+              },
+            },
+            usuarioMatch: {
+              select: {
+                id: true,
+                nombre: true,
+                avatar: true,
+              },
+            },
+            eventoPropuesto: matchExistente.eventoPropuestoId ? {
+              select: {
+                id: true,
+                titulo: true,
+                fechaInicio: true,
+              },
+            } : false,
+          },
+        });
+
+        res.status(200).json({
+          success: true,
+          message: '¡Es un match! Ahora pueden chatear.',
+          data: matchAceptado,
+        });
+        return;
+      }
+
       res.status(409).json({
         success: false,
         message: 'Ya existe un match con este usuario',

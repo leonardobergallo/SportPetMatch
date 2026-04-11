@@ -45,11 +45,11 @@ export const obtenerEventos = async (req: Request, res: Response): Promise<void>
             avatar: true,
           },
         },
-        participantes: {
-          where: { estado: 'confirmado' },
-          select: {
-            usuarioId: true,
-          },
+      participantes: {
+        where: { estado: 'confirmado' },
+        select: {
+          usuarioId: true,
+        },
         },
         _count: {
           select: {
@@ -138,6 +138,7 @@ export const obtenerEvento = async (req: Request, res: Response): Promise<void> 
       data: {
         ...evento,
         participantesCount: evento._count.participantes,
+        participantesIds: evento.participantes.map((p) => p.usuarioId),
       },
     });
   } catch (error) {
@@ -167,6 +168,7 @@ export const crearEvento = async (req: Request, res: Response): Promise<void> =>
       titulo,
       descripcion,
       tipo,
+      imagenUrl,
       nivelDificultad,
       fechaInicio,
       fechaFin,
@@ -192,6 +194,7 @@ export const crearEvento = async (req: Request, res: Response): Promise<void> =>
         titulo,
         descripcion,
         tipo,
+        imagenUrl: imagenUrl || null,
         nivelDificultad: nivelDificultad ? parseInt(nivelDificultad) : 1,
         fechaInicio: new Date(fechaInicio),
         fechaFin: fechaFin ? new Date(fechaFin) : null,
@@ -261,6 +264,7 @@ export const actualizarEvento = async (req: Request, res: Response): Promise<voi
       'titulo',
       'descripcion',
       'tipo',
+      'imagenUrl',
       'nivelDificultad',
       'fechaInicio',
       'fechaFin',
