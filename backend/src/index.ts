@@ -25,7 +25,7 @@ import rutasMensajes from './rutas/mensajes';
 // Cargar variables de entorno
 // Cargar desde la raíz del backend
 import path from 'path';
-const configPath = path.resolve(__dirname, '../config.env');
+const configPath = path.resolve(process.cwd(), 'config.env');
 dotenv.config({ path: configPath });
 
 // Crear aplicación Express
@@ -36,7 +36,12 @@ const app = express();
 const PUERTO = parseInt(process.env.PORT || '3000', 10);
 // En desarrollo, escuchar en todas las interfaces (0.0.0.0) para permitir conexiones desde Expo Go
 // En producción (Railway, Render, etc.), escuchar en 0.0.0.0 para que funcione correctamente
-const HOST = process.env.HOST || '0.0.0.0';
+const hostConfigurado = process.env.HOST || '0.0.0.0';
+const HOST =
+  process.env.NODE_ENV === 'development' &&
+  (hostConfigurado === 'localhost' || hostConfigurado === '127.0.0.1')
+    ? '0.0.0.0'
+    : hostConfigurado;
 
 // Middleware de seguridad
 app.use(helmet({

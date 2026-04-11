@@ -11,8 +11,8 @@ const API_BASE_URL = getAPIBaseURL();
 const TOKEN_KEY = '@SportPetMatch:token';
 const USER_KEY = '@SportPetMatch:user';
 
-// Log para debugging
-if (__DEV__) {
+// Log para debugging solo en desarrollo web para no ensuciar la consola del celular
+if (__DEV__ && !isMobile) {
   const configInfo = getConfigInfo();
   console.log('Configuracion de API:');
   console.log('  - URL:', configInfo.apiURL);
