@@ -28,8 +28,7 @@
     "concurrently": "^8.2.2"
   },
   "workspaces": [
-    "backend",
-    "frontend"
+    "backend"
   ],
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
