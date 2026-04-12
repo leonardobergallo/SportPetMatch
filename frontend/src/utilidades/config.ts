@@ -53,6 +53,10 @@ export function getAPIBaseURL(): string {
   if (isWeb) {
     // En web, verificar si estamos en produccion o desarrollo
     if (typeof window !== 'undefined') {
+      const metaApiUrl = normalizeApiUrl(
+        document.querySelector('meta[name="indio-api-base"]')?.getAttribute('content') || ''
+      );
+
       const isProduction =
         window.location.hostname !== 'localhost' &&
         window.location.hostname !== '127.0.0.1' &&
@@ -60,8 +64,16 @@ export function getAPIBaseURL(): string {
         !window.location.hostname.includes('172.');
 
       if (isProduction) {
-        // En produccion web siempre usar el mismo dominio.
-        // Evita que una variable vieja o un meta tag apunten a otro backend.
+        if (envApiUrl) {
+          console.log('Produccion detectada: usando EXPO_PUBLIC_API_URL');
+          return envApiUrl;
+        }
+
+        if (metaApiUrl) {
+          console.log('Produccion detectada: usando indio-api-base');
+          return metaApiUrl;
+        }
+
         console.log('Produccion detectada: usando ruta relativa /api');
         return '/api';
       }
@@ -69,10 +81,6 @@ export function getAPIBaseURL(): string {
       if (envApiUrl) {
         return envApiUrl;
       }
-
-      const metaApiUrl = normalizeApiUrl(
-        document.querySelector('meta[name="indio-api-base"]')?.getAttribute('content') || ''
-      );
 
       if (metaApiUrl) {
         return metaApiUrl;
