@@ -77,6 +77,22 @@ export default function PantallaPerfil(): JSX.Element {
         </View>
       </View>
 
+      {/* Banner: perfil incompleto */}
+      {(!usuario?.avatar || !usuario?.biografia) && (
+        <TouchableOpacity
+          style={estilos.bannerInompleto}
+          onPress={() => navigation.navigate('EditarPerfil')}
+          activeOpacity={0.85}
+        >
+          <MaterialIcons name="edit" size={22} color="#fff" style={{ marginRight: 10 }} />
+          <View style={{ flex: 1 }}>
+            <Text style={estilos.bannerTitle}>Completá tu perfil 🐾</Text>
+            <Text style={estilos.bannerSub}>Agregá tu foto y una descripción para que otros te encuentren.</Text>
+          </View>
+          <MaterialIcons name="chevron-right" size={22} color="#fff" />
+        </TouchableOpacity>
+      )}
+
       {/* Configuración */}
       <Card style={estilos.cardConfig}>
         <Card.Content>
@@ -318,5 +334,27 @@ const estilos = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: temaApp.colors.error,
+  },
+  bannerInompleto: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: temaApp.colors.primary,
+    marginHorizontal: espaciado.lg,
+    marginTop: espaciado.lg,
+    marginBottom: 0,
+    borderRadius: 12,
+    padding: espaciado.md,
+    ...sombras.media,
+  },
+  bannerTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  bannerSub: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.82)',
+    lineHeight: 16,
   },
 });

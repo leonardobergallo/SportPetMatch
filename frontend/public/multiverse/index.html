@@ -11,7 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
 		<!-- Opcional: forzar URL del API. Si está vacío, se detecta solo (igual que la app React: local → :3000, producción → /api) -->
-		<meta name="indio-api-base" content="" />
+		<meta name="indio-api-base" content="https://sport-pet-match-backend2.vercel.app/api" />
 		<link rel="stylesheet" href="/multiverse/assets/css/main.css" />
 		<link rel="stylesheet" href="/multiverse/assets/css/indio-override.css" />
 		<noscript><link rel="stylesheet" href="/multiverse/assets/css/noscript.css" /></noscript>
@@ -38,7 +38,7 @@
 				<!-- Main -->
 					<div id="main">
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/01.png" class="image"><img src="/multiverse/images/thumbs/01.png" alt="Perro jugando" /></a>
+							<a href="/multiverse/images/fulls/01.jpg" class="image"><img src="/multiverse/images/thumbs/01.jpg" alt="Perro jugando" /></a>
 							<h2>Eventos</h2>
 							<p>Encuentros y actividades con mascotas.</p>
 						</article>
@@ -53,27 +53,22 @@
 							<p>Coordiná salidas al instante.</p>
 						</article>
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/08.png" class="image"><img src="/multiverse/images/thumbs/08.png" alt="Mascota feliz" /></a>
-							<h2>Gamificación</h2>
-							<p>Metas y hábitos con tu mascota.</p>
-						</article>
-						<article class="thumb">
-							<a href="/multiverse/images/fulls/01.png" class="image"><img src="/multiverse/images/thumbs/01.png" alt="Perro en el parque" /></a>
+							<a href="/multiverse/images/fulls/04.jpg" class="image"><img src="/multiverse/images/thumbs/04.jpg" alt="Encuentro pet-friendly" /></a>
 							<h2>Encuentros</h2>
 							<p>Planes al aire libre pet-friendly.</p>
 						</article>
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/02.jpg" class="image"><img src="/multiverse/images/thumbs/02.jpg" alt="Labrador" /></a>
+							<a href="/multiverse/images/fulls/05.jpg" class="image"><img src="/multiverse/images/thumbs/05.jpg" alt="Paseo con mascotas" /></a>
 							<h2>Salidas</h2>
 							<p>Paseos y encuentros juntos.</p>
 						</article>
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/07.jpg" class="image"><img src="/multiverse/images/thumbs/07.jpg" alt="Usuario" /></a>
+							<a href="/multiverse/images/fulls/06.jpg" class="image"><img src="/multiverse/images/thumbs/06.jpg" alt="Tu perfil" /></a>
 							<h2>Tu perfil</h2>
 							<p>Usuario y mascota en un solo lugar.</p>
 						</article>
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/08.png" class="image"><img src="/multiverse/images/thumbs/08.png" alt="Mascota feliz" /></a>
+							<a href="/multiverse/images/fulls/08.jpg" class="image"><img src="/multiverse/images/thumbs/08.jpg" alt="Gratis beta" /></a>
 							<h2>Gratis</h2>
 							<p>Sin costo para usar la app.</p>
 						</article>
@@ -175,11 +170,11 @@
 								<p class="indio-tag">GALERÍA</p>
 								<h2 class="indio-section-title indio-display">Momentos con tu compañero</h2>
 								<div class="indio-gallery-scroll">
-									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/01.png" alt="Perro jugando" /><div class="indio-gallery-cap">Diversión al aire libre</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/01.jpg" alt="Perro jugando" /><div class="indio-gallery-cap">Diversión al aire libre</div></div>
 									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/02.jpg" alt="Labrador" /><div class="indio-gallery-cap">Labrador activo</div></div>
 									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/03.jpg" alt="Husky" /><div class="indio-gallery-cap">Paseo y exploración</div></div>
-									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/08.png" alt="Mascota feliz" /><div class="indio-gallery-cap">Comunidad pet-friendly</div></div>
-									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/01.png" alt="Perro en el parque" /><div class="indio-gallery-cap">Encuentro en el parque</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/08.jpg" alt="Mascota feliz" /><div class="indio-gallery-cap">Comunidad pet-friendly</div></div>
+									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/01.jpg" alt="Perro en el parque" /><div class="indio-gallery-cap">Encuentro en el parque</div></div>
 									<div class="indio-gallery-card"><img src="/multiverse/images/fulls/02.jpg" alt="Labrador" /><div class="indio-gallery-cap">Salida pet-friendly</div></div>
 								</div>
 							</div>
@@ -240,6 +235,42 @@
 									</div>
 								</div>
 								<p class="indio-install-micro">Si preferís, también podés usar Indio desde la web sin instalar nada.</p>
+							</div>
+						</div>
+
+						<!-- Planes y precios -->
+						<div class="indio-section indio-precios-section" id="indio-precios">
+							<p class="indio-tag">PLANES</p>
+							<h2 class="indio-display">Elegí tu plan</h2>
+							<p class="indio-precios-sub">Usá Indio gratis o pasate a Premium para desbloquear todo.</p>
+							<div class="indio-precios-grid">
+								<div class="indio-plan">
+									<div class="indio-plan-badge indio-plan-badge-free">GRATIS</div>
+									<div class="indio-plan-price">ARS <span class="indio-plan-num">$0</span></div>
+									<p class="indio-plan-period">Durante la beta</p>
+									<ul class="indio-plan-features">
+										<li>&#10003; Perfil de usuario y mascota</li>
+										<li>&#10003; Matching con otros due&#241;os</li>
+										<li>&#10003; Eventos pet-friendly</li>
+										<li>&#10003; Chat b&#225;sico</li>
+										<li>&#10003; Mapa de la comunidad</li>
+									</ul>
+									<button type="button" class="indio-btn-plan indio-btn-plan-free" onclick="document.getElementById('indio-mid-cta').click()">Crear cuenta</button>
+								</div>
+								<div class="indio-plan indio-plan-premium">
+									<div class="indio-plan-badge indio-plan-badge-pro">PREMIUM</div>
+									<div class="indio-plan-price">ARS <span class="indio-plan-num">$14.990</span></div>
+									<p class="indio-plan-period">por mes &middot; pr&#243;ximamente</p>
+									<ul class="indio-plan-features">
+										<li>&#10003; Todo lo del plan Gratis</li>
+										<li>&#11088; Perfil destacado en el feed</li>
+										<li>&#11088; Matches ilimitados por d&#237;a</li>
+										<li>&#11088; Ver qui&#233;n vio tu perfil</li>
+										<li>&#11088; Prioridad en eventos</li>
+										<li>&#11088; Soporte prioritario</li>
+									</ul>
+									<button type="button" class="indio-btn-plan indio-btn-plan-pro">Pr&#243;ximamente</button>
+								</div>
 							</div>
 						</div>
 
@@ -470,7 +501,7 @@
 						} catch (e) {
 							throw new Error('No se pudo guardar la sesión en el navegador');
 						}
-						var dest = '/?app=1';
+						var dest = '/app.html?app=1';
 						try {
 							if (window.top && window.top !== window) {
 								window.top.location.href = dest;
@@ -480,7 +511,7 @@
 						window.location.href = dest;
 					}
 					function openAppRoot() {
-						var dest = '/?app=1';
+						var dest = '/app.html?app=1';
 						try {
 							if (window.top && window.top !== window) {
 								window.top.location.href = dest;

@@ -175,10 +175,10 @@ export default function PantallaOnboarding(): JSX.Element {
       // Actualizar contexto local
       actualizarUsuario(usuarioActualizado);
 
-      // Navegar a la pantalla principal
+      // Navegar a completar perfil después del onboarding
       navigation.reset({
-        index: 0,
-        routes: [{ name: 'Principal' }],
+        index: 1,
+        routes: [{ name: 'Principal' }, { name: 'EditarPerfil' }],
       });
     } catch (error: any) {
       console.error('Error guardando onboarding:', error);
