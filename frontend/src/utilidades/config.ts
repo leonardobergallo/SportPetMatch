@@ -1,9 +1,9 @@
-// Configuración centralizada para SportPetMatch
-// Maneja la configuración de la URL de la API según el entorno
+// Configuracion centralizada para SportPetMatch
+// Maneja la configuracion de la URL de la API segun el entorno
 
 import { Platform } from 'react-native';
 
-// IP local para desarrollo (móvil/Expo Go). Opcional: EXPO_PUBLIC_LOCAL_IP en .env
+// IP local para desarrollo (movil/Expo Go). Opcional: EXPO_PUBLIC_LOCAL_IP en .env
 // Para encontrar tu IP: Windows: ipconfig | findstr IPv4 | Mac/Linux: ifconfig | grep "inet "
 export const LOCAL_IP =
   (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_LOCAL_IP?.trim()) || '192.168.0.174';
@@ -11,7 +11,7 @@ export const LOCAL_IP =
 // Puerto del backend
 export const API_PORT = 3000;
 
-// Detectar si estamos en un dispositivo móvil (Expo Go)
+// Detectar si estamos en un dispositivo movil (Expo Go)
 export const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
 export const isWeb = Platform.OS === 'web';
 
@@ -23,8 +23,8 @@ function normalizeApiUrl(apiUrl: string): string {
   }
 
   if (trimmed.includes('postgresql://') || trimmed.includes('psql')) {
-    console.warn('⚠️ EXPO_PUBLIC_API_URL contiene una cadena de conexión de base de datos.');
-    console.warn('⚠️ Ignorando variable y usando detección automática.');
+    console.warn('EXPO_PUBLIC_API_URL contiene una cadena de conexion de base de datos.');
+    console.warn('Ignorando variable y usando deteccion automatica.');
     return '';
   }
 
@@ -44,66 +44,63 @@ function normalizeApiUrl(apiUrl: string): string {
 }
 
 /**
- * Obtener la URL base de la API según el entorno
+ * Obtener la URL base de la API segun el entorno
  */
 export function getAPIBaseURL(): string {
   const envApiUrl = normalizeApiUrl(process.env.EXPO_PUBLIC_API_URL || '');
 
   // Si estamos en web
   if (isWeb) {
-    if (envApiUrl) {
-      return envApiUrl;
-    }
-
-    // En web, verificar si estamos en producción o desarrollo
+    // En web, verificar si estamos en produccion o desarrollo
     if (typeof window !== 'undefined') {
+      const isProduction =
+        window.location.hostname !== 'localhost' &&
+        window.location.hostname !== '127.0.0.1' &&
+        !window.location.hostname.includes('192.168') &&
+        !window.location.hostname.includes('172.');
+
+      if (isProduction) {
+        // En produccion web siempre usar el mismo dominio.
+        // Evita que una variable vieja o un meta tag apunten a otro backend.
+        console.log('Produccion detectada: usando ruta relativa /api');
+        return '/api';
+      }
+
+      if (envApiUrl) {
+        return envApiUrl;
+      }
+
       const metaApiUrl = normalizeApiUrl(
-        document
-          .querySelector('meta[name="indio-api-base"]')
-          ?.getAttribute('content') || ''
+        document.querySelector('meta[name="indio-api-base"]')?.getAttribute('content') || ''
       );
 
       if (metaApiUrl) {
         return metaApiUrl;
       }
-
-      // Detectar si estamos en producción (Vercel)
-      const isProduction = window.location.hostname !== 'localhost' && 
-                           window.location.hostname !== '127.0.0.1' &&
-                           !window.location.hostname.includes('192.168') &&
-                           !window.location.hostname.includes('172.');
-      
-      if (isProduction) {
-        // En producción (Vercel), SIEMPRE usar ruta relativa /api
-        // Esto funciona para monorepo donde backend y frontend están en el mismo dominio
-        // Ignorar cualquier variable de entorno que pueda tener una URL completa
-        console.log('🌐 Producción detectada: usando ruta relativa /api');
-        return '/api';
-      }
     }
-    
+
     // En desarrollo web local
     return `http://localhost:${API_PORT}/api`;
   }
 
-  // Si hay una variable de entorno, validarla primero (solo para móvil)
+  // Si hay una variable de entorno, validarla primero (solo para movil)
   if (envApiUrl) {
     return envApiUrl;
   }
 
-  // Si estamos en móvil
+  // Si estamos en movil
   if (isMobile) {
-    // En producción (builds de EAS), siempre usar variable de entorno
-    // Si no está configurada, mostrar error claro
+    // En produccion (builds de EAS), siempre usar variable de entorno
+    // Si no esta configurada, mostrar error claro
     if (__DEV__) {
       // En desarrollo con Expo Go, usar IP local
       return `http://${LOCAL_IP}:${API_PORT}/api`;
-    } else {
-      // En producción, la variable EXPO_PUBLIC_API_URL debe estar configurada
-      console.error('❌ EXPO_PUBLIC_API_URL no está configurada. Configúrala antes de crear el build.');
-      console.error('❌ Ejemplo: EXPO_PUBLIC_API_URL=https://tu-backend.vercel.app/api');
-      return ''; // Retornar vacío para que la app maneje esto gracefully
     }
+
+    // En produccion, la variable EXPO_PUBLIC_API_URL debe estar configurada
+    console.error('EXPO_PUBLIC_API_URL no esta configurada. Configurala antes de crear el build.');
+    console.error('Ejemplo: EXPO_PUBLIC_API_URL=https://tu-backend.vercel.app/api');
+    return '';
   }
 
   // Por defecto, usar IP local para desarrollo
@@ -111,7 +108,7 @@ export function getAPIBaseURL(): string {
 }
 
 /**
- * Obtener información de configuración para debugging
+ * Obtener informacion de configuracion para debugging
  */
 export function getConfigInfo() {
   return {
@@ -123,4 +120,3 @@ export function getConfigInfo() {
     port: API_PORT,
   };
 }
-
