@@ -53,3 +53,15 @@ frontend/public/
 _expo/
 frontend/.expo/
 backend/.expo/
+
+.vercel
+.env*.local
+
+# Local/generated artifacts
+.playwright-mcp/
+Fotos Leo/
+public/
+tmp.env*.json
+tmp.vercel*.json
+nul
+VARIABLES_BACKEND.txt

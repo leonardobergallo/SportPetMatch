@@ -1,10 +1,17 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "npx prisma generate",
   "installCommand": "npm install",
+  "outputDirectory": "public",
   "framework": null,
-  "outputDirectory": "dist",
   "functions": {
-    "index.js": {"memory": 1024, "maxDuration": 60}
-  }
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 60,
+      "includeFiles": "{dist,node_modules/.prisma,node_modules/@prisma/client,prisma}/**"
+    }
+  },
+  "rewrites": [
+    {"source": "/(.*)", "destination": "/api/index.js"}
+  ]
 }

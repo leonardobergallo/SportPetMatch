@@ -24,9 +24,8 @@ if (fs.existsSync(sourceApi)) {
   try {
     // Leer el contenido y ajustar la ruta de require
     let content = fs.readFileSync(sourceApi, 'utf8');
-    // Cambiar require('../dist/index.js') a require('./dist/index.js')
-    // porque desde api/index.js, dist está en api/dist/
-    content = content.replace(/require\(['"]\.\.\/dist\//g, "require('./dist/");
+    // Desde api/index.js (raíz), el build del backend vive en ../backend/dist/
+    content = content.replace(/require\(['"]\.\.\/dist\//g, "require('../backend/dist/");
     fs.writeFileSync(destApi, content, 'utf8');
     console.log('✅ Copiado: api/index.js (con rutas ajustadas)');
   } catch (error) {
@@ -38,42 +37,18 @@ if (fs.existsSync(sourceApi)) {
   process.exit(1);
 }
 
-// Copiar dist del backend a api/dist (para que la función serverless pueda acceder)
-if (fs.existsSync(sourceDist)) {
+// No copiar backend/dist dentro de api/, porque Vercel contaría esos .js como funciones extra.
+// Limpiar api/dist legado si existe de builds anteriores.
+if (fs.existsSync(destDist)) {
   try {
-    // Copiar todo el contenido de dist
-    if (!fs.existsSync(destDist)) {
-      fs.mkdirSync(destDist, { recursive: true });
-    }
-    
-    // Copiar archivos recursivamente
-    function copyRecursiveSync(src, dest) {
-      const exists = fs.existsSync(src);
-      const stats = exists && fs.statSync(src);
-      const isDirectory = exists && stats.isDirectory();
-      
-      if (isDirectory) {
-        if (!fs.existsSync(dest)) {
-          fs.mkdirSync(dest, { recursive: true });
-        }
-        fs.readdirSync(src).forEach(childItemName => {
-          copyRecursiveSync(
-            path.join(src, childItemName),
-            path.join(dest, childItemName)
-          );
-        });
-      } else {
-        fs.copyFileSync(src, dest);
-      }
-    }
-    
-    copyRecursiveSync(sourceDist, destDist);
-    console.log('✅ Copiado: backend/dist → api/dist');
+    fs.rmSync(destDist, { recursive: true, force: true });
+    console.log('✅ Eliminado: api/dist legado');
   } catch (error) {
-    console.error('❌ Error copiando dist:', error.message);
-    // No salir con error, puede que no sea crítico
+    console.warn('⚠️  No se pudo limpiar api/dist legado:', error.message);
   }
-} else {
+}
+
+if (!fs.existsSync(sourceDist)) {
   console.warn('⚠️  Advertencia: backend/dist no existe. Asegúrate de que el build del backend se haya completado.');
 }
 
@@ -131,6 +106,6 @@ console.log('');
 console.log('🎉 Proceso completado exitosamente!');
 console.log('📁 Estructura lista para Vercel:');
 console.log('   - api/index.js (función serverless del backend)');
-console.log('   - api/dist/ (build del backend)');
+console.log('   - backend/dist/ (build del backend incluido en la función)');
 console.log('   - public/ (archivos del frontend)');
 

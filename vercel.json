@@ -1,13 +1,18 @@
 {
   "version": 2,
-  "buildCommand": "cd backend && npm install && npm run build",
+  "buildCommand": "npm run vercel-build",
   "installCommand": "npm install",
-  "outputDirectory": "backend/dist",
+  "outputDirectory": "public",
   "framework": null,
   "functions": {
-    "api/index.js": {"memory": 1024, "maxDuration": 60}
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 60,
+      "includeFiles": "backend/{dist,node_modules/.prisma,node_modules/@prisma/client,prisma}/**"
+    }
   },
   "rewrites": [
-    {"source": "/api/(.*)", "destination": "/api/index.js"}
+    {"source": "/api/(.*)", "destination": "/api/index.js"},
+    {"source": "/(.*)", "destination": "/index.html"}
   ]
 }
