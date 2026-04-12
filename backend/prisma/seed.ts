@@ -33,6 +33,52 @@ async function main() {
   };
 
   // ============================================
+  // USUARIO REAL: Leonardo
+  // ============================================
+  const leonardo = await prisma.usuario.create({
+    data: {
+      email: 'leonardobergallo@gmail.com',
+      password: passwordHash,
+      nombre: 'Leonardo Bergallo',
+      fechaNacimiento: new Date(1988, 6, 10),
+      telefono: '+5493420000000',
+      avatar: null,
+      biografia: 'Usuario real de Indio. Perfil base para validar flujo productivo y QA.',
+      ubicacionLat: ciudades.santaFe.lat,
+      ubicacionLng: ciudades.santaFe.lng,
+      ubicacionCiudad: ciudades.santaFe.ciudad,
+      ubicacionPais: ciudades.santaFe.pais,
+      nivelDeporte: 3,
+      intereses: ['caminar', 'eventos', 'mascotas'],
+      tipoUsuario: 'con_mascota',
+      onboardingCompletado: true,
+      emailVerificado: true,
+    },
+  });
+
+  await prisma.mascota.create({
+    data: {
+      usuarioId: leonardo.id,
+      nombre: 'Indio',
+      tipo: 'Perro',
+      raza: 'Mestizo',
+      edad: 4,
+      peso: 20,
+      altura: 48,
+      color: 'Marrón',
+      genero: 'Macho',
+      esterilizado: true,
+      nivelActividad: 4,
+      personalidad: ['sociable', 'activo', 'curioso'],
+      intereses: ['paseos', 'encuentros', 'jugar'],
+      vacunas: ['Rabia', 'Séxtuple'],
+      fotos: [],
+    },
+  });
+
+  console.log('✅ Usuario real creado: Leonardo Bergallo con Indio');
+
+  // ============================================
   // USUARIO 1: María - Corredora con Perro
   // ============================================
   const maria = await prisma.usuario.create({
