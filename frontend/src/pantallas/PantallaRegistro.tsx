@@ -2,39 +2,33 @@
 // Adaptada con nuevos componentes y servicios API
 
 import React, { useState } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  ScrollView, 
-  KeyboardAvoidingView, 
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
   Platform,
   Alert
 } from 'react-native';
-import { Text, TextInput, ActivityIndicator } from 'react-native-paper';
+import { Text, TextInput } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-// Importar nuevos componentes UI
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-
-// Importar servicios y contexto
 import { registrarUsuario, DatosRegistro } from '@/servicios/servicioAuth';
 import { normalizarUsuario, useAuth } from '@/contextos/ContextoAuth';
 import { temaApp, espaciado, sombras, MARCA } from '@/constantes/tema';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
+import { normalizarEmail, normalizarTelefono, validarRegistro } from '@/utilidades/validaciones';
 
 type RegistroScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Registro'>;
 
-/**
- * Pantalla de Registro - Crear nueva cuenta
- */
 export default function PantallaRegistro(): JSX.Element {
   const navigation = useNavigation<RegistroScreenNavigationProp>();
   const { iniciarSesion } = useAuth();
-  
-  // Estados del formulario
+
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,49 +37,23 @@ export default function PantallaRegistro(): JSX.Element {
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [cargando, setCargando] = useState(false);
 
-  /**
-   * Validar formulario
-   */
   const validarFormulario = (): boolean => {
-    // Importar validaciones
-    const validaciones = require('../utilidades/validaciones');
-    const { validarEmail, validarContraseña, validarTelefono, validarCampoRequerido, mensajesError } = validaciones;
-    
-    if (!validarCampoRequerido(nombre)) {
-      Alert.alert('Error', mensajesError.campoRequerido('El nombre'));
+    const resultado = validarRegistro({
+      nombre,
+      email,
+      password,
+      confirmarPassword,
+      telefono,
+    });
+
+    if (!resultado.valida) {
+      Alert.alert('Error', resultado.mensaje || 'Revisa los datos ingresados');
       return false;
     }
-    if (!validarCampoRequerido(email)) {
-      Alert.alert('Error', mensajesError.campoRequerido('El email'));
-      return false;
-    }
-    if (!validarEmail(email)) {
-      Alert.alert('Error', mensajesError.emailInvalido);
-      return false;
-    }
-    if (!validarCampoRequerido(password)) {
-      Alert.alert('Error', mensajesError.campoRequerido('La contraseña'));
-      return false;
-    }
-    if (!validarContraseña(password)) {
-      Alert.alert('Error', mensajesError.contraseñaCorta);
-      return false;
-    }
-    if (password !== confirmarPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return false;
-    }
-    // Validar teléfono si se proporciona
-    if (telefono.trim() && !validarTelefono(telefono.trim())) {
-      Alert.alert('Error', mensajesError.telefonoInvalido);
-      return false;
-    }
+
     return true;
   };
 
-  /**
-   * Manejar registro
-   */
   const manejarRegistro = async () => {
     if (!validarFormulario()) {
       return;
@@ -96,9 +64,9 @@ export default function PantallaRegistro(): JSX.Element {
     try {
       const datosRegistro: DatosRegistro = {
         nombre: nombre.trim(),
-        email: email.trim().toLowerCase(),
+        email: normalizarEmail(email),
         password,
-        telefono: telefono.trim() || undefined,
+        telefono: telefono.trim() ? normalizarTelefono(telefono) : undefined,
       };
 
       const respuesta = await registrarUsuario(datosRegistro);
@@ -117,12 +85,10 @@ export default function PantallaRegistro(): JSX.Element {
         await iniciarSesion(usuario, respuesta.data.token);
 
         Alert.alert(
-          '¡Bienvenido!',
-          `Cuenta creada exitosamente. ¡Bienvenido ${usuario.nombre}!`,
+          'Bienvenido',
+          `Cuenta creada exitosamente. Bienvenido ${usuario.nombre}!`,
           [{ text: 'Continuar' }]
         );
-
-        // La navegación se maneja automáticamente por el contexto de auth
       }
     } catch (error: any) {
       console.error('Error en registro:', error);
@@ -133,9 +99,6 @@ export default function PantallaRegistro(): JSX.Element {
     }
   };
 
-  /**
-   * Navegar a login
-   */
   const navegarALogin = () => {
     navigation.navigate('Login');
   };
@@ -150,7 +113,6 @@ export default function PantallaRegistro(): JSX.Element {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
         <View style={estilos.header}>
           <View style={estilos.logoContainer}>
             <View style={estilos.logo}>
@@ -161,12 +123,10 @@ export default function PantallaRegistro(): JSX.Element {
           <Text style={estilos.subtitulo}>Crea tu cuenta y conecta con otros</Text>
         </View>
 
-        {/* Formulario */}
         <Card style={estilos.card}>
           <CardContent>
             <Text style={estilos.tituloFormulario}>Crear Cuenta</Text>
 
-            {/* Nombre */}
             <View style={estilos.campoContainer}>
               <MaterialIcons
                 name="person"
@@ -185,7 +145,6 @@ export default function PantallaRegistro(): JSX.Element {
               />
             </View>
 
-            {/* Email */}
             <View style={estilos.campoContainer}>
               <MaterialIcons
                 name="email"
@@ -205,7 +164,6 @@ export default function PantallaRegistro(): JSX.Element {
               />
             </View>
 
-            {/* Teléfono (opcional) */}
             <View style={estilos.campoContainer}>
               <MaterialIcons
                 name="phone"
@@ -214,7 +172,7 @@ export default function PantallaRegistro(): JSX.Element {
                 style={estilos.iconoCampo}
               />
               <TextInput
-                label="Teléfono (opcional)"
+                label="Telefono (opcional)"
                 value={telefono}
                 onChangeText={setTelefono}
                 mode="outlined"
@@ -224,7 +182,6 @@ export default function PantallaRegistro(): JSX.Element {
               />
             </View>
 
-            {/* Contraseña */}
             <View style={estilos.campoContainer}>
               <MaterialIcons
                 name="lock"
@@ -233,7 +190,7 @@ export default function PantallaRegistro(): JSX.Element {
                 style={estilos.iconoCampo}
               />
               <TextInput
-                label="Contraseña"
+                label="Contrasena"
                 value={password}
                 onChangeText={setPassword}
                 mode="outlined"
@@ -249,7 +206,6 @@ export default function PantallaRegistro(): JSX.Element {
               />
             </View>
 
-            {/* Confirmar Contraseña */}
             <View style={estilos.campoContainer}>
               <MaterialIcons
                 name="lock-outline"
@@ -258,7 +214,7 @@ export default function PantallaRegistro(): JSX.Element {
                 style={estilos.iconoCampo}
               />
               <TextInput
-                label="Confirmar Contraseña"
+                label="Confirmar contrasena"
                 value={confirmarPassword}
                 onChangeText={setConfirmarPassword}
                 mode="outlined"
@@ -268,7 +224,6 @@ export default function PantallaRegistro(): JSX.Element {
               />
             </View>
 
-            {/* Botón de registro */}
             <Button
               variant="default"
               size="lg"
@@ -281,15 +236,14 @@ export default function PantallaRegistro(): JSX.Element {
           </CardContent>
         </Card>
 
-        {/* Enlace a login */}
         <View style={estilos.contenedorLogin}>
-          <Text style={estilos.textoLogin}>¿Ya tienes cuenta? </Text>
+          <Text style={estilos.textoLogin}>Ya tienes cuenta? </Text>
           <Button
             variant="link"
             onPress={navegarALogin}
             style={estilos.botonLogin}
           >
-            Inicia sesión aquí
+            Inicia sesion aqui
           </Button>
         </View>
       </ScrollView>

@@ -1,10 +1,18 @@
-// Controlador de Autenticación - SportPetMatch
+// Controlador de Autenticacion - SportPetMatch
 // Maneja login, registro y dashboard con Prisma
 
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../utilidades/prisma';
 import { generarTokens } from '../servicios/jwtService';
+
+function normalizarEmail(email: unknown): string {
+  return String(email || '').trim().toLowerCase();
+}
+
+function normalizarTelefono(telefono: unknown): string {
+  return String(telefono || '').replace(/[\s\-\(\)]/g, '').trim();
+}
 
 /**
  * Registro de nuevo usuario
@@ -13,62 +21,82 @@ export const registro = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, nombre, fechaNacimiento, telefono, tipoUsuario, intereses } = req.body;
 
-    // Validación básica
-    if (!email || !password || !nombre) {
+    const emailNormalizado = normalizarEmail(email);
+    const nombreNormalizado = String(nombre || '').trim();
+    const telefonoNormalizado = normalizarTelefono(telefono);
+
+    if (!emailNormalizado || !password || !nombreNormalizado) {
       res.status(400).json({
         success: false,
-        message: 'Email, contraseña y nombre son requeridos',
+        message: 'Email, contrasena y nombre son requeridos',
+        code: 'VALIDATION_ERROR',
       });
       return;
     }
 
-    // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(emailNormalizado)) {
       res.status(400).json({
         success: false,
-        message: 'Email inválido',
+        message: 'Email invalido',
+        code: 'INVALID_EMAIL',
       });
       return;
     }
 
-    // Validar longitud de contraseña
-    if (password.length < 6) {
+    if (nombreNormalizado.length < 2) {
       res.status(400).json({
         success: false,
-        message: 'La contraseña debe tener al menos 6 caracteres',
+        message: 'El nombre debe tener al menos 2 caracteres',
+        code: 'INVALID_NAME',
       });
       return;
     }
 
-    // Verificar si el usuario ya existe
+    if (String(password).length < 6) {
+      res.status(400).json({
+        success: false,
+        message: 'La contrasena debe tener al menos 6 caracteres',
+        code: 'INVALID_PASSWORD',
+      });
+      return;
+    }
+
+    if (telefonoNormalizado && !/^\d{8,15}$/.test(telefonoNormalizado)) {
+      res.status(400).json({
+        success: false,
+        message: 'Telefono invalido',
+        code: 'INVALID_PHONE',
+      });
+      return;
+    }
+
     const usuarioExistente = await prisma.usuario.findUnique({
-      where: { email },
+      where: { email: emailNormalizado },
     });
 
     if (usuarioExistente) {
       res.status(409).json({
         success: false,
         message: 'Ya existe un usuario con este email',
+        code: 'EMAIL_ALREADY_EXISTS',
       });
       return;
     }
 
-    // Hash de la contraseña
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(String(password), 10);
 
-    // Crear usuario
     const nuevoUsuario = await prisma.usuario.create({
       data: {
-        email,
+        email: emailNormalizado,
         password: passwordHash,
-        nombre,
+        nombre: nombreNormalizado,
         fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
-        telefono: telefono || null,
+        telefono: telefonoNormalizado || null,
         tipoUsuario: tipoUsuario || 'dueno',
-        intereses: intereses || [],
+        intereses: Array.isArray(intereses) ? intereses : [],
         isActive: true,
-        emailVerificado: false, // En producción, enviar email de verificación
+        emailVerificado: false,
       },
       select: {
         id: true,
@@ -80,7 +108,6 @@ export const registro = async (req: Request, res: Response): Promise<void> => {
       },
     });
 
-    // Generar tokens
     const tokens = generarTokens({
       usuarioId: nuevoUsuario.id,
       email: nuevoUsuario.email,
@@ -109,20 +136,30 @@ export const registro = async (req: Request, res: Response): Promise<void> => {
  */
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
+    const emailNormalizado = normalizarEmail(email);
 
-  // Validación básica
-  if (!email || !password) {
-    res.status(400).json({
-      success: false,
-        message: 'Email y contraseña son requeridos',
-    });
-    return;
-  }
+    if (!emailNormalizado || !password) {
+      res.status(400).json({
+        success: false,
+        message: 'Email y contrasena son requeridos',
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
 
-    // Buscar usuario
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailNormalizado)) {
+      res.status(400).json({
+        success: false,
+        message: 'Email invalido',
+        code: 'INVALID_EMAIL',
+      });
+      return;
+    }
+
     const usuario = await prisma.usuario.findUnique({
-      where: { email },
+      where: { email: emailNormalizado },
       select: {
         id: true,
         email: true,
@@ -141,43 +178,42 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       res.status(401).json({
         success: false,
         message: 'Credenciales incorrectas',
+        code: 'INVALID_CREDENTIALS',
       });
       return;
     }
 
-    // Verificar si el usuario está activo
     if (!usuario.isActive) {
       res.status(403).json({
         success: false,
         message: 'Usuario inactivo. Contacta al administrador',
+        code: 'INACTIVE_USER',
       });
       return;
     }
 
-    // Verificar contraseña
-    const passwordValida = await bcrypt.compare(password, usuario.password || '');
+    const passwordValida = await bcrypt.compare(String(password), usuario.password || '');
 
     if (!passwordValida) {
       res.status(401).json({
         success: false,
         message: 'Credenciales incorrectas',
+        code: 'INVALID_CREDENTIALS',
       });
       return;
     }
 
-    // Generar tokens
     const tokens = generarTokens({
       usuarioId: usuario.id,
       email: usuario.email,
     });
 
-    // Preparar datos del usuario para respuesta (sin password)
     const { password: _, ...usuarioSinPassword } = usuario;
 
-  res.json({
-    success: true,
-    message: 'Login exitoso',
-    data: {
+    res.json({
+      success: true,
+      message: 'Login exitoso',
+      data: {
         usuario: usuarioSinPassword,
         ...tokens,
       },
@@ -186,7 +222,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.error('Error en login:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al iniciar sesión',
+      message: 'Error al iniciar sesion',
       error: process.env.NODE_ENV === 'development' ? error : undefined,
     });
   }
@@ -207,7 +243,6 @@ export const obtenerDashboard = async (req: Request, res: Response): Promise<voi
 
     const usuarioId = req.usuario.usuarioId;
 
-    // Obtener usuario con relaciones
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
       select: {
@@ -225,7 +260,7 @@ export const obtenerDashboard = async (req: Request, res: Response): Promise<voi
           orderBy: { fechaInicio: 'asc' },
           where: {
             fechaInicio: {
-              gte: new Date(), // Solo eventos futuros
+              gte: new Date(),
             },
           },
         },
@@ -261,7 +296,6 @@ export const obtenerDashboard = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    // Formatear datos del dashboard
     const dashboardData = {
       usuario: {
         id: usuario.id,
@@ -295,10 +329,10 @@ export const obtenerDashboard = async (req: Request, res: Response): Promise<voi
         fecha: match.fechaMatch,
         estado: match.estado,
       })),
-  };
+    };
 
-  res.json({
-    success: true,
+    res.json({
+      success: true,
       data: dashboardData,
     });
   } catch (error) {
