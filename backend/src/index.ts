@@ -49,24 +49,40 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// Configuración de CORS para permitir conexiones desde la app móvil
-// En desarrollo, permitir todas las conexiones desde Expo Go
-// En producción, usar variable de entorno CORS_ORIGIN o permitir Vercel por defecto
-const getCorsOrigins = (): string[] | boolean => {
-  if (process.env.NODE_ENV === 'production') {
-    // Si hay una variable CORS_ORIGIN configurada, usarla
-    if (process.env.CORS_ORIGIN) {
-      return process.env.CORS_ORIGIN.split(',').map(origin => origin.trim());
-    }
-    // Permitir cualquier dominio de Vercel por defecto
-    return true; // En producción también permitir todos si no está especificado (para facilidad)
+// Configuración de CORS para permitir conexiones desde la app móvil y previews de Vercel.
+const allowedOriginsFromEnv = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const defaultAllowedOriginPatterns = [
+  /^https?:\/\/localhost(?::\d+)?$/i,
+  /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i,
+  /^exp:\/\/.+$/i,
+  /^https:\/\/.*\.vercel\.app$/i,
+];
+
+const isOriginAllowed = (origin?: string): boolean => {
+  if (!origin) {
+    return true;
   }
-  // En desarrollo, permitir todas las conexiones
-  return true;
+
+  if (allowedOriginsFromEnv.includes(origin)) {
+    return true;
+  }
+
+  return defaultAllowedOriginPatterns.some((pattern) => pattern.test(origin));
 };
 
-const corsOptions = {
-  origin: getCorsOrigins(),
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`Origen no permitido por CORS: ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
