@@ -1,8 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npx prisma generate",
+  "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "outputDirectory": "public",
   "framework": null,
   "functions": {
     "api/index.js": {
