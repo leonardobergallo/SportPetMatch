@@ -11,7 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
 		<!-- Backend público separado para no depender del /api protegido del proyecto principal -->
-		<meta name="indio-api-base" content="https://sport-pet-match-backend2.vercel.app/api" />
+		<meta name="indio-api-base" content="/api" />
 		<link rel="stylesheet" href="/multiverse/assets/css/main.css" />
 		<link rel="stylesheet" href="/multiverse/assets/css/indio-override.css" />
 		<noscript><link rel="stylesheet" href="/multiverse/assets/css/noscript.css" /></noscript>
@@ -459,7 +459,7 @@
 							throw new Error(
 								'Sin API en este sitio (llegó una página HTML, no el backend). ' +
 								'Usá un deploy monorepo desde la raíz o configurá el backend separado en ' +
-								'meta name=indio-api-base content=https://TU-API.vercel.app/api'
+								'meta name=indio-api-base content=/api'
 							);
 						}
 						try {

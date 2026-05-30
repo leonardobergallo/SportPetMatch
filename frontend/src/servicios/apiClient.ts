@@ -45,7 +45,7 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     if (!API_BASE_URL || API_BASE_URL === '') {
-      const error = new Error('Backend no configurado. Por favor, configura EXPO_PUBLIC_API_URL en Vercel.');
+      const error = new Error('Backend no configurado. Por favor, configura EXPO_PUBLIC_API_URL o indio-api-base.');
       console.warn(error.message);
       return Promise.reject(error);
     }
@@ -94,7 +94,7 @@ apiClient.interceptors.response.use(
       const configInfo = getConfigInfo();
 
       if (!configInfo.apiURL || configInfo.apiURL === '') {
-        const errorMessage = 'Backend no configurado. Por favor, configura EXPO_PUBLIC_API_URL en Vercel.';
+        const errorMessage = 'Backend no configurado. Por favor, configura EXPO_PUBLIC_API_URL o indio-api-base.';
         console.warn(errorMessage);
         throw new Error(errorMessage);
       }
