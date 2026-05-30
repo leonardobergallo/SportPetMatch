@@ -125,6 +125,8 @@ Build VPS completo: OK
 Servidor local VPS: OK
 /api/salud: 200
 /: 200
+Deploy VPS final: OK desde el servidor
+Frontend y API bajo el mismo dominio: OK
 ```
 
 Configuracion Coolify esperada:

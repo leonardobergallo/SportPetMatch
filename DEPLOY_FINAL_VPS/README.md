@@ -21,7 +21,12 @@ Usar SportPetMatch como proyecto modelo para migrar despues Market Santa Fe y ot
 - El servidor VPS local ya fue probado:
   - `GET /api/salud` respondio `200`
   - `GET /` respondio `200`
-- El VPS `69.62.64.252` no respondia en `22`, `80` ni `8000` al momento de la verificacion.
+- Deploy VPS final probado desde el servidor:
+  - `GET /` respondio `200` con `text/html`
+  - `GET /app.html` respondio `200` con `text/html`
+  - `GET /api/salud` respondio `200`
+  - `meta[name="indio-api-base"]` quedo en `/api`
+  - Imagen Docker activa: `djy0oa0nqb3409yv1j6j14s9:f13f17e`
 
 ## Cuando el VPS vuelva
 

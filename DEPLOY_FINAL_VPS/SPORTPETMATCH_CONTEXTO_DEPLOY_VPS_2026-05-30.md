@@ -102,6 +102,17 @@ GET http://127.0.0.1:3000/api/salud: 200
 GET http://127.0.0.1:3000/: 200
 ```
 
+Validacion final en VPS:
+
+```text
+URL: http://sportpetmatch.69.62.64.252.sslip.io
+Imagen activa: djy0oa0nqb3409yv1j6j14s9:f13f17e
+GET /: 200 text/html
+GET /app.html: 200 text/html
+GET /api/salud: 200 application/json
+Frontend API base: /api
+```
+
 En Coolify:
 
 ```text
