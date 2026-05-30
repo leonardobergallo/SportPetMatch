@@ -44,6 +44,10 @@ coverage/
 # Misc
 *.pem
 *.key
+frontend/credentials.json
+frontend/android/keystores/
+frontend/indio-latest.apk
+frontend/*.apk
 
 # Expo: copia generada para estáticos en dev (npm run sync-public / preweb)
 frontend/public/
@@ -58,6 +62,7 @@ backend/.expo/
 .env*.local
 
 # Local/generated artifacts
+.codex-logs/
 .playwright-mcp/
 Fotos Leo/
 public/

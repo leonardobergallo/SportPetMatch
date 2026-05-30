@@ -64,13 +64,15 @@
         {
           "photosPermission": "La app necesita acceso a tus fotos para que puedas seleccionar imágenes de tu mascota."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "extra": {
+      "slogan": "Indio, mi mejor amigo",
       "eas": {
-        "projectId": "tu-project-id-aqui"
-      },
-      "slogan": "Indio, mi mejor amigo"
-    }
+        "projectId": "14fd1aef-1de1-4762-9e4c-f01c08982de6"
+      }
+    },
+    "owner": "leobergallo"
   }
 }

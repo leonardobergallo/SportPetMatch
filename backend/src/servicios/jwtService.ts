@@ -1,10 +1,14 @@
 // Servicio JWT - Manejo de tokens de autenticación
 import jwt, { SignOptions } from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_jwt_secret_muy_seguro_aqui_cambiar_en_produccion';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || '7d') as string | number;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'tu_refresh_secret_muy_seguro_aqui_cambiar_en_produccion';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const JWT_REFRESH_EXPIRES_IN = (process.env.JWT_REFRESH_EXPIRES_IN || '30d') as string | number;
+
+if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
+  throw new Error('JWT_SECRET y JWT_REFRESH_SECRET son obligatorios.');
+}
 
 export interface TokenPayload {
   usuarioId: string;

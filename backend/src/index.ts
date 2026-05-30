@@ -109,8 +109,8 @@ if (process.env.NODE_ENV === 'development') {
 // el polling de la app mientras estamos probando flujos.
 const rateLimitMax =
   process.env.NODE_ENV === 'development'
-    ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS_DEV || '1000')
-    : parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100');
+    ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS_DEV || process.env.RATE_LIMIT_MAX || '1000')
+    : parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || process.env.RATE_LIMIT_MAX || '1000');
 
 // Rate limiting para prevenir abuso de la API
 const limitador = rateLimit({

@@ -12,7 +12,7 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|@react-navigation|@expo|expo|@unimodules|unimodules|sentry-expo|native-base|react-native-svg)',
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/componentes/(.*)$': '<rootDir>/src/componentes/$1',
     '^@/pantallas/(.*)$': '<rootDir>/src/pantallas/$1',

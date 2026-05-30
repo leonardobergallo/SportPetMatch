@@ -71,22 +71,4 @@ config.server = {
 // Configuración de caché - deshabilitar caché problemática pero mantener estabilidad
 // config.cacheStores = []; // Comentado para evitar problemas de reconexión
 
-// Configuración de resolución de archivos
-config.resolver.sourceExts = [
-  'js',
-  'jsx',
-  'ts',
-  'tsx',
-  'json',
-  'cjs',
-];
-
-// Configuración de plataformas
-config.resolver.platforms = [
-  'ios',
-  'android',
-  'native',
-  'web',
-];
-
 module.exports = config;

@@ -1,7 +1,7 @@
 // Pantalla de Matches de SportPetMatch
 // Conversaciones con usuarios que han hecho match
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -20,10 +20,10 @@ import {
   FAB,
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
-import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
+import { RootStackParamList, TabParamList } from '../navegacion/NavegacionPrincipal';
 import { useAuth } from '../contextos/ContextoAuth';
 import { obtenerMisMatches, Match } from '../servicios/servicioMatches';
 import {
@@ -34,6 +34,7 @@ import {
 } from '../servicios/servicioMensajes';
 
 type MatchesScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+type MatchesScreenRouteProp = RouteProp<TabParamList, 'Matches'>;
 
 interface Conversacion {
   match: Match;
@@ -49,7 +50,9 @@ interface Conversacion {
 
 export default function PantallaMatches(): JSX.Element {
   const navigation = useNavigation<MatchesScreenNavigationProp>();
+  const route = useRoute<MatchesScreenRouteProp>();
   const { usuario } = useAuth();
+  const matchAbiertoRef = useRef<string | null>(null);
 
   const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
   const [busqueda, setBusqueda] = useState('');
@@ -60,6 +63,20 @@ export default function PantallaMatches(): JSX.Element {
   useEffect(() => {
     cargarDatos({ mostrarError: true });
   }, []);
+
+  useEffect(() => {
+    const openMatchId = route.params?.openMatchId;
+
+    if (!openMatchId || cargando || matchAbiertoRef.current === openMatchId) {
+      return;
+    }
+
+    const conversacion = conversaciones.find((item) => item.match.id === openMatchId);
+    if (conversacion) {
+      matchAbiertoRef.current = openMatchId;
+      navigation.navigate('Chat', { matchId: openMatchId });
+    }
+  }, [route.params?.openMatchId, cargando, conversaciones, navigation]);
 
   useEffect(() => {
     const interval = setInterval(() => {

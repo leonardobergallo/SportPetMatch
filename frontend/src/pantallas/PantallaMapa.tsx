@@ -21,11 +21,28 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useUbicacion } from '../contextos/ContextoUbicacion';
 import { temaApp, espaciado } from '../constantes/tema';
+import { obtenerEventos } from '../servicios/servicioEventos';
+import { obtenerRecomendaciones } from '../servicios/servicioMatches';
 
 // Coordenadas de Santa Fe Capital, Argentina (por defecto)
 const SANTA_FE_CAPITAL = {
   latitud: -31.6333,
   longitud: -60.7,
+};
+
+const PUNTOS_SANTA_FE = [
+  { latitud: -31.6307, longitud: -60.6950, ciudad: 'Centro, Santa Fe' },
+  { latitud: -31.6240, longitud: -60.7080, ciudad: 'Candioti Sur, Santa Fe' },
+  { latitud: -31.6420, longitud: -60.6850, ciudad: 'Barranquitas, Santa Fe' },
+  { latitud: -31.6180, longitud: -60.7120, ciudad: 'Guadalupe Norte, Santa Fe' },
+  { latitud: -31.6350, longitud: -60.7000, ciudad: 'Costanera, Santa Fe' },
+];
+
+const fechaFutura = (dias: number, hora = 9): string => {
+  const fecha = new Date();
+  fecha.setDate(fecha.getDate() + dias);
+  fecha.setHours(hora, 0, 0, 0);
+  return fecha.toISOString();
 };
 
 // Tipos para los datos del mapa
@@ -435,8 +452,51 @@ export default function PantallaMapa() {
         }
       ];
 
-      setUsuarios(usuariosPrueba);
-      setEventos(eventosPrueba);
+      const [usuariosRecomendados, eventosApi] = await Promise.all([
+        obtenerRecomendaciones().catch(() => []),
+        obtenerEventos({
+          fechaDesde: new Date().toISOString(),
+          limit: 20,
+          esPetFriendly: true,
+        }).catch(() => []),
+      ]);
+
+      const usuariosMapa = usuariosRecomendados.length > 0
+        ? usuariosRecomendados.slice(0, 12).map((usuario, index) => {
+            const punto = PUNTOS_SANTA_FE[index % PUNTOS_SANTA_FE.length];
+            return {
+              id: usuario.id,
+              nombre: usuario.nombre,
+              edad: 25,
+              ubicacionLat: usuario.ubicacionLat || punto.latitud,
+              ubicacionLng: usuario.ubicacionLng || punto.longitud,
+              ubicacionCiudad: usuario.ubicacionCiudad || punto.ciudad,
+              mascotas: usuario.mascotas.map((mascota) => `${mascota.nombre} (${mascota.tipo})`),
+            };
+          })
+        : usuariosPrueba;
+
+      const eventosMapa = eventosApi.length > 0
+        ? eventosApi.slice(0, 12).map((evento, index) => {
+            const punto = PUNTOS_SANTA_FE[(index + 1) % PUNTOS_SANTA_FE.length];
+            return {
+              id: evento.id,
+              titulo: evento.titulo,
+              tipo: evento.tipo,
+              fechaInicio: evento.fechaInicio,
+              ubicacionLat: punto.latitud,
+              ubicacionLng: punto.longitud,
+              participantes: evento.participantesCount || 0,
+              maxParticipantes: evento.maxParticipantes || 20,
+            };
+          })
+        : eventosPrueba.map((evento, index) => ({
+            ...evento,
+            fechaInicio: fechaFutura(index + 3, index % 2 === 0 ? 9 : 17),
+          }));
+
+      setUsuarios(usuariosMapa);
+      setEventos(eventosMapa);
       
     } catch (error) {
       console.error('Error cargando datos del mapa:', error);

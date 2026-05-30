@@ -16,14 +16,10 @@ import {
 import { Avatar, Button, Card, Chip, Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 
 import { temaApp } from '../constantes/tema';
-import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { Coordenadas, useUbicacion } from '../contextos/ContextoUbicacion';
 import { crearMatch, obtenerRecomendaciones } from '../servicios/servicioMatches';
-
-type MatchingScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 interface UsuarioPotencial {
   id: string;
@@ -82,7 +78,7 @@ function resolverImagenMascota(uri: string | null, index: number): ImageSourcePr
 }
 
 export default function PantallaMatching(): JSX.Element {
-  const navigation = useNavigation<MatchingScreenNavigationProp>();
+  const navigation = useNavigation<any>();
   const [usuarios, setUsuarios] = useState<UsuarioPotencial[]>([]);
   const [usuarioActual, setUsuarioActual] = useState(0);
   const [cargando, setCargando] = useState(true);
@@ -170,24 +166,20 @@ export default function PantallaMatching(): JSX.Element {
     }
   };
 
-  const enviarLike = async (usuarioId: string) => {
+  const navegarAlChat = (matchId: string) => {
+    navigation.navigate('Matches', { openMatchId: matchId });
+  };
+
+  const enviarLike = async (usuarioId: string): Promise<boolean> => {
     try {
       const match = await crearMatch({
         usuarioMatchId: usuarioId,
       });
 
       if (match.estado === 'aceptado') {
-        Alert.alert(
-          'Es un Match',
-          'Ambos se gustaron. Ya pueden abrir el chat.',
-          [
-            { text: 'Seguir viendo' },
-            {
-              text: 'Ir al chat',
-              onPress: () => navigation.navigate('Chat', { matchId: match.id }),
-            },
-          ]
-        );
+        setUsuarios((prev) => prev.filter((u) => u.id !== usuarioId));
+        navegarAlChat(match.id);
+        return true;
       } else {
         Alert.alert(
           'Like enviado',
@@ -199,6 +191,8 @@ export default function PantallaMatching(): JSX.Element {
       console.error('Error enviando like:', error);
       Alert.alert('Error', error.message || 'No se pudo enviar el like');
     }
+
+    return false;
   };
 
   const enviarPass = async (usuarioId: string) => {
@@ -214,7 +208,8 @@ export default function PantallaMatching(): JSX.Element {
     if (!usuario) return;
 
     if (direction === 'right') {
-      await enviarLike(usuario.id);
+      const abreChat = await enviarLike(usuario.id);
+      if (abreChat) return;
     } else {
       await enviarPass(usuario.id);
     }

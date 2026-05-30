@@ -10,8 +10,8 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
-		<!-- Opcional: forzar URL del API. Si está vacío, se detecta solo (igual que la app React: local → :3000, producción → /api) -->
-		<meta name="indio-api-base" content="/api" />
+		<!-- Backend público separado para no depender del /api protegido del proyecto principal -->
+		<meta name="indio-api-base" content="https://sport-pet-match-backend2.vercel.app/api" />
 		<link rel="stylesheet" href="/multiverse/assets/css/main.css" />
 		<link rel="stylesheet" href="/multiverse/assets/css/indio-override.css" />
 		<noscript><link rel="stylesheet" href="/multiverse/assets/css/noscript.css" /></noscript>
@@ -102,7 +102,7 @@
 								<div class="indio-paw" aria-hidden="true">🐾</div>
 								<h2 class="indio-title indio-display">Indio</h2>
 								<p class="indio-slogan">Mi mejor amigo</p>
-								<p class="indio-desc"><strong>Eventos, matching y chat para personas y mascotas.</strong> Gratis durante la beta. Creá tu cuenta una sola vez y seguí el flujo guiado para completar tu perfil, agregar tu mascota y empezar a usar Indio.</p>
+								<p class="indio-desc"><strong>Eventos, matching y chat para personas y mascotas.</strong> Indio es gratis durante esta beta de prueba. Por ahora la experiencia esta enfocada en la provincia de Santa Fe y zonas cercanas como Parana; mas adelante se puede extender a nuevas ciudades.</p>
 								<form id="indio-form-login" class="indio-form-box" novalidate>
 									<label for="indio-email">Email</label>
 									<input id="indio-email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" required />
@@ -124,14 +124,14 @@
 									<div class="indio-feature-icon" aria-hidden="true">📅</div>
 									<div>
 										<h3>Eventos</h3>
-										<p>Descubrí personas con mascotas, sumate a encuentros y encontrá eventos pet-friendly cerca tuyo.</p>
+										<p>Descubri personas con mascotas, sumate a encuentros y encontra eventos pet-friendly en Santa Fe y zonas cercanas como Parana.</p>
 									</div>
 								</div>
 								<div class="indio-feature">
 									<div class="indio-feature-icon" aria-hidden="true">💜</div>
 									<div>
 										<h3>Matching</h3>
-										<p>Encontrá personas y mascotas compatibles según intereses, nivel y ubicación.</p>
+										<p>Encontra personas y mascotas compatibles segun intereses, nivel y ubicacion dentro de la beta regional.</p>
 									</div>
 								</div>
 								<div class="indio-feature">
@@ -152,14 +152,14 @@
 									<div class="indio-feature-icon" aria-hidden="true">🐾</div>
 									<div>
 										<h3>Comunidad</h3>
-										<p>Sumate a una comunidad pensada para personas con mascotas, matches y salidas compartidas.</p>
+										<p>Sumate a una comunidad pensada para personas con mascotas de Santa Fe, Parana y alrededores.</p>
 									</div>
 								</div>
 								<div class="indio-feature">
 									<div class="indio-feature-icon" aria-hidden="true">🆓</div>
 									<div>
 										<h3>Gratis</h3>
-										<p>Acceso gratuito durante esta etapa beta.</p>
+										<p>Acceso gratuito durante la versión beta de prueba.</p>
 									</div>
 								</div>
 							</div>
@@ -203,51 +203,50 @@
 							<div class="indio-section-inner">
 								<p class="indio-tag">INSTALACIÓN</p>
 								<h2 class="indio-section-title indio-display">Usá Indio en tu teléfono</h2>
-								<p class="indio-install-intro">Podés acceder desde la web o instalar Indio en tu celular. La cuenta es la misma en todos los dispositivos.</p>
+								<p class="indio-install-intro">Elegí tu teléfono y seguí estos pasos. La cuenta es la misma en web, Android y iPhone.</p>
 								<div class="indio-install-row">
 									<div class="indio-install-card">
 										<span class="indio-install-emoji" aria-hidden="true">🍎</span>
 										<h3>iPhone (Safari)</h3>
 										<ol class="indio-install-steps-list">
-											<li>Abrí esta web con <strong>Safari</strong>.</li>
-											<li>Tocá <strong>Compartir</strong>.</li>
-											<li>Elegí <strong>Agregar a inicio</strong>.</li>
-											<li>Abrí el ícono e iniciá sesión con tu cuenta.</li>
+											<li>Abrí este link con <strong>Safari</strong>: <a href="https://sport-pet-match3.vercel.app/" target="_blank" rel="noopener noreferrer">sport-pet-match3.vercel.app</a></li>
+											<li>Tocá <strong>Compartir</strong> y después <strong>Agregar a pantalla de inicio</strong>.</li>
+											<li>Abrí el ícono de Indio e iniciá sesión.</li>
 										</ol>
-										<p class="indio-install-note">Se instala como app desde Safari, sin App Store.</p>
+										<p class="indio-install-note">Próximamente también en App Store.</p>
 									</div>
 									<div class="indio-install-card">
 										<span class="indio-install-emoji" aria-hidden="true">🤖</span>
 										<h3>Android</h3>
-										<p>Podés usar Indio desde el navegador o instalar la app con el APK oficial del proyecto.</p>
+										<p>Abrí Chrome y descargá la app desde el botón.</p>
 										<div class="indio-apk-box">
 											<p class="indio-apk-title">¿Qué es el APK?</p>
 											<p>Es el paquete que Android usa para instalar apps fuera de la tienda. Es seguro si confiás en el enlace oficial del proyecto.</p>
 											<ol class="indio-apk-steps">
-												<li>Tocá <strong>Descargar APK</strong> y esperá la descarga.</li>
-												<li>Abrí el archivo desde <strong>Descargas</strong> o la notificación.</li>
-												<li>Si pide permiso, permití instalar desde el navegador o archivos.</li>
-												<li>Abrí Indio e iniciá sesión con la misma cuenta.</li>
+												<li>Abrí este link con <strong>Chrome</strong>: <a href="https://sport-pet-match3.vercel.app/" target="_blank" rel="noopener noreferrer">sport-pet-match3.vercel.app</a></li>
+												<li>Tocá <strong>Descargar APK de prueba</strong>.</li>
+												<li>Abrí el archivo descargado y tocá <strong>Instalar</strong>.</li>
+												<li>Si Android pide permiso, aceptá instalar desde Chrome.</li>
 											</ol>
 										</div>
-										<p class="indio-install-apk-wrap"><a class="indio-install-apk" href="https://github.com/leonardobergallo/SportPetMatch/releases/latest/download/indio-latest.apk" target="_blank" rel="noopener noreferrer">Descargar APK (última versión)</a></p>
-										<p class="indio-install-note">Enlace oficial: <code class="indio-code">github.com/…/releases/…/indio-latest.apk</code></p>
+										<p class="indio-install-apk-wrap"><a class="indio-install-apk" href="https://github.com/marketsantafeoficial-a11y/SportPetMatch2/releases/download/v1.0.0/indio-latest.apk" target="_blank" rel="noopener noreferrer">Descargar APK de prueba</a></p>
+										<p class="indio-install-note">Link directo al APK: <a href="https://github.com/marketsantafeoficial-a11y/SportPetMatch2/releases/download/v1.0.0/indio-latest.apk" target="_blank" rel="noopener noreferrer">indio-latest.apk</a></p>
 									</div>
 								</div>
 								<p class="indio-install-micro">Si preferís, también podés usar Indio desde la web sin instalar nada.</p>
 							</div>
 						</div>
 
-						<!-- Planes y precios -->
+						<!-- Planes y apoyo voluntario -->
 						<div class="indio-section indio-precios-section" id="indio-precios">
-							<p class="indio-tag">PLANES</p>
-							<h2 class="indio-display">Elegí tu plan</h2>
-							<p class="indio-precios-sub">Usá Indio gratis o pasate a Premium para desbloquear todo.</p>
+							<p class="indio-tag">APOYO</p>
+							<h2 class="indio-display">Indio es gratis durante la beta</h2>
+							<p class="indio-precios-sub">Si te gusta la app y querés apoyar el desarrollo, podés hacer una donación voluntaria. No es obligatoria para usar Indio.</p>
 							<div class="indio-precios-grid">
 								<div class="indio-plan">
 									<div class="indio-plan-badge indio-plan-badge-free">GRATIS</div>
 									<div class="indio-plan-price">ARS <span class="indio-plan-num">$0</span></div>
-									<p class="indio-plan-period">Durante la beta</p>
+									<p class="indio-plan-period">Acceso libre durante la beta</p>
 									<ul class="indio-plan-features">
 										<li>&#10003; Perfil de usuario y mascota</li>
 										<li>&#10003; Matching con otros due&#241;os</li>
@@ -258,18 +257,18 @@
 									<button type="button" class="indio-btn-plan indio-btn-plan-free" onclick="document.getElementById('indio-mid-cta').click()">Crear cuenta</button>
 								</div>
 								<div class="indio-plan indio-plan-premium">
-									<div class="indio-plan-badge indio-plan-badge-pro">PREMIUM</div>
-									<div class="indio-plan-price">ARS <span class="indio-plan-num">$14.990</span></div>
-									<p class="indio-plan-period">por mes &middot; pr&#243;ximamente</p>
+									<div class="indio-plan-badge indio-plan-badge-pro">DONACIÓN</div>
+									<div class="indio-plan-price">Aporte <span class="indio-plan-num">voluntario</span></div>
+									<p class="indio-plan-period">Para quienes quieran apoyar el proyecto</p>
 									<ul class="indio-plan-features">
-										<li>&#10003; Todo lo del plan Gratis</li>
-										<li>&#11088; Perfil destacado en el feed</li>
-										<li>&#11088; Matches ilimitados por d&#237;a</li>
-										<li>&#11088; Ver qui&#233;n vio tu perfil</li>
-										<li>&#11088; Prioridad en eventos</li>
-										<li>&#11088; Soporte prioritario</li>
+										<li>&#10003; Alias: <strong>IT360.SOLUCIONES</strong></li>
+										<li>&#10003; Banco Santander</li>
+										<li>&#10003; CBU: 0720156788000001781072</li>
+										<li>&#10003; Cuenta: CAJA DE AHORRO EN PESOS 156-017810/7</li>
+										<li>&#10003; Titular: ANIBAL LEONARDO BERGALLO</li>
+										<li>&#10003; CUIT: 23-27487833-9</li>
 									</ul>
-									<button type="button" class="indio-btn-plan indio-btn-plan-pro">Pr&#243;ximamente</button>
+									<a class="indio-btn-plan indio-btn-plan-pro" href="https://wa.me/5493425089906?text=Hola%2C%20quiero%20apoyar%20Indio%20con%20una%20donaci%C3%B3n." target="_blank" rel="noopener noreferrer">Avisar donación</a>
 								</div>
 							</div>
 						</div>
@@ -278,9 +277,9 @@
 							<div class="indio-extra-card" id="indio-registro">
 								<p class="indio-tag">ESTADO DEL PROYECTO</p>
 								<h2 class="indio-display">Estamos construyendo la próxima beta</h2>
-								<p class="indio-extra-lead">Indio está enfocado en una experiencia simple: crear tu cuenta, completar el onboarding, agregar tu mascota y empezar a explorar eventos, matching y chat.</p>
+								<p class="indio-extra-lead">Indio esta enfocado en una experiencia simple para la beta regional: crear tu cuenta, completar el onboarding, agregar tu mascota y empezar a explorar eventos, matching y chat en Santa Fe, Parana y alrededores.</p>
 								<div class="indio-steps">
-									<div class="indio-step"><div class="indio-step-num">✓</div><h3>Gratis durante la beta</h3><p>Podés registrarte y empezar a usar Indio sin costo.</p></div>
+									<div class="indio-step"><div class="indio-step-num">✓</div><h3>Gratis durante la beta</h3><p>Podés registrarte y empezar a usar Indio sin costo mientras está en versión de prueba.</p></div>
 									<div class="indio-step"><div class="indio-step-num">⚙</div><h3>En desarrollo activo</h3><p>Estamos mejorando funciones y experiencia semana a semana.</p></div>
 									<div class="indio-step"><div class="indio-step-num">→</div><h3>Próximamente más funciones</h3><p>Seguimos trabajando en nuevas herramientas para la comunidad.</p></div>
 								</div>
@@ -314,7 +313,7 @@
 
 						<div class="indio-brand-footer">
 							<strong>Indio · mi mejor amigo</strong>
-							Eventos, matching y chat para personas y mascotas · Gratis durante la beta · IT360
+							Eventos, matching y chat para personas y mascotas · Beta gratis en Santa Fe, Parana y alrededores · IT360
 						</div>
 					</div>
 				</section>
@@ -325,7 +324,7 @@
 							<div>
 								<section>
 									<h2>Indio</h2>
-									<p>App para <strong>personas y mascotas</strong>: eventos, matching y chat. Gratis durante la beta y en desarrollo activo.</p>
+									<p>App para <strong>personas y mascotas</strong>: eventos, matching y chat. Gratis durante la beta de prueba, enfocada por ahora en Santa Fe, Parana y alrededores.</p>
 								</section>
 								<section>
 									<h2>IT360</h2>

@@ -262,12 +262,7 @@ export const crearMatch = async (req: Request, res: Response): Promise<void> => 
     });
 
     if (matchExistente) {
-      const esLikeReciprocoPendiente =
-        matchExistente.usuarioId === usuarioMatchId &&
-        matchExistente.usuarioMatchId === usuarioId &&
-        matchExistente.estado === 'pendiente';
-
-      if (esLikeReciprocoPendiente) {
+      if (matchExistente.estado !== 'aceptado') {
         const matchAceptado = await prisma.match.update({
           where: { id: matchExistente.id },
           data: {
@@ -306,9 +301,37 @@ export const crearMatch = async (req: Request, res: Response): Promise<void> => 
         return;
       }
 
-      res.status(409).json({
-        success: false,
-        message: 'Ya existe un match con este usuario',
+      const matchAceptado = await prisma.match.findUnique({
+        where: { id: matchExistente.id },
+        include: {
+          usuario: {
+            select: {
+              id: true,
+              nombre: true,
+              avatar: true,
+            },
+          },
+          usuarioMatch: {
+            select: {
+              id: true,
+              nombre: true,
+              avatar: true,
+            },
+          },
+          eventoPropuesto: matchExistente.eventoPropuestoId ? {
+            select: {
+              id: true,
+              titulo: true,
+              fechaInicio: true,
+            },
+          } : false,
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Ya tenes un match con este usuario. Pueden chatear.',
+        data: matchAceptado,
       });
       return;
     }
@@ -328,16 +351,23 @@ export const crearMatch = async (req: Request, res: Response): Promise<void> => 
       }
     }
 
-    // Crear el match
+    // En la beta, tocar "Match" abre la conversacion directamente.
     const nuevoMatch = await prisma.match.create({
       data: {
         usuarioId,
         usuarioMatchId,
         mensajeInicial: mensajeInicial || null,
         eventoPropuestoId: eventoPropuestoId || null,
-        estado: 'pendiente',
+        estado: 'aceptado',
       },
       include: {
+        usuario: {
+          select: {
+            id: true,
+            nombre: true,
+            avatar: true,
+          },
+        },
         usuarioMatch: {
           select: {
             id: true,
@@ -357,7 +387,7 @@ export const crearMatch = async (req: Request, res: Response): Promise<void> => 
 
     res.status(201).json({
       success: true,
-      message: 'Match creado exitosamente',
+      message: 'Match creado. Ya pueden chatear.',
       data: nuevoMatch,
     });
   } catch (error) {

@@ -54,6 +54,8 @@ export interface Match {
   fechaMatch: string;
   mensajeInicial: string | null;
   eventoPropuestoId: string | null;
+  usuarioId: string;
+  usuarioMatchId: string;
   usuario: {
     id: string;
     nombre: string;

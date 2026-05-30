@@ -5,8 +5,11 @@
   "private": true,
   "scripts": {
     "start": "npm run dev:frontend",
+    "dev:frontend": "npm run --prefix frontend web",
+    "dev:backend": "npm run --prefix backend dev",
     "vercel-build": "node scripts/vercel-build.js",
     "build": "npm run install:backend && npm run install:frontend && npm run build:backend && npm run build:frontend && node scripts/copiar-api.js",
+    "build:all": "npm run build",
     "install:backend": "npm install --prefix backend",
     "install:frontend": "npm install --prefix frontend",
     "build:backend": "npm run --prefix backend build",
