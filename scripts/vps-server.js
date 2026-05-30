@@ -1,17 +1,18 @@
 #!/usr/bin/env node
-const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
 const rootDir = path.join(__dirname, '..');
+const backendDir = path.join(rootDir, 'backend');
 const publicDir = path.join(rootDir, 'public');
 const port = parseInt(process.env.PORT || '3000', 10);
 const host = process.env.HOST || '0.0.0.0';
+const express = require(path.join(backendDir, 'node_modules', 'express'));
 
 let apiApp;
 
 try {
-  const importedApi = require(path.join(rootDir, 'backend', 'dist', 'src', 'index.js'));
+  const importedApi = require(path.join(backendDir, 'dist', 'src', 'index.js'));
   apiApp = importedApi.default || importedApi;
 
   if (!apiApp || typeof apiApp !== 'function') {
