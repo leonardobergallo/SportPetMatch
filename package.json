@@ -8,6 +8,8 @@
     "dev:frontend": "npm run --prefix frontend web",
     "dev:backend": "npm run --prefix backend dev",
     "vercel-build": "node scripts/vercel-build.js",
+    "vps-build": "node scripts/vps-build.js",
+    "vps-start": "node scripts/vps-server.js",
     "build": "npm run install:backend && npm run install:frontend && npm run build:backend && npm run build:frontend && node scripts/copiar-api.js",
     "build:all": "npm run build",
     "install:backend": "npm install --prefix backend",

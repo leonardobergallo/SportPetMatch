@@ -173,8 +173,9 @@ app.use('/api/matches', rutasMatches);
 app.use('/api/mensajes', rutasMensajes);
 app.use('/api/admin', rutasAdmin);
 
-// Middleware para rutas no encontradas (404)
-app.use('*', (req: Request, res: Response) => {
+// Middleware para rutas de API no encontradas (404).
+// Mantenerlo limitado a /api permite que un servidor externo sirva la web estatica.
+app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({
     error: 'Endpoint no encontrado',
     mensaje: `La ruta ${req.originalUrl} no existe en esta API`,
