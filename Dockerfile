@@ -8,9 +8,13 @@ ENV PORT=3016
 
 COPY package*.json ./
 COPY backend/package*.json ./backend/
+COPY backend/prisma ./backend/prisma
 COPY frontend/package*.json ./frontend/
 
-RUN npm install \
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install \
   && npm install --prefix backend \
   && npm install --prefix frontend
 
