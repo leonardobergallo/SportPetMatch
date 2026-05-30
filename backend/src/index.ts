@@ -31,6 +31,7 @@ dotenv.config({ path: configPath });
 
 // Crear aplicación Express
 const app = express();
+app.set('trust proxy', 1);
 
 // Configuración del puerto
 // Convertir a número explícitamente para evitar errores de TypeScript
@@ -60,6 +61,7 @@ const defaultAllowedOriginPatterns = [
   /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i,
   /^exp:\/\/.+$/i,
   /^https:\/\/.*\.vercel\.app$/i,
+  /^https?:\/\/.*\.sslip\.io(?::\d+)?$/i,
 ];
 
 const isOriginAllowed = (origin?: string): boolean => {
