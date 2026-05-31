@@ -62,6 +62,7 @@ const defaultAllowedOriginPatterns = [
   /^exp:\/\/.+$/i,
   /^https:\/\/.*\.vercel\.app$/i,
   /^https?:\/\/.*\.sslip\.io(?::\d+)?$/i,
+  /^https?:\/\/(www\.)?indio\.com\.ar(?::\d+)?$/i,
 ];
 
 const isOriginAllowed = (origin?: string): boolean => {

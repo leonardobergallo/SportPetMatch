@@ -11,7 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
 		<!-- Backend público separado para no depender del /api protegido del proyecto principal -->
-		<meta name="indio-api-base" content="https://sport-pet-match-backend2.vercel.app/api" />
+		<meta name="indio-api-base" content="/api" />
 		<link rel="stylesheet" href="/multiverse/assets/css/main.css" />
 		<link rel="stylesheet" href="/multiverse/assets/css/indio-override.css" />
 		<noscript><link rel="stylesheet" href="/multiverse/assets/css/noscript.css" /></noscript>
@@ -209,7 +209,7 @@
 										<span class="indio-install-emoji" aria-hidden="true">🍎</span>
 										<h3>iPhone (Safari)</h3>
 										<ol class="indio-install-steps-list">
-											<li>Abrí este link con <strong>Safari</strong>: <a href="https://sport-pet-match3.vercel.app/" target="_blank" rel="noopener noreferrer">sport-pet-match3.vercel.app</a></li>
+											<li>Abrí este link con <strong>Safari</strong>: <a href="http://indio.com.ar/" target="_blank" rel="noopener noreferrer">indio.com.ar</a></li>
 											<li>Tocá <strong>Compartir</strong> y después <strong>Agregar a pantalla de inicio</strong>.</li>
 											<li>Abrí el ícono de Indio e iniciá sesión.</li>
 										</ol>
@@ -223,7 +223,7 @@
 											<p class="indio-apk-title">¿Qué es el APK?</p>
 											<p>Es el paquete que Android usa para instalar apps fuera de la tienda. Es seguro si confiás en el enlace oficial del proyecto.</p>
 											<ol class="indio-apk-steps">
-												<li>Abrí este link con <strong>Chrome</strong>: <a href="https://sport-pet-match3.vercel.app/" target="_blank" rel="noopener noreferrer">sport-pet-match3.vercel.app</a></li>
+												<li>Abrí este link con <strong>Chrome</strong>: <a href="http://indio.com.ar/" target="_blank" rel="noopener noreferrer">indio.com.ar</a></li>
 												<li>Tocá <strong>Descargar APK de prueba</strong>.</li>
 												<li>Abrí el archivo descargado y tocá <strong>Instalar</strong>.</li>
 												<li>Si Android pide permiso, aceptá instalar desde Chrome.</li>
@@ -241,7 +241,7 @@
 						<div class="indio-section indio-precios-section" id="indio-precios">
 							<p class="indio-tag">APOYO</p>
 							<h2 class="indio-display">Indio es gratis durante la beta</h2>
-							<p class="indio-precios-sub">Si te gusta la app y querés apoyar el desarrollo, podés hacer una donación voluntaria. No es obligatoria para usar Indio.</p>
+							<p class="indio-precios-sub">Si te gusta la app y querés ayudar a mantenerla activa, podés hacer una contribución voluntaria. No es obligatoria para usar Indio.</p>
 							<div class="indio-precios-grid">
 								<div class="indio-plan">
 									<div class="indio-plan-badge indio-plan-badge-free">GRATIS</div>
@@ -257,18 +257,15 @@
 									<button type="button" class="indio-btn-plan indio-btn-plan-free" onclick="document.getElementById('indio-mid-cta').click()">Crear cuenta</button>
 								</div>
 								<div class="indio-plan indio-plan-premium">
-									<div class="indio-plan-badge indio-plan-badge-pro">DONACIÓN</div>
-									<div class="indio-plan-price">Aporte <span class="indio-plan-num">voluntario</span></div>
-									<p class="indio-plan-period">Para quienes quieran apoyar el proyecto</p>
+									<div class="indio-plan-badge indio-plan-badge-pro">CONTRIBUCI&Oacute;N</div>
+									<div class="indio-plan-price">Mantenimiento <span class="indio-plan-num">voluntario</span></div>
+									<p class="indio-plan-period">Para ayudar a que Indio siga funcionando y mejorando.</p>
 									<ul class="indio-plan-features">
 										<li>&#10003; Alias: <strong>IT360.SOLUCIONES</strong></li>
 										<li>&#10003; Banco Santander</li>
-										<li>&#10003; CBU: 0720156788000001781072</li>
-										<li>&#10003; Cuenta: CAJA DE AHORRO EN PESOS 156-017810/7</li>
 										<li>&#10003; Titular: ANIBAL LEONARDO BERGALLO</li>
-										<li>&#10003; CUIT: 23-27487833-9</li>
 									</ul>
-									<a class="indio-btn-plan indio-btn-plan-pro" href="https://wa.me/5493425089906?text=Hola%2C%20quiero%20apoyar%20Indio%20con%20una%20donaci%C3%B3n." target="_blank" rel="noopener noreferrer">Avisar donación</a>
+									<a class="indio-btn-plan indio-btn-plan-pro" href="https://wa.me/5493425089906?text=Hola%2C%20quiero%20hacer%20una%20contribuci%C3%B3n%20para%20el%20mantenimiento%20de%20Indio." target="_blank" rel="noopener noreferrer">Avisar contribuci&oacute;n</a>
 								</div>
 							</div>
 						</div>
@@ -459,7 +456,7 @@
 							throw new Error(
 								'Sin API en este sitio (llegó una página HTML, no el backend). ' +
 								'Usá un deploy monorepo desde la raíz o configurá el backend separado en ' +
-								'meta name=indio-api-base content=https://TU-API.vercel.app/api'
+								'meta name=indio-api-base content=/api'
 							);
 						}
 						try {
@@ -467,6 +464,15 @@
 						} catch (e) {
 							throw new Error('No se pudo conectar con el servidor (respuesta no válida).');
 						}
+					}
+					function getApiErrorMessage(j) {
+						if (!j) return 'Error al iniciar sesión';
+						if (typeof j.message === 'string') return j.message;
+						if (typeof j.mensaje === 'string') return j.mensaje;
+						if (typeof j.error === 'string') return j.error;
+						if (j.message && typeof j.message.error === 'string') return j.message.error;
+						if (j.detalles && typeof j.detalles === 'string') return j.detalles;
+						return 'Error al iniciar sesión';
 					}
 					function mapUsuario(u) {
 						var nom = u && u.nombre ? String(u.nombre) : '';
@@ -545,7 +551,7 @@
 									return r.text().then(function (t) { return parseApiResponse(r, t); });
 								})
 								.then(function (j) {
-									if (!j.success) throw new Error(j.message || 'Error al iniciar sesión');
+									if (!j.success) throw new Error(getApiErrorMessage(j));
 									persistAndGo(j);
 								})
 								.catch(function (err) {
