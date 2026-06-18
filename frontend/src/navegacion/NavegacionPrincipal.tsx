@@ -32,6 +32,7 @@ import PantallaConfiguracion from '../pantallas/PantallaConfiguracion';
 // Importar tema y contexto de autenticación
 import { temaApp } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
+import Header from '../components/Header';
 
 // Tipos para la navegación
 export type RootStackParamList = {
@@ -145,6 +146,7 @@ function NavegadorTabs(): JSX.Element {
           fontWeight: '600',
           fontSize: 18,
         },
+        header: () => <Header />,
       })}
     >
       {/* Tab de Inicio - Pantalla principal con feed de actividades */}
@@ -153,7 +155,6 @@ function NavegadorTabs(): JSX.Element {
         component={PantallaInicio}
         options={{
           title: 'Inicio',
-          headerShown: false, // El header está en el componente Header
         }}
       />
       

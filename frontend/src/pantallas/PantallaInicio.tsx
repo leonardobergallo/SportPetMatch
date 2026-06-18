@@ -21,11 +21,11 @@ import { RootStackParamList, TabParamList } from '@/navegacion/NavegacionPrincip
 // Importar nuevos componentes UI
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import Header from '@/components/Header';
 import AdBanner from '@/componentes/AdBanner';
 
 // Importar servicios
 import { obtenerDashboard } from '@/servicios/servicioAuth';
+import { obtenerEventos, Evento } from '@/servicios/servicioEventos';
 
 // Importar tema y constantes
 import { temaApp, espaciado, sombras } from '@/constantes/tema';
@@ -33,9 +33,6 @@ import { useAuth } from '@/contextos/ContextoAuth';
 
 // Rutas a imágenes
 const images = {
-  golden: require('../../assets/golden-retriever-playing.png'),
-  huskyWalk: require('../../assets/husky-running-mountain.jpg'),
-  labradorPlay: require('../../assets/labrador-playing-tennis.jpg'),
   placeholder: require('../../assets/placeholder.jpg'),
 };
 
@@ -52,40 +49,7 @@ export default function PantallaInicio(): JSX.Element {
   const [datos, setDatos] = useState<any>(null);
   const [cargando, setCargando] = useState(true);
   const [searchText, setSearchText] = useState('');
-
-  // Datos mockados basados en la estructura
-  const events = [
-    {
-      id: 'event1',
-      title: 'Encuentro en parque pet-friendly',
-      location: 'Parque Central',
-      date: 'Sáb, 15 Nov',
-      distance: '2.5 km',
-      pets: 12,
-      image: images.golden,
-      matched: true,
-    },
-    {
-      id: 'event2',
-      title: 'Caminata grupal con mascotas',
-      location: 'Costanera Norte',
-      date: 'Dom, 16 Nov',
-      distance: '5.2 km',
-      pets: 8,
-      image: images.huskyWalk,
-      matched: false,
-    },
-    {
-      id: 'event3',
-      title: 'Merienda pet-friendly',
-      location: 'Café Huellitas',
-      date: 'Mié, 20 Nov',
-      distance: '3.1 km',
-      pets: 6,
-      image: images.labradorPlay,
-      matched: false,
-    },
-  ];
+  const [eventos, setEventos] = useState<Evento[]>([]);
 
   const matches = [
     {
@@ -93,29 +57,37 @@ export default function PantallaInicio(): JSX.Element {
       name: 'María González',
       pet: 'Golden Retriever',
       matchDate: 'Quiere ir a un parque este finde',
-      image: images.golden,
+      image: images.placeholder,
     },
     {
       id: 'match2',
       name: 'Carlos Ruiz',
       pet: 'Husky',
       matchDate: 'Busca compartir una salida pet-friendly',
-      image: images.huskyWalk,
+      image: images.placeholder,
     },
   ];
 
   useEffect(() => {
     cargarDatos();
+    cargarEventos();
   }, []);
+
+  const cargarEventos = async () => {
+    try {
+      const data = await obtenerEventos({ limit: 3 });
+      setEventos(data);
+    } catch (error: any) {
+      console.error('Error cargando eventos:', error);
+    }
+  };
 
   const cargarDatos = async () => {
     try {
-      // Usar servicio de autenticación
       const dashboardData = await obtenerDashboard();
       setDatos(dashboardData);
     } catch (error: any) {
       console.error('Error cargando datos:', error);
-      // Si hay error de autenticación, los datos serán null
     } finally {
       setCargando(false);
     }
@@ -123,27 +95,28 @@ export default function PantallaInicio(): JSX.Element {
 
   const manejarRefresh = React.useCallback(() => {
     setRefrescando(true);
-    cargarDatos().finally(() => {
+    Promise.all([cargarDatos(), cargarEventos()]).finally(() => {
       setRefrescando(false);
     });
   }, []);
 
   const manejarCrearEvento = () => {
     if (!estaAutenticado) {
-      // Si no está autenticado, navegar a login
       navigation.navigate('Login');
       return;
     }
-    // Navegar a la pantalla de crear evento
     navigation.navigate('CrearEvento');
+  };
+
+  const formatearFecha = (fechaISO: string) => {
+    const fecha = new Date(fechaISO);
+    const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return `${dias[fecha.getUTCDay()]}, ${fecha.getUTCDate()} ${meses[fecha.getUTCMonth()]}`;
   };
 
   return (
     <View style={estilos.contenedor}>
-      {/* Header */}
-      <Header />
-
-      {/* Content */}
       <ScrollView
         style={estilos.scrollView}
         contentContainerStyle={estilos.contentContainer}
@@ -187,43 +160,45 @@ export default function PantallaInicio(): JSX.Element {
           <View style={estilos.headerSeccion}>
             <Text style={estilos.tituloSeccion}>Eventos Pet-Friendly</Text>
             <View style={estilos.badge}>
-              <Text style={estilos.badgeTexto}>{events.length} eventos</Text>
+              <Text style={estilos.badgeTexto}>{eventos.length} eventos</Text>
             </View>
           </View>
           <View style={estilos.listaEventos}>
-            {events.map((event) => (
-              <Card key={event.id} style={estilos.cardEvento}>
+            {eventos.map((evento) => (
+              <Card key={evento.id} style={estilos.cardEvento}>
                 <View style={estilos.imagenContainer}>
-                  <Image source={event.image} style={estilos.imagenEvento} resizeMode="cover" />
-                  {event.matched && (
+                  <Image source={images.placeholder} style={estilos.imagenEvento} resizeMode="cover" />
+                  {evento.esPetFriendly && (
                     <View style={estilos.badgeMatch}>
-                      <MaterialIcons name="local-fire-department" size={14} color="#FFFFFF" />
-                      <Text style={estilos.badgeMatchTexto}>¡Match!</Text>
+                      <MaterialIcons name="pets" size={14} color="#FFFFFF" />
+                      <Text style={estilos.badgeMatchTexto}>Pet Friendly</Text>
                     </View>
                   )}
                   <View style={estilos.overlayImagen}>
-                    <Text style={estilos.tituloImagen}>{event.title}</Text>
+                    <Text style={estilos.tituloImagen}>{evento.titulo}</Text>
                   </View>
                 </View>
                 <CardContent>
                   <View style={estilos.infoEvento}>
                     <View style={estilos.filaEvento}>
                       <View style={estilos.infoItem}>
-                        <MaterialIcons name="place" size={14} color={temaApp.colors.primary} />
-                        <Text style={estilos.textoInfo}>{event.location}</Text>
+                        <MaterialIcons name="category" size={14} color={temaApp.colors.primary} />
+                        <Text style={estilos.textoInfo}>{evento.tipo}</Text>
                       </View>
                       <View style={estilos.badgeDistancia}>
-                        <Text style={estilos.badgeDistanciaTexto}>{event.distance}</Text>
+                        <Text style={estilos.badgeDistanciaTexto}>
+                          {evento.esPremium ? 'Premium' : 'Gratis'}
+                        </Text>
                       </View>
                     </View>
                     <View style={estilos.filaEvento}>
                       <View style={estilos.infoItem}>
                         <MaterialIcons name="event" size={14} color={temaApp.colors.primary} />
-                        <Text style={estilos.textoInfo}>{event.date}</Text>
+                        <Text style={estilos.textoInfo}>{formatearFecha(evento.fechaInicio)}</Text>
                       </View>
                       <View style={estilos.infoItem}>
                         <MaterialIcons name="people" size={14} color={temaApp.colors.primary} />
-                        <Text style={estilos.textoInfo}>{event.pets} mascotas</Text>
+                        <Text style={estilos.textoInfo}>{evento.participantesCount || 0} participantes</Text>
                       </View>
                     </View>
                   </View>
@@ -351,7 +326,7 @@ const estilos = StyleSheet.create({
     position: 'absolute',
     top: 12,
     right: 12,
-    backgroundColor: temaApp.colors.match, // Verde intenso para matches
+    backgroundColor: temaApp.colors.match,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -407,7 +382,6 @@ const estilos = StyleSheet.create({
     gap: 8,
   },
   cardMatch: {
-    // Estilos del card
   },
   matchItem: {
     flexDirection: 'row',

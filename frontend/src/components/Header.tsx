@@ -5,12 +5,10 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Text, Avatar, Menu, Divider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { useAuth } from '../contextos/ContextoAuth';
 import { temaApp, espaciado, MARCA } from '../constantes/tema';
 
-type HeaderNavigationProp = StackNavigationProp<RootStackParamList>;
+type HeaderNavigationProp = any;
 
 interface HeaderProps {
   /** Título a mostrar en el header (opcional, por defecto "SportPetMatch") */

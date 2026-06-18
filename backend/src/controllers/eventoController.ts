@@ -411,6 +411,15 @@ export const participarEvento = async (req: Request, res: Response): Promise<voi
       return;
     }
 
+    // Verificar que el organizador no se une a su propio evento
+    if (evento.organizadorId === usuarioId) {
+      res.status(400).json({
+        success: false,
+        message: 'Sos el organizador de este evento',
+      });
+      return;
+    }
+
     // Verificar límite de participantes
     if (evento.maxParticipantes && evento._count.participantes >= evento.maxParticipantes) {
       res.status(400).json({
