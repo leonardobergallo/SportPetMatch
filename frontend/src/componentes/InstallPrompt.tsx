@@ -9,14 +9,17 @@ import { isInstalled, isIOS, promptInstall } from '../utilidades/pwa';
 export default function InstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(false);
+  const [installed, setInstalled] = useState(false);
 
   useEffect(() => {
     if (Platform.OS !== 'web') {
       return;
     }
 
-    // No mostrar si ya está instalada
-    if (isInstalled()) {
+    const alreadyInstalled = isInstalled();
+    setInstalled(alreadyInstalled);
+
+    if (alreadyInstalled) {
       return;
     }
 
@@ -26,12 +29,15 @@ export default function InstallPrompt() {
 
     // Para iOS, verificar si el usuario ya descartó el prompt recientemente
     if (iOS) {
-      const dismissedTime = localStorage.getItem('installPromptDismissed');
-      const oneHourAgo = Date.now() - 60 * 60 * 1000;
+      try {
+        const dismissedTime = localStorage.getItem('installPromptDismissed');
+        const oneHourAgo = Date.now() - 60 * 60 * 1000;
 
-      if (!dismissedTime || parseInt(dismissedTime) < oneHourAgo) {
-        setShowPrompt(true);
-      }
+        if (!dismissedTime || parseInt(dismissedTime) < oneHourAgo) {
+          setShowPrompt(true);
+        }
+      } catch (_) {}
+      return;
     }
 
     // Para Android/Desktop, escuchar el evento beforeinstallprompt
@@ -41,36 +47,40 @@ export default function InstallPrompt() {
       setShowPrompt(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    try {
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    } catch (_) {}
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      try {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      } catch (_) {}
     };
   }, []);
 
   const handleInstall = async () => {
     if (isIOSDevice) {
-      // En iOS, solo mostrar instrucciones
       return;
     }
 
-    const installed = await promptInstall();
-    if (installed) {
+    const success = await promptInstall();
+    if (success) {
       setShowPrompt(false);
     }
   };
 
   const handleClose = () => {
     setShowPrompt(false);
-    localStorage.setItem('installPromptDismissed', Date.now().toString());
+    try {
+      localStorage.setItem('installPromptDismissed', Date.now().toString());
+    } catch (_) {}
   };
 
-  if (isInstalled() || !showPrompt) {
+  if (Platform.OS !== 'web') {
     return null;
   }
 
-  // Solo renderizar en web
-  if (Platform.OS !== 'web') {
+  if (installed || !showPrompt) {
     return null;
   }
 

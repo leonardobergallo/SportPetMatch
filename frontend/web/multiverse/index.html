@@ -431,20 +431,21 @@
 						return '/' + apiUrl.replace(/^\/+/, '').replace(/\/+$/, '');
 					}
 					function getApiBase() {
+						var h = window.location.hostname || '';
+						/* Desarrollo local / LAN: siempre URL explícita al backend, no usar ruta relativa */
+						if (h === 'localhost' || h === '127.0.0.1') {
+							return 'http://localhost:3000/api';
+						}
+						if (/^192\.168\./.test(h) || /^10\./.test(h) || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) {
+							return 'http://' + h + ':3000/api';
+						}
+						/* Producción: priorizar indio-api-base sobre EXPO_PUBLIC_API_URL */
 						var el = document.querySelector('meta[name="indio-api-base"]');
 						var manual = normalizeApiUrl(el ? el.getAttribute('content') : '');
 						if (manual) return manual;
 						if (window.EXPO_PUBLIC_API_URL) {
 							var envUrl = normalizeApiUrl(window.EXPO_PUBLIC_API_URL);
 							if (envUrl) return envUrl;
-						}
-						var h = window.location.hostname || '';
-						if (h === 'localhost' || h === '127.0.0.1') {
-							return 'http://localhost:3000/api';
-						}
-						/* Expo en LAN: la web corre en :8081 pero el backend sigue en :3000 de esta máquina */
-						if (/^192\.168\./.test(h) || /^10\./.test(h) || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) {
-							return 'http://' + h + ':3000/api';
 						}
 						/* Producción (Vercel, etc.): mismo dominio, /api reescribe al serverless */
 						return '/api';

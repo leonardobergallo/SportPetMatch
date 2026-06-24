@@ -62,11 +62,29 @@ export const isInstalled = (): boolean => {
     return false
   }
 
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true ||
-    document.referrer.includes('android-app://')
-  )
+  if (typeof window.matchMedia !== 'function') {
+    return false
+  }
+
+  let installed = false
+
+  try {
+    installed = window.matchMedia('(display-mode: standalone)').matches
+  } catch (_) {
+    installed = false
+  }
+
+  if (installed) return true
+
+  if ((window.navigator as any).standalone === true) return true
+
+  try {
+    if (typeof document !== 'undefined' && document.referrer && document.referrer.includes('android-app://')) {
+      return true
+    }
+  } catch (_) {}
+
+  return false
 }
 
 /**
