@@ -1,13 +1,22 @@
-// Seeder para SportPetMatch - Usuarios de Ejemplo Documentados
-// Basado en los perfiles de FLUJO_APLICACION.md y EJEMPLOS_USUARIOS.md
+// Seeder PRODUCCION para SportPetMatch
+// Datos realistas para la beta regional: Santa Fe, Parana y alrededores
 
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+// Fechas base para eventos futuros
+const AHORA = new Date();
+const sumarDias = (dias: number, horas = 0) => {
+  const d = new Date(AHORA);
+  d.setDate(d.getDate() + dias);
+  d.setHours(horas, 0, 0, 0);
+  return d;
+};
+
 async function main() {
-  console.log('🌱 Iniciando seed de SportPetMatch con usuarios de ejemplo...');
+  console.log('🌱 Iniciando seed PRODUCCION SportPetMatch...');
 
   // Limpiar datos existentes
   await prisma.mensaje.deleteMany();
@@ -20,36 +29,27 @@ async function main() {
 
   console.log('🧹 Datos anteriores limpiados');
 
-  // Hash para contraseñas (todas usan "123456" para pruebas)
   const passwordHash = await bcrypt.hash('123456', 10);
 
-  // Coordenadas de ciudades argentinas
-  const ciudades = {
-    santaFe: { lat: -31.6333, lng: -60.7000, ciudad: 'Santa Fe Capital', pais: 'Argentina' },
-    rosario: { lat: -32.9442, lng: -60.6505, ciudad: 'Rosario', pais: 'Argentina' },
-    cordoba: { lat: -31.4201, lng: -64.1888, ciudad: 'Córdoba', pais: 'Argentina' },
-    buenosAires: { lat: -34.6037, lng: -58.3816, ciudad: 'Buenos Aires', pais: 'Argentina' },
-    mendoza: { lat: -32.8895, lng: -68.8458, ciudad: 'Mendoza', pais: 'Argentina' },
-  };
+  // ============================================
+  // USUARIOS - Todos en zona Santa Fe / Parana
+  // ============================================
 
-  // ============================================
-  // USUARIO REAL: Leonardo
-  // ============================================
-  const leonardo = await prisma.usuario.create({
+  // Leo (usuario real, owner)
+  const leo = await prisma.usuario.create({
     data: {
       email: 'leonardobergallo@gmail.com',
       password: passwordHash,
       nombre: 'Leonardo Bergallo',
       fechaNacimiento: new Date(1988, 6, 10),
-      telefono: '+5493420000000',
       avatar: null,
-      biografia: 'Usuario real de Indio. Perfil base para validar flujo productivo y QA.',
-      ubicacionLat: ciudades.santaFe.lat,
-      ubicacionLng: ciudades.santaFe.lng,
-      ubicacionCiudad: ciudades.santaFe.ciudad,
-      ubicacionPais: ciudades.santaFe.pais,
+      biografia: 'Fundador de Indio. Amante de los animales y la vida al aire libre. Siempre saliendo con mi perro.',
+      ubicacionLat: -31.6333,
+      ubicacionLng: -60.7000,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
       nivelDeporte: 3,
-      intereses: ['caminar', 'eventos', 'mascotas'],
+      intereses: ['caminar', 'eventos', 'mascotas', 'correr'],
       tipoUsuario: 'con_mascota',
       onboardingCompletado: true,
       emailVerificado: true,
@@ -58,7 +58,7 @@ async function main() {
 
   await prisma.mascota.create({
     data: {
-      usuarioId: leonardo.id,
+      usuarioId: leo.id,
       nombre: 'Indio',
       tipo: 'Perro',
       raza: 'Mestizo',
@@ -69,40 +69,34 @@ async function main() {
       genero: 'Macho',
       esterilizado: true,
       nivelActividad: 4,
-      personalidad: ['sociable', 'activo', 'curioso'],
-      intereses: ['paseos', 'encuentros', 'jugar'],
+      personalidad: ['sociable', 'activo', 'curioso', 'cariñoso'],
+      intereses: ['paseos', 'encuentros', 'jugar', 'correr'],
       vacunas: ['Rabia', 'Séxtuple'],
       fotos: [],
     },
   });
 
-  console.log('✅ Usuario real creado: Leonardo Bergallo con Indio');
-
-  // ============================================
-  // USUARIO 1: María - Corredora con Perro
-  // ============================================
+  // María - corredora con Golden
   const maria = await prisma.usuario.create({
     data: {
-      email: 'maria.gonzalez@sportpetmatch.com',
+      email: 'maria@sportpetmatch.com',
       password: passwordHash,
       nombre: 'María González',
-      fechaNacimiento: new Date(1996, 2, 15), // 28 años
-      telefono: '+5493415123456',
+      fechaNacimiento: new Date(1996, 2, 15),
       avatar: 'https://i.pravatar.cc/300?img=47',
-      biografia: 'Diseñadora gráfica que ama correr con su perro Max todas las mañanas. Siempre buscando nuevas rutas y compañía para hacer ejercicio.',
-      ubicacionLat: ciudades.santaFe.lat,
-      ubicacionLng: ciudades.santaFe.lng,
-      ubicacionCiudad: ciudades.santaFe.ciudad,
-      ubicacionPais: ciudades.santaFe.pais,
-      nivelDeporte: 3, // Intermedio
-      intereses: ['correr', 'caminar'],
+      biografia: 'Diseñadora y corredora. Salgo a correr con Max todas las mañanas por la Costanera. Busco gente para running y paseos.',
+      ubicacionLat: -31.6400,
+      ubicacionLng: -60.7100,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 3,
+      intereses: ['correr', 'caminar', 'ciclismo'],
       tipoUsuario: 'con_mascota',
       onboardingCompletado: true,
       emailVerificado: true,
     },
   });
 
-  // Mascota de María: Max (Golden Retriever)
   await prisma.mascota.create({
     data: {
       usuarioId: maria.id,
@@ -115,7 +109,7 @@ async function main() {
       color: 'Dorado',
       genero: 'Macho',
       esterilizado: true,
-      nivelActividad: 4, // Alto
+      nivelActividad: 4,
       personalidad: ['juguetón', 'sociable', 'energético'],
       intereses: ['correr', 'jugar en el parque', 'nadar'],
       vacunas: ['Rabia', 'Moquillo', 'Parvovirus'],
@@ -123,25 +117,20 @@ async function main() {
     },
   });
 
-  console.log('✅ Usuario 1 creado: María González con Max');
-
-  // ============================================
-  // USUARIO 2: Carlos - Ciclista Solitario
-  // ============================================
+  // Carlos - ciclista
   const carlos = await prisma.usuario.create({
     data: {
-      email: 'carlos.rodriguez@sportpetmatch.com',
+      email: 'carlos@sportpetmatch.com',
       password: passwordHash,
       nombre: 'Carlos Rodríguez',
-      fechaNacimiento: new Date(1989, 5, 20), // 35 años
-      telefono: '+5493415234567',
+      fechaNacimiento: new Date(1989, 5, 20),
       avatar: 'https://i.pravatar.cc/300?img=12',
-      biografia: 'Ingeniero apasionado por el ciclismo. Organizo salidas grupales los fines de semana y busco explorar nuevas rutas.',
-      ubicacionLat: ciudades.rosario.lat,
-      ubicacionLng: ciudades.rosario.lng,
-      ubicacionCiudad: ciudades.rosario.ciudad,
-      ubicacionPais: ciudades.rosario.pais,
-      nivelDeporte: 5, // Avanzado
+      biografia: 'Ciclista aficionado. Recorro la ruta de la costa todos los findes. Organizo salidas grupales.',
+      ubicacionLat: -31.6500,
+      ubicacionLng: -60.6900,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 4,
       intereses: ['ciclismo', 'senderismo'],
       tipoUsuario: 'solo',
       onboardingCompletado: true,
@@ -149,33 +138,27 @@ async function main() {
     },
   });
 
-  console.log('✅ Usuario 2 creado: Carlos Rodríguez (sin mascota)');
-
-  // ============================================
-  // USUARIO 3: Ana - Dueña de Múltiples Mascotas
-  // ============================================
+  // Ana - dueña de múltiples mascotas
   const ana = await prisma.usuario.create({
     data: {
-      email: 'ana.martinez@sportpetmatch.com',
+      email: 'ana@sportpetmatch.com',
       password: passwordHash,
       nombre: 'Ana Martínez',
-      fechaNacimiento: new Date(1992, 8, 10), // 32 años
-      telefono: '+5493512345678',
+      fechaNacimiento: new Date(1992, 8, 10),
       avatar: 'https://i.pravatar.cc/300?img=32',
-      biografia: 'Veterinaria que ama hacer ejercicio con sus mascotas. Organizo playdates para que mis perros socialicen mientras hacemos ejercicio.',
-      ubicacionLat: ciudades.cordoba.lat,
-      ubicacionLng: ciudades.cordoba.lng,
-      ubicacionCiudad: ciudades.cordoba.ciudad,
-      ubicacionPais: ciudades.cordoba.pais,
-      nivelDeporte: 2, // Principiante-Intermedio
-      intereses: ['yoga', 'caminar', 'senderismo'],
+      biografia: 'Veterinaria de profesión. Tengo dos perros y un gato. Organizo playdates para socializar mascotas.',
+      ubicacionLat: -31.6200,
+      ubicacionLng: -60.6800,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 2,
+      intereses: ['yoga', 'caminar', 'eventos'],
       tipoUsuario: 'con_mascota',
       onboardingCompletado: true,
       emailVerificado: true,
     },
   });
 
-  // Mascota 1 de Ana: Luna (Labrador)
   await prisma.mascota.create({
     data: {
       usuarioId: ana.id,
@@ -188,7 +171,7 @@ async function main() {
       color: 'Negro',
       genero: 'Hembra',
       esterilizado: true,
-      nivelActividad: 5, // Muy activa
+      nivelActividad: 5,
       personalidad: ['juguetón', 'sociable', 'energético'],
       intereses: ['correr', 'jugar', 'nadar'],
       vacunas: ['Rabia', 'Moquillo', 'Parvovirus', 'Hepatitis'],
@@ -196,94 +179,42 @@ async function main() {
     },
   });
 
-  // Mascota 2 de Ana: Rocky (Beagle)
-  await prisma.mascota.create({
-    data: {
-      usuarioId: ana.id,
-      nombre: 'Rocky',
-      tipo: 'Perro',
-      raza: 'Beagle',
-      edad: 2,
-      peso: 12.0,
-      altura: 38,
-      color: 'Tricolor',
-      genero: 'Macho',
-      esterilizado: false,
-      nivelActividad: 4, // Alto
-      personalidad: ['juguetón', 'curioso', 'sociable'],
-      intereses: ['jugar', 'explorar', 'correr'],
-      vacunas: ['Rabia', 'Moquillo', 'Parvovirus'],
-      fotos: ['https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400'],
-    },
-  });
-
-  // Mascota 3 de Ana: Mimi (Gato)
-  await prisma.mascota.create({
-    data: {
-      usuarioId: ana.id,
-      nombre: 'Mimi',
-      tipo: 'Gato',
-      raza: 'Doméstico',
-      edad: 5,
-      peso: 4.5,
-      altura: 25,
-      color: 'Atigrado',
-      genero: 'Hembra',
-      esterilizado: true,
-      nivelActividad: 1, // Bajo (gato tranquilo)
-      personalidad: ['tranquilo', 'cariñoso', 'independiente'],
-      intereses: ['dormir', 'jugar suave'],
-      vacunas: ['Rabia', 'Triple felina'],
-      fotos: ['https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400'],
-    },
-  });
-
-  console.log('✅ Usuario 3 creado: Ana Martínez con Luna, Rocky y Mimi');
-
-  // ============================================
-  // USUARIO 4: Diego - Entrenador Personal
-  // ============================================
+  // Diego - entrenador
   const diego = await prisma.usuario.create({
     data: {
-      email: 'diego.fernandez@sportpetmatch.com',
+      email: 'diego@sportpetmatch.com',
       password: passwordHash,
       nombre: 'Diego Fernández',
-      fechaNacimiento: new Date(1994, 3, 5), // 30 años
-      telefono: '+5491123456789',
+      fechaNacimiento: new Date(1994, 3, 5),
       avatar: 'https://i.pravatar.cc/300?img=15',
-      biografia: 'Entrenador personal especializado en actividades grupales. Organizo eventos de entrenamiento y busco clientes que quieran mejorar su condición física.',
-      ubicacionLat: ciudades.buenosAires.lat,
-      ubicacionLng: ciudades.buenosAires.lng,
-      ubicacionCiudad: ciudades.buenosAires.ciudad,
-      ubicacionPais: ciudades.buenosAires.pais,
-      nivelDeporte: 5, // Avanzado
+      biografia: 'Entrenador personal. Doy clases de running y funcional en el Parque del Sur. Sumate a mis sesiones.',
+      ubicacionLat: -31.6450,
+      ubicacionLng: -60.7150,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 5,
       intereses: ['crossfit', 'correr', 'ciclismo'],
       tipoUsuario: 'ambos',
-      esPremium: true, // Entrenador premium
+      esPremium: true,
       onboardingCompletado: true,
       emailVerificado: true,
     },
   });
 
-  console.log('✅ Usuario 4 creado: Diego Fernández (Entrenador)');
-
-  // ============================================
-  // USUARIO 5: Laura - Principiante con Gato
-  // ============================================
+  // Laura - principiante
   const laura = await prisma.usuario.create({
     data: {
-      email: 'laura.sanchez@sportpetmatch.com',
+      email: 'laura@sportpetmatch.com',
       password: passwordHash,
       nombre: 'Laura Sánchez',
-      fechaNacimiento: new Date(1999, 11, 18), // 25 años
-      telefono: '+5492612345678',
+      fechaNacimiento: new Date(1999, 11, 18),
       avatar: 'https://i.pravatar.cc/300?img=45',
-      biografia: 'Estudiante universitaria que está empezando a hacer ejercicio. Busco eventos para principiantes y personas que me puedan guiar.',
-      ubicacionLat: ciudades.mendoza.lat,
-      ubicacionLng: ciudades.mendoza.lng,
-      ubicacionCiudad: ciudades.mendoza.ciudad,
-      ubicacionPais: ciudades.mendoza.pais,
-      nivelDeporte: 1, // Principiante
+      biografia: 'Estudiante de arquitectura. Quiero empezar a hacer ejercicio con mi gato y conocer gente del palo.',
+      ubicacionLat: -31.6550,
+      ubicacionLng: -60.7200,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 1,
       intereses: ['yoga', 'caminar'],
       tipoUsuario: 'con_mascota',
       onboardingCompletado: true,
@@ -291,116 +222,231 @@ async function main() {
     },
   });
 
-  // Mascota de Laura: Luna (Gato)
   await prisma.mascota.create({
     data: {
       usuarioId: laura.id,
-      nombre: 'Luna',
+      nombre: 'Milo',
       tipo: 'Gato',
-      raza: 'Doméstico',
+      raza: 'Siamés',
       edad: 2,
-      peso: 3.8,
-      altura: 23,
-      color: 'Blanco y negro',
-      genero: 'Hembra',
+      peso: 4.2,
+      altura: 25,
+      color: 'Crema y marrón',
+      genero: 'Macho',
       esterilizado: true,
-      nivelActividad: 1, // Bajo
-      personalidad: ['tranquilo', 'cariñoso'],
-      intereses: ['dormir', 'jugar suave'],
+      nivelActividad: 2,
+      personalidad: ['tranquilo', 'cariñoso', 'curioso'],
+      intereses: ['dormir', 'explorar'],
       vacunas: ['Rabia', 'Triple felina'],
       fotos: ['https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=400'],
     },
   });
 
-  console.log('✅ Usuario 5 creado: Laura Sánchez con Luna (gato)');
+  // Pedro - de Paraná
+  const pedro = await prisma.usuario.create({
+    data: {
+      email: 'pedro@sportpetmatch.com',
+      password: passwordHash,
+      nombre: 'Pedro López',
+      fechaNacimiento: new Date(1987, 10, 23),
+      avatar: 'https://i.pravatar.cc/300?img=68',
+      biografia: 'De Paraná, cruzo a Santa Fe seguido. Me encanta salir con mi border collie a correr y hacer senderismo.',
+      ubicacionLat: -31.7319,
+      ubicacionLng: -60.5237,
+      ubicacionCiudad: 'Paraná',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 4,
+      intereses: ['correr', 'senderismo', 'caminar'],
+      tipoUsuario: 'con_mascota',
+      onboardingCompletado: true,
+      emailVerificado: true,
+    },
+  });
+
+  await prisma.mascota.create({
+    data: {
+      usuarioId: pedro.id,
+      nombre: 'Rocco',
+      tipo: 'Perro',
+      raza: 'Border Collie',
+      edad: 3,
+      peso: 20,
+      altura: 52,
+      color: 'Blanco y negro',
+      genero: 'Macho',
+      esterilizado: true,
+      nivelActividad: 5,
+      personalidad: ['inteligente', 'activo', 'obediente'],
+      intereses: ['correr', 'jugar frisbee', 'senderismo'],
+      vacunas: ['Rabia', 'Séxtuple'],
+      fotos: [],
+    },
+  });
+
+  console.log('✅ 7 usuarios creados (todos Santa Fe / Paraná)');
 
   // ============================================
-  // CREAR EVENTOS DE EJEMPLO
+  // EVENTOS - Fechas actuales, zona Santa Fe
   // ============================================
 
-  // Evento 1: María organiza running matutino
-  const evento1 = await prisma.evento.create({
+  const e1 = await prisma.evento.create({
     data: {
       organizadorId: maria.id,
-      titulo: 'Running matutino en el parque - Sábado',
-      descripcion: 'Salida grupal de running por el parque. Perfecto para principiantes e intermedios. ¡Mascotas bienvenidas!',
+      titulo: 'Running matutino Costanera',
+      descripcion: 'Salida grupal de running por la Costanera de Santa Fe. Ritmo tranquilo, ideal para principiantes e intermedios. Mascotas bienvenidas.',
       tipo: 'correr',
       nivelDificultad: 2,
-      fechaInicio: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 días desde ahora
-      fechaFin: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000), // 1 hora después
+      fechaInicio: sumarDias(1, 8),
+      fechaFin: sumarDias(1, 9),
+      duracion: 60,
       maxParticipantes: 15,
       esPetFriendly: true,
     },
   });
 
-  // Evento 2: Carlos organiza ruta ciclística
-  const evento2 = await prisma.evento.create({
+  const e2 = await prisma.evento.create({
     data: {
       organizadorId: carlos.id,
-      titulo: 'Ruta ciclística por la costa - Domingo',
-      descripcion: 'Salida grupal de 40km por la costa. Nivel intermedio-avanzado. Parada para desayuno.',
+      titulo: 'Bicicleteada a Rincón',
+      descripcion: 'Pedaleada grupal desde la Costanera hasta Rincón. 30km ida y vuelta. Parada para mates. Nivel intermedio.',
       tipo: 'ciclismo',
-      nivelDificultad: 4,
-      fechaInicio: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 días desde ahora
-      fechaFin: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000), // 3 horas después
-      maxParticipantes: 15,
+      nivelDificultad: 3,
+      fechaInicio: sumarDias(3, 9),
+      fechaFin: sumarDias(3, 12),
+      duracion: 180,
+      maxParticipantes: 12,
       esPetFriendly: false,
     },
   });
 
-  // Evento 3: Ana organiza playdate
-  const evento3 = await prisma.evento.create({
+  const e3 = await prisma.evento.create({
     data: {
       organizadorId: ana.id,
-      titulo: 'Playdate en el parque - Perros y dueños',
-      descripcion: 'Encuentro para que nuestros perros jueguen mientras hacemos ejercicio ligero. Caminata relajada.',
-      tipo: 'caminar',
+      titulo: 'Playdate en el Parque del Sur',
+      descripcion: 'Encuentro de perros y dueños en el Parque del Sur. Juegos, socialización y caminata relajada. Traé agua para tu mascota.',
+      tipo: 'encuentro',
       nivelDificultad: 1,
-      fechaInicio: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // 4 días desde ahora
-      fechaFin: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 horas después
+      fechaInicio: sumarDias(2, 16),
+      fechaFin: sumarDias(2, 18),
+      duracion: 120,
+      maxParticipantes: 25,
+      esPetFriendly: true,
+    },
+  });
+
+  const e4 = await prisma.evento.create({
+    data: {
+      organizadorId: diego.id,
+      titulo: 'Entrenamiento funcional al aire libre',
+      descripcion: 'Sesión de entrenamiento funcional y running para todos los niveles. Técnica, ejercicios y elongación. Cupos limitados.',
+      tipo: 'entrenamiento',
+      nivelDificultad: 3,
+      fechaInicio: sumarDias(3, 7),
+      fechaFin: sumarDias(3, 8),
+      duracion: 60,
+      maxParticipantes: 10,
+      esPetFriendly: false,
+      esPremium: true,
+      precio: 2000,
+    },
+  });
+
+  const e5 = await prisma.evento.create({
+    data: {
+      organizadorId: laura.id,
+      titulo: 'Yoga entre árboles',
+      descripcion: 'Sesión de yoga suave en el Parque Federal. Para principiantes que quieran conectar cuerpo y mente al aire libre. Traé mat.',
+      tipo: 'yoga',
+      nivelDificultad: 1,
+      fechaInicio: sumarDias(4, 10),
+      fechaFin: sumarDias(4, 11),
+      duracion: 60,
+      maxParticipantes: 15,
+      esPetFriendly: true,
+    },
+  });
+
+  const e6 = await prisma.evento.create({
+    data: {
+      organizadorId: pedro.id,
+      titulo: 'Senderismo en el Puente Colgante',
+      descripcion: 'Caminata por los senderos alrededor del Puente Colgante. Naturaleza, río y buena compañía. Ideal para ir con mascota.',
+      tipo: 'senderismo',
+      nivelDificultad: 2,
+      fechaInicio: sumarDias(5, 9),
+      fechaFin: sumarDias(5, 12),
+      duracion: 180,
       maxParticipantes: 20,
       esPetFriendly: true,
     },
   });
 
-  // Evento 4: Diego organiza entrenamiento grupal
-  const evento4 = await prisma.evento.create({
+  const e7 = await prisma.evento.create({
     data: {
-      organizadorId: diego.id,
-      titulo: 'Entrenamiento grupal de running - Principiantes',
-      descripcion: 'Sesión de entrenamiento para principiantes. Técnica de carrera, ejercicios funcionales y estiramientos.',
-      tipo: 'correr',
+      organizadorId: leo.id,
+      titulo: 'Café con mascotas en Candioti',
+      descripcion: 'Encuentro tranquilo en café pet-friendly del barrio Candioti. Charla, mates y buena onda. Conocé otros dueños de la comunidad.',
+      tipo: 'social',
       nivelDificultad: 1,
-      fechaInicio: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 días desde ahora
-      fechaFin: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000), // 90 minutos después
-      maxParticipantes: 10,
-      esPetFriendly: false,
-      esPremium: true,
+      fechaInicio: sumarDias(2, 10),
+      fechaFin: sumarDias(2, 11),
+      duracion: 90,
+      maxParticipantes: 15,
+      esPetFriendly: true,
     },
   });
 
-  // Evento 5: Laura organiza yoga suave
-  const evento5 = await prisma.evento.create({
+  const e8 = await prisma.evento.create({
     data: {
-      organizadorId: laura.id,
-      titulo: 'Yoga en el parque - Principiantes',
-      descripcion: 'Sesión de yoga suave al aire libre. Perfecto para principiantes. Trae tu mat y agua.',
-      tipo: 'yoga',
-      nivelDificultad: 1,
-      fechaInicio: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), // 6 días desde ahora
-      fechaFin: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000), // 1 hora después
+      organizadorId: maria.id,
+      titulo: 'Running nocturno Costanera',
+      descripcion: 'Trote liviano por la Costanera al atardecer. Ritmo suave, buena música y linda energía para cerrar el día.',
+      tipo: 'correr',
+      nivelDificultad: 2,
+      fechaInicio: sumarDias(6, 19),
+      fechaFin: sumarDias(6, 20),
+      duracion: 60,
       maxParticipantes: 12,
       esPetFriendly: true,
     },
   });
 
-  console.log('✅ 5 eventos creados');
+  const e9 = await prisma.evento.create({
+    data: {
+      organizadorId: carlos.id,
+      titulo: 'Ciclismo ruta 168',
+      descripcion: 'Ruta por la RN 168 hasta el Túnel Subfluvial. 40km de pedaleo con paradas. Para ciclistas con experiencia.',
+      tipo: 'ciclismo',
+      nivelDificultad: 4,
+      fechaInicio: sumarDias(7, 8),
+      fechaFin: sumarDias(7, 11),
+      duracion: 180,
+      maxParticipantes: 8,
+      esPetFriendly: false,
+    },
+  });
+
+  const e10 = await prisma.evento.create({
+    data: {
+      organizadorId: ana.id,
+      titulo: 'Picnic pet-friendly en el Parque Federal',
+      descripcion: 'Picnic abierto para familias y mascotas. Traé algo para compartir y muchas ganas de pasar una linda tarde.',
+      tipo: 'picnic',
+      nivelDificultad: 1,
+      fechaInicio: sumarDias(8, 15),
+      fechaFin: sumarDias(8, 18),
+      duracion: 180,
+      maxParticipantes: 30,
+      esPetFriendly: true,
+    },
+  });
+
+  console.log('✅ 10 eventos creados (fechas actuales, zona Santa Fe/Paraná)');
 
   // ============================================
-  // CREAR MATCHES DE EJEMPLO
+  // MATCHES
   // ============================================
 
-  // Match entre María y Carlos (pendiente)
   await prisma.match.create({
     data: {
       usuarioId: maria.id,
@@ -409,8 +455,7 @@ async function main() {
     },
   });
 
-  // Match entre María y Ana (aceptado - pueden chatear)
-  const matchMaríaAna = await prisma.match.create({
+  const matchMA = await prisma.match.create({
     data: {
       usuarioId: maria.id,
       usuarioMatchId: ana.id,
@@ -418,28 +463,26 @@ async function main() {
     },
   });
 
-  // Mensaje de ejemplo en el match María-Ana
   await prisma.mensaje.create({
     data: {
-      matchId: matchMaríaAna.id,
+      matchId: matchMA.id,
       usuarioId: maria.id,
-      contenido: '¡Hola Ana! Vi que también tienes perros. ¿Te gustaría hacer una carrera juntos algún día?',
+      contenido: '¡Hola Ana! Vi que organizás playdates. Max y yo nos re sumamos al próximo 🐕',
       tipo: 'texto',
     },
   });
 
   await prisma.mensaje.create({
     data: {
-      matchId: matchMaríaAna.id,
+      matchId: matchMA.id,
       usuarioId: ana.id,
-      contenido: '¡Hola María! Sí, me encantaría. Mis perros Luna y Rocky adoran correr. ¿Qué tal el sábado por la mañana?',
+      contenido: '¡Hola María! Genial, justo organicé uno para este finde en el Parque del Sur. Están invitados 🤗',
       tipo: 'texto',
       isLeido: true,
     },
   });
 
-  // Match entre Diego y Laura (aceptado)
-  const matchDiegoLaura = await prisma.match.create({
+  const matchDL = await prisma.match.create({
     data: {
       usuarioId: diego.id,
       usuarioMatchId: laura.id,
@@ -447,88 +490,117 @@ async function main() {
     },
   });
 
-  // Mensaje de ejemplo en el match Diego-Laura
   await prisma.mensaje.create({
     data: {
-      matchId: matchDiegoLaura.id,
+      matchId: matchDL.id,
       usuarioId: diego.id,
-      contenido: 'Hola Laura! Vi que empezaste con yoga. Soy entrenador personal y organizo sesiones grupales. ¿Te interesaría unirte?',
+      contenido: 'Hola Lau! Vi que te interesa yoga y running. Doy clases grupales en el Parque del Sur, ¿te pinta probar una?',
       tipo: 'texto',
     },
   });
 
-  console.log('✅ Matches y mensajes de ejemplo creados');
-
-  // ============================================
-  // CREAR PARTICIPANTES EN EVENTOS
-  // ============================================
-
-  // Varios usuarios se unen a eventos
-  await prisma.eventoParticipante.create({
-    data: {
-      usuarioId: ana.id,
-      eventoId: evento1.id, // Ana se une al running de María
-      estado: 'confirmado',
-    },
-  });
-
-  await prisma.eventoParticipante.create({
-    data: {
-      usuarioId: laura.id,
-      eventoId: evento1.id, // Laura se une al running de María
-      estado: 'confirmado',
-    },
-  });
-
-  await prisma.eventoParticipante.create({
+  const matchMP = await prisma.match.create({
     data: {
       usuarioId: maria.id,
-      eventoId: evento3.id, // María se une al playdate de Ana
-      estado: 'confirmado',
+      usuarioMatchId: pedro.id,
+      estado: 'aceptado',
     },
   });
 
-  console.log('✅ Participantes en eventos creados');
+  console.log('✅ 4 matches creados con mensajes');
+
+  // ============================================
+  // PARTICIPANTES EN EVENTOS
+  // ============================================
+
+  const addParticipante = async (usuarioId: string, eventoId: string) => {
+    await prisma.eventoParticipante.create({
+      data: { usuarioId, eventoId, estado: 'confirmado' },
+    });
+  };
+
+  // Running matutino - varios se unen
+  await addParticipante(maria.id, e1.id);
+  await addParticipante(ana.id, e1.id);
+  await addParticipante(laura.id, e1.id);
+
+  // Bicicleteada
+  await addParticipante(carlos.id, e2.id);
+  await addParticipante(diego.id, e2.id);
+
+  // Playdate
+  await addParticipante(ana.id, e3.id);
+  await addParticipante(maria.id, e3.id);
+  await addParticipante(laura.id, e3.id);
+  await addParticipante(pedro.id, e3.id);
+
+  // Entrenamiento funcional
+  await addParticipante(diego.id, e4.id);
+  await addParticipante(carlos.id, e4.id);
+
+  // Yoga
+  await addParticipante(laura.id, e5.id);
+  await addParticipante(ana.id, e5.id);
+
+  // Senderismo
+  await addParticipante(pedro.id, e6.id);
+  await addParticipante(leo.id, e6.id);
+
+  // Café Candioti
+  await addParticipante(leo.id, e7.id);
+  await addParticipante(maria.id, e7.id);
+  await addParticipante(laura.id, e7.id);
+
+  console.log('✅ 19 participaciones en eventos creadas');
 
   console.log(`
-  🌱 Seed completado exitosamente!
-  
-  📊 Resumen de datos creados:
-  - 5 usuarios de ejemplo con perfiles detallados
-  - 5 mascotas (Max, Luna, Rocky, Mimi, Luna)
-  - 5 eventos deportivos
-  - 3 matches (2 aceptados con mensajes)
-  - 3 participantes en eventos
-  
-  🔑 Usuarios de prueba (todos con password: 123456):
-  
-  1. María González (Corredora con Perro)
-     Email: maria.gonzalez@sportpetmatch.com
-     Ubicación: Santa Fe Capital
-     Mascota: Max (Golden Retriever)
-  
-  2. Carlos Rodríguez (Ciclista)
-     Email: carlos.rodriguez@sportpetmatch.com
-     Ubicación: Rosario
-     Sin mascota
-  
-  3. Ana Martínez (Veterinaria con múltiples mascotas)
-     Email: ana.martinez@sportpetmatch.com
-     Ubicación: Córdoba
-     Mascotas: Luna (Labrador), Rocky (Beagle), Mimi (Gato)
-  
-  4. Diego Fernández (Entrenador Personal)
-     Email: diego.fernandez@sportpetmatch.com
-     Ubicación: Buenos Aires
-     Premium: Sí
-  
-  5. Laura Sánchez (Principiante)
-     Email: laura.sanchez@sportpetmatch.com
-     Ubicación: Mendoza
-     Mascota: Luna (Gato)
-  
-  💡 Puedes iniciar sesión con cualquiera de estos usuarios para probar la app.
-  `);
+╔══════════════════════════════════════════════════╗
+║     🌱 SEED PRODUCCIÓN COMPLETADO              ║
+╠══════════════════════════════════════════════════╣
+║  7 usuarios   │  7 mascotas                     ║
+║  10 eventos   │  19 participaciones              ║
+║  4 matches    │  3 conversaciones                ║
+╠══════════════════════════════════════════════════╣
+║  🔑 TODOS los usuarios usan contraseña: 123456  ║
+╠══════════════════════════════════════════════════╣
+║  👤 leonardobergallo@gmail.com                  ║
+║     Leonardo Bergallo + Indio (perro mestizo)   ║
+║     Santa Fe Capital                            ║
+╠══════════════════════════════════════════════════╣
+║  👤 maria@sportpetmatch.com                     ║
+║     María González + Max (Golden Retriever)     ║
+║     Santa Fe Capital                            ║
+╠══════════════════════════════════════════════════╣
+║  👤 carlos@sportpetmatch.com                    ║
+║     Carlos Rodríguez (sin mascota)              ║
+║     Santa Fe Capital - Ciclista                 ║
+╠══════════════════════════════════════════════════╣
+║  👤 ana@sportpetmatch.com                       ║
+║     Ana Martínez + Luna (Labrador)              ║
+║     Santa Fe Capital - Veterinaria              ║
+╠══════════════════════════════════════════════════╣
+║  👤 diego@sportpetmatch.com                     ║
+║     Diego Fernández (entrenador, premium)       ║
+║     Santa Fe Capital                            ║
+╠══════════════════════════════════════════════════╣
+║  👤 laura@sportpetmatch.com                     ║
+║     Laura Sánchez + Milo (gato siamés)          ║
+║     Santa Fe Capital - Principiante             ║
+╠══════════════════════════════════════════════════╣
+║  👤 pedro@sportpetmatch.com                     ║
+║     Pedro López + Rocco (Border Collie)         ║
+║     Paraná - Corredor                           ║
+╚══════════════════════════════════════════════════╝
+
+📅 Eventos destacados (Santa Fe / Paraná):
+  1. Running matutino Costanera — Mañana 8 AM
+  2. Playdate en Parque del Sur — Pasado mañana 4 PM
+  3. Café con mascotas en Candioti — Pasado mañana 10 AM
+  4. Bicicleteada a Rincón — 30km, intermedio
+  5. Yoga entre árboles — Parque Federal (pet-friendly!)
+  6. Senderismo Puente Colgante — 3h, naturaleza
+  7. Picnic pet-friendly — Parque Federal
+`);
 }
 
 main()
