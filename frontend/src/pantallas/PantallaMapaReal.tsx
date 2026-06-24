@@ -21,6 +21,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useUbicacion } from '../contextos/ContextoUbicacion';
+import { participarEnEvento } from '../servicios/servicioEventos';
 
 // Tipos para los datos del mapa
 interface UsuarioMapa {
@@ -194,10 +195,16 @@ export default function PantallaMapaReal() {
     Alert.alert('Chat', 'Funcionalidad de chat próximamente');
   };
 
-  const unirseEvento = () => {
-    cerrarDialog();
-    // TODO: Implementar unirse a evento
-    Alert.alert('Evento', 'Te has unido al evento');
+  const unirseEvento = async () => {
+    if (!elementoSeleccionado?.id) return;
+    try {
+      await participarEnEvento(elementoSeleccionado.id);
+      cerrarDialog();
+      Alert.alert('¡Listo!', 'Te has unido al evento exitosamente');
+      cargarDatosCercanos();
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'No se pudo unir al evento');
+    }
   };
 
   // Mostrar pantalla de carga si no hay coordenadas
