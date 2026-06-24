@@ -64,14 +64,14 @@ export function getAPIBaseURL(): string {
         !window.location.hostname.includes('172.');
 
       if (isProduction) {
-        if (envApiUrl) {
-          console.log('Produccion detectada: usando EXPO_PUBLIC_API_URL');
-          return envApiUrl;
-        }
-
         if (metaApiUrl) {
           console.log('Produccion detectada: usando indio-api-base');
           return metaApiUrl;
+        }
+
+        if (envApiUrl) {
+          console.log('Produccion detectada: usando EXPO_PUBLIC_API_URL');
+          return envApiUrl;
         }
 
         console.log('Produccion detectada: usando ruta relativa /api');
@@ -82,7 +82,7 @@ export function getAPIBaseURL(): string {
         return envApiUrl;
       }
 
-      if (metaApiUrl) {
+      if (metaApiUrl && !metaApiUrl.startsWith('/')) {
         return metaApiUrl;
       }
     }

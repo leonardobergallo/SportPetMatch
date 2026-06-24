@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import {
@@ -22,7 +22,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { MARCA } from '../constantes/tema';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { useAuth, normalizarUsuario } from '../contextos/ContextoAuth';
-import { iniciarSesion as servicioIniciarSesion } from '../servicios/servicioAuth';
+import {
+  iniciarSesion as servicioIniciarSesion,
+  resetPassword,
+  solicitarResetPassword,
+} from '../servicios/servicioAuth';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -66,6 +70,23 @@ export default function PantallaLogin(): JSX.Element {
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') {
+      return;
+    }
+
+    const token = new URLSearchParams(window.location.search).get('resetToken');
+    if (token) {
+      setResetToken(token);
+      setResetMode(true);
+      setResetMessage('Ingresa tu nueva contrasena para recuperar el acceso.');
+    }
+  }, []);
 
   const scrollToExtraLogin = () => {
     loginRef.current?.measureLayout(
@@ -106,6 +127,48 @@ export default function PantallaLogin(): JSX.Element {
     try { await new Promise(r => setTimeout(r, 2000)); Alert.alert('Bienvenido!', 'Sesion con Google'); }
     catch { Alert.alert('Error', 'No se pudo iniciar con Google.'); }
     finally { setLoading(false); }
+  };
+
+  const handleSolicitarReset = async () => {
+    const correo = email.trim();
+    if (!correo) { Alert.alert('Error', 'Ingresa el email de tu cuenta'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { Alert.alert('Error', 'Correo no valido'); return; }
+
+    setLoading(true);
+    setResetMessage('');
+    try {
+      const r = await solicitarResetPassword(correo);
+      if (r.data?.resetToken) {
+        setResetToken(r.data.resetToken);
+        setResetMessage('Usuario validado. Ingresa una nueva contrasena.');
+      } else {
+        setResetMessage(r.message || 'Si el email existe, te enviamos un link de recuperacion.');
+      }
+    } catch (e: any) {
+      Alert.alert('No pudimos validar el usuario', e.message || 'Revisa el email ingresado');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmarReset = async () => {
+    if (!resetToken) { Alert.alert('Error', 'Primero solicita un link de recuperacion'); return; }
+    if (newPw.length < 6) { Alert.alert('Error', 'La nueva contrasena debe tener al menos 6 caracteres'); return; }
+
+    setLoading(true);
+    try {
+      const r = await resetPassword(resetToken, newPw);
+      Alert.alert('Listo', r.message || 'Contrasena actualizada');
+      setResetMode(false);
+      setResetToken('');
+      setNewPw('');
+      setPw('');
+      setResetMessage('');
+    } catch (e: any) {
+      Alert.alert('No pudimos actualizar la contrasena', e.message || 'Solicita un link nuevo e intenta otra vez');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const goRegistro = () => navigation.navigate('Registro');
@@ -152,6 +215,44 @@ export default function PantallaLogin(): JSX.Element {
                     <Text style={st.heroLoginBtnTxt}>Iniciar sesión</Text>
                   )}
                 </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setResetMode(!resetMode);
+                    setResetMessage('');
+                  }}
+                  style={st.heroLinkMore}
+                  disabled={loading}
+                >
+                  <Text style={st.heroLinkMoreTxt}>
+                    {resetMode ? 'Volver al inicio de sesion' : 'Olvide mi contrasena'}
+                  </Text>
+                </Pressable>
+                {resetMode && (
+                  <View style={st.resetBox}>
+                    {resetToken ? (
+                      <>
+                        <RNTextInput
+                          style={st.heroInput}
+                          placeholder="Nueva contrasena"
+                          placeholderTextColor="rgba(255,255,255,0.88)"
+                          value={newPw}
+                          onChangeText={setNewPw}
+                          secureTextEntry
+                          autoComplete="new-password"
+                          editable={!loading}
+                        />
+                        <Pressable style={st.heroLoginBtn} onPress={handleConfirmarReset} disabled={loading}>
+                          {loading ? <ActivityIndicator color="#6200ea" /> : <Text style={st.heroLoginBtnTxt}>Guardar contrasena</Text>}
+                        </Pressable>
+                      </>
+                    ) : (
+                      <Pressable style={st.heroLoginBtn} onPress={handleSolicitarReset} disabled={loading}>
+                        {loading ? <ActivityIndicator color="#6200ea" /> : <Text style={st.heroLoginBtnTxt}>Validar usuario</Text>}
+                      </Pressable>
+                    )}
+                    {!!resetMessage && <Text style={st.resetInfo}>{resetMessage}</Text>}
+                  </View>
+                )}
                 <Pressable style={st.heroCtaSecondary} onPress={goRegistro}>
                   <Text style={st.heroCtaSecondaryTxt}>Crear cuenta gratis</Text>
                 </Pressable>
@@ -360,6 +461,17 @@ const st = StyleSheet.create({
   heroCtaSecondaryTxt: { color: '#fff', fontWeight: '700', fontSize: 20, ...(fontSans ? { fontFamily: fontSans } : {}) },
   heroLinkMore: { paddingVertical: 8, alignItems: 'center' },
   heroLinkMoreTxt: { color: 'rgba(255,255,255,0.96)', fontSize: 18, fontWeight: '700', ...(fontSans ? { fontFamily: fontSans } : {}) },
+  resetBox: {
+    gap: 10,
+    paddingTop: 4,
+  },
+  resetInfo: {
+    color: '#ffffff',
+    fontSize: 14,
+    lineHeight: 19,
+    textAlign: 'center',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
 
   // Sections
   section: { paddingHorizontal: 20, paddingVertical: 36, maxWidth: 600, alignSelf: 'center', width: '100%' },

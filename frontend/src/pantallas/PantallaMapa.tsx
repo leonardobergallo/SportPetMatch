@@ -68,11 +68,12 @@ interface EventoMapa {
 }
 
 // Componente de Mapa con OpenStreetMap (sin API key requerida)
-const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress }: {
+const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNavigateToEvents }: {
   coordenadas: { latitud: number; longitud: number };
   usuarios: UsuarioMapa[];
   eventos: EventoMapa[];
   onItemPress: (tipo: 'usuario' | 'evento', item: any) => void;
+  onNavigateToEvents: () => void;
 }) => {
   // URL de OpenStreetMap (gratis, sin API key)
   
@@ -192,10 +193,10 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress }: {
             <View style={[styles.leyendaColor, { backgroundColor: '#4CAF50' }]} />
             <Text style={styles.leyendaTexto}>Usuarios ({usuarios.length})</Text>
           </View>
-          <View style={styles.leyendaItem}>
+          <TouchableOpacity style={styles.leyendaItem} onPress={onNavigateToEvents} activeOpacity={0.75}>
             <View style={[styles.leyendaColor, { backgroundColor: '#F44336' }]} />
             <Text style={styles.leyendaTexto}>Eventos ({eventos.length})</Text>
-          </View>
+          </TouchableOpacity>
         </View>
         <ScrollView style={styles.listaContainer}>
           <ListaUsuariosYEventos
@@ -233,10 +234,10 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress }: {
               </View>
             )}
             {eventos.length > 0 && (
-              <View style={styles.marcadorItem}>
+              <TouchableOpacity style={styles.marcadorItem} onPress={onNavigateToEvents} activeOpacity={0.75}>
                 <View style={[styles.marcadorPunto, { backgroundColor: '#F44336' }]} />
                 <Text style={styles.marcadorTexto}>{eventos.length} eventos cercanos</Text>
-              </View>
+              </TouchableOpacity>
             )}
           </View>
           
@@ -552,6 +553,7 @@ export default function PantallaMapa() {
             usuarios={usuarios}
             eventos={eventos}
             onItemPress={manejarPresionMarcador}
+            onNavigateToEvents={() => navigation.navigate('Eventos')}
           />
           
           {/* Controles flotantes */}
@@ -567,6 +569,7 @@ export default function PantallaMapa() {
               icon="calendar" 
               mode="outlined"
               style={styles.chip}
+              onPress={() => navigation.navigate('Eventos')}
             >
               {eventos.length} eventos
             </Chip>
@@ -624,14 +627,14 @@ export default function PantallaMapa() {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setDialogVisible(false)}>Cerrar</Button>
-            <Button mode="contained" onPress={() => {
-              setDialogVisible(false);
-              if (tipoElemento === 'evento') {
+            {tipoElemento === 'evento' && (
+              <Button mode="contained" onPress={() => {
+                setDialogVisible(false);
                 navigation.navigate('DetalleEvento', { eventoId: elementoSeleccionado.id });
-              }
-            }}>
-              Ver más
-            </Button>
+              }}>
+                Ver evento
+              </Button>
+            )}
           </Dialog.Actions>
         </Dialog>
       </Portal>

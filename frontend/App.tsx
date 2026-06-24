@@ -10,10 +10,7 @@ import { ProveedorAuth } from './src/contextos/ContextoAuth';
 import { ProveedorUbicacion } from './src/contextos/ContextoUbicacion';
 import NavegacionPrincipal from './src/navegacion/NavegacionPrincipal';
 import ErrorBoundary from './src/componentes/ErrorBoundary';
-
-// Componente opcional para mostrar prompt de instalación PWA
-// Descomenta la siguiente línea si quieres mostrar el banner de instalación:
-// import InstallPrompt from './src/componentes/InstallPrompt';
+import InstallPrompt from './src/componentes/InstallPrompt';
 
 // Configurar tema personalizado
 const tema = {
@@ -43,8 +40,7 @@ export default function App() {
           <ProveedorUbicacion>
             <StatusBar style="auto" />
             <NavegacionPrincipal />
-            {/* Descomenta la siguiente línea para mostrar el banner de instalación PWA: */}
-            {/* <InstallPrompt /> */}
+            <InstallPrompt />
           </ProveedorUbicacion>
         </ProveedorAuth>
       </ErrorBoundary>

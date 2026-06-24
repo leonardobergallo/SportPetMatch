@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { isInstalled, canInstall, isIOS, promptInstall } from '../utilidades/pwa';
+import { isInstalled, isIOS, promptInstall } from '../utilidades/pwa';
 
 /**
  * Componente que muestra un banner para invitar a instalar la PWA
@@ -11,6 +11,10 @@ export default function InstallPrompt() {
   const [isIOSDevice, setIsIOSDevice] = useState(false);
 
   useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
     // No mostrar si ya está instalada
     if (isInstalled()) {
       return;

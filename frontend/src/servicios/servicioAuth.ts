@@ -16,6 +16,16 @@ export interface DatosLogin {
   password: string;
 }
 
+export interface RespuestaResetPassword {
+  success: boolean;
+  message: string;
+  data?: {
+    email?: string;
+    resetToken?: string;
+    resetUrl?: string;
+  };
+}
+
 export interface UsuarioAuth {
   id: string;
   email: string;
@@ -83,6 +93,19 @@ export async function iniciarSesion(datos: DatosLogin): Promise<RespuestaAuth> {
   return response.data;
 }
 
+export async function solicitarResetPassword(email: string): Promise<RespuestaResetPassword> {
+  const response = await apiClient.post<RespuestaResetPassword>('/auth/recuperar-password', { email });
+  return response.data;
+}
+
+export async function resetPassword(token: string, password: string): Promise<{ success: boolean; message: string }> {
+  const response = await apiClient.post<{ success: boolean; message: string }>('/auth/reset-password', {
+    token,
+    password,
+  });
+  return response.data;
+}
+
 /**
  * Obtener datos del dashboard
  */
@@ -90,4 +113,3 @@ export async function obtenerDashboard(): Promise<DatosDashboard> {
   const response = await apiClient.get<{ success: boolean; data: DatosDashboard }>('/auth/dashboard');
   return response.data.data;
 }
-

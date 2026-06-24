@@ -3,6 +3,8 @@
 
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 import prisma from '../utilidades/prisma';
 import { generarTokens } from '../servicios/jwtService';
 
@@ -12,6 +14,38 @@ function normalizarEmail(email: unknown): string {
 
 function normalizarTelefono(telefono: unknown): string {
   return String(telefono || '').replace(/[\s\-\(\)]/g, '').trim();
+}
+
+function obtenerBaseFrontend(req: Request): string {
+  const envUrl = process.env.FRONTEND_URL || process.env.APP_URL || '';
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '');
+  }
+
+  const origin = req.get('origin');
+  if (origin) {
+    return origin.replace(/\/+$/, '');
+  }
+
+  return `${req.protocol}://${req.get('host')}`.replace(/\/+$/, '');
+}
+
+function crearTransporterEmail() {
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || 587);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !user || !pass) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
 }
 
 /**
@@ -177,8 +211,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!usuario) {
       res.status(401).json({
         success: false,
-        message: 'Credenciales incorrectas',
-        code: 'INVALID_CREDENTIALS',
+        message: 'No encontramos una cuenta con ese email',
+        code: 'USER_NOT_FOUND',
       });
       return;
     }
@@ -197,8 +231,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!passwordValida) {
       res.status(401).json({
         success: false,
-        message: 'Credenciales incorrectas',
-        code: 'INVALID_CREDENTIALS',
+        message: 'La contrasena ingresada es incorrecta',
+        code: 'INVALID_PASSWORD',
       });
       return;
     }
@@ -223,6 +257,205 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({
       success: false,
       message: 'Error al iniciar sesion',
+      error: process.env.NODE_ENV === 'development' ? error : undefined,
+    });
+  }
+};
+
+/**
+ * Solicitar recuperacion de password.
+ * En produccion envia link por email si SMTP esta configurado.
+ * En desarrollo devuelve resetToken para poder probar el flujo completo.
+ */
+export const solicitarResetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const emailNormalizado = normalizarEmail(req.body.email);
+
+    if (!emailNormalizado) {
+      res.status(400).json({
+        success: false,
+        message: 'Ingresa el email de tu cuenta',
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailNormalizado)) {
+      res.status(400).json({
+        success: false,
+        message: 'Email invalido',
+        code: 'INVALID_EMAIL',
+      });
+      return;
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { email: emailNormalizado },
+      select: { id: true, email: true, nombre: true, password: true, isActive: true },
+    });
+
+    if (!usuario || !usuario.isActive || !usuario.password) {
+      res.status(404).json({
+        success: false,
+        message: 'No encontramos una cuenta activa con ese email',
+        code: 'USER_NOT_FOUND',
+      });
+      return;
+    }
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      res.status(500).json({
+        success: false,
+        message: 'No se pudo generar el token de recuperacion',
+        code: 'JWT_NOT_CONFIGURED',
+      });
+      return;
+    }
+
+    const resetToken = jwt.sign(
+      {
+        usuarioId: usuario.id,
+        email: usuario.email,
+        purpose: 'password-reset',
+        passwordVersion: usuario.password.slice(0, 16),
+      },
+      secret,
+      { expiresIn: process.env.PASSWORD_RESET_EXPIRES_IN || '30m' } as jwt.SignOptions,
+    );
+    const resetUrl = `${obtenerBaseFrontend(req)}/?app=1&resetToken=${encodeURIComponent(resetToken)}`;
+    const transporter = crearTransporterEmail();
+
+    if (transporter) {
+      await transporter.sendMail({
+        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        to: usuario.email,
+        subject: 'Recuperar contrasena de Indio',
+        text: `Hola ${usuario.nombre}. Para crear una nueva contrasena entra a este link: ${resetUrl}`,
+        html: `<p>Hola ${usuario.nombre},</p><p>Para crear una nueva contrasena en Indio, entra a este link:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>El link vence en 30 minutos.</p>`,
+      });
+    } else {
+      console.warn('SMTP no configurado. Link de recuperacion generado:', resetUrl);
+    }
+
+    const esHostLocal = ['localhost', '127.0.0.1', '::1'].includes(req.hostname);
+    const exponerTokenPrueba = process.env.NODE_ENV !== 'production' || esHostLocal;
+
+    res.json({
+      success: true,
+      message: transporter
+        ? 'Te enviamos un link para recuperar tu contrasena'
+        : exponerTokenPrueba
+          ? 'SMTP no configurado. Usa el token de prueba para completar el reset.'
+          : 'No hay envio de email configurado. Contacta al administrador para recuperar tu contrasena.',
+      data: {
+        email: usuario.email,
+        resetToken: exponerTokenPrueba ? resetToken : undefined,
+        resetUrl: exponerTokenPrueba ? resetUrl : undefined,
+      },
+    });
+  } catch (error) {
+    console.error('Error solicitando recuperacion de password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al solicitar recuperacion de contrasena',
+      error: process.env.NODE_ENV === 'development' ? error : undefined,
+    });
+  }
+};
+
+/**
+ * Confirmar nueva password usando token de recuperacion.
+ */
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const token = String(req.body.token || '').trim();
+    const nuevaPassword = String(req.body.password || '');
+
+    if (!token || !nuevaPassword) {
+      res.status(400).json({
+        success: false,
+        message: 'Token y nueva contrasena son requeridos',
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    if (nuevaPassword.length < 6) {
+      res.status(400).json({
+        success: false,
+        message: 'La nueva contrasena debe tener al menos 6 caracteres',
+        code: 'INVALID_PASSWORD',
+      });
+      return;
+    }
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      res.status(500).json({
+        success: false,
+        message: 'No se pudo validar el token de recuperacion',
+        code: 'JWT_NOT_CONFIGURED',
+      });
+      return;
+    }
+
+    const payload = jwt.verify(token, secret) as {
+      usuarioId: string;
+      email: string;
+      purpose: string;
+      passwordVersion: string;
+    };
+
+    if (payload.purpose !== 'password-reset') {
+      res.status(400).json({
+        success: false,
+        message: 'Token de recuperacion invalido',
+        code: 'INVALID_RESET_TOKEN',
+      });
+      return;
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: payload.usuarioId },
+      select: { id: true, email: true, password: true, isActive: true },
+    });
+
+    if (!usuario || !usuario.isActive || !usuario.password || usuario.email !== payload.email) {
+      res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado o inactivo',
+        code: 'USER_NOT_FOUND',
+      });
+      return;
+    }
+
+    if (usuario.password.slice(0, 16) !== payload.passwordVersion) {
+      res.status(400).json({
+        success: false,
+        message: 'El link ya fue usado o expiro. Solicita uno nuevo.',
+        code: 'RESET_TOKEN_USED',
+      });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(nuevaPassword, 10);
+    await prisma.usuario.update({
+      where: { id: usuario.id },
+      data: { password: passwordHash },
+    });
+
+    res.json({
+      success: true,
+      message: 'Contrasena actualizada exitosamente',
+    });
+  } catch (error) {
+    const isJwtError = error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError;
+    res.status(isJwtError ? 400 : 500).json({
+      success: false,
+      message: isJwtError ? 'El link de recuperacion es invalido o expiro' : 'Error al actualizar la contrasena',
+      code: isJwtError ? 'INVALID_RESET_TOKEN' : 'RESET_PASSWORD_ERROR',
       error: process.env.NODE_ENV === 'development' ? error : undefined,
     });
   }
