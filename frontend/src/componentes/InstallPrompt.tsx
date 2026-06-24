@@ -41,8 +41,9 @@ export default function InstallPrompt() {
     }
 
     // Para Android/Desktop, escuchar el evento beforeinstallprompt
+    // NO llamamos preventDefault() para evitar el error de Chrome:
+    // "The page must call beforeinstallpromptevent.prompt() to show the banner"
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
       (window as any).deferredPrompt = e;
       setShowPrompt(true);
     };
