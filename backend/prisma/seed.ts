@@ -286,6 +286,238 @@ async function main() {
   console.log('✅ 7 usuarios creados (todos Santa Fe / Paraná)');
 
   // ============================================
+  // USUARIOS EXTRA para más matches y actividad
+  // ============================================
+
+  // Sofía - runner con husky
+  const sofia = await prisma.usuario.create({
+    data: {
+      email: 'sofia@sportpetmatch.com',
+      password: passwordHash,
+      nombre: 'Sofía Benítez',
+      fechaNacimiento: new Date(1997, 4, 8),
+      avatar: 'https://i.pravatar.cc/300?img=5',
+      biografia: 'Profesora de educación física. Corro maratones y entreno perros. Mi husky Alaska es mi compañero de ruta.',
+      ubicacionLat: -31.6420,
+      ubicacionLng: -60.6850,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 5,
+      intereses: ['correr', 'senderismo', 'ciclismo'],
+      tipoUsuario: 'con_mascota',
+      onboardingCompletado: true,
+      emailVerificado: true,
+    },
+  });
+
+  await prisma.mascota.create({
+    data: {
+      usuarioId: sofia.id,
+      nombre: 'Alaska',
+      tipo: 'Perro',
+      raza: 'Husky Siberiano',
+      edad: 4,
+      peso: 23,
+      altura: 55,
+      color: 'Gris y blanco',
+      genero: 'Macho',
+      esterilizado: true,
+      nivelActividad: 5,
+      personalidad: ['enérgico', 'aventurero', 'sociable'],
+      intereses: ['correr', 'senderismo', 'nieve'],
+      vacunas: ['Rabia', 'Séxtuple'],
+      fotos: [],
+    },
+  });
+
+  // Martín - con labrador, busca pareja de running
+  const martin = await prisma.usuario.create({
+    data: {
+      email: 'martin@sportpetmatch.com',
+      password: passwordHash,
+      nombre: 'Martín Díaz',
+      fechaNacimiento: new Date(1993, 8, 14),
+      avatar: 'https://i.pravatar.cc/300?img=60',
+      biografia: 'Ingeniero en sistemas. Salgo a correr con mi labrador Thor todos los días. Busco gente piola para entrenar.',
+      ubicacionLat: -31.6350,
+      ubicacionLng: -60.7000,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 3,
+      intereses: ['correr', 'caminar', 'eventos'],
+      tipoUsuario: 'con_mascota',
+      onboardingCompletado: true,
+      emailVerificado: true,
+    },
+  });
+
+  await prisma.mascota.create({
+    data: {
+      usuarioId: martin.id,
+      nombre: 'Thor',
+      tipo: 'Perro',
+      raza: 'Labrador',
+      edad: 2,
+      peso: 30,
+      altura: 56,
+      color: 'Chocolate',
+      genero: 'Macho',
+      esterilizado: false,
+      nivelActividad: 4,
+      personalidad: ['juguetón', 'cariñoso', 'obediente'],
+      intereses: ['correr', 'nadar', 'buscar objetos'],
+      vacunas: ['Rabia', 'Moquillo', 'Parvovirus'],
+      fotos: [],
+    },
+  });
+
+  // Julieta - yin yoga, sin mascota pero ama animales
+  const julieta = await prisma.usuario.create({
+    data: {
+      email: 'julieta@sportpetmatch.com',
+      password: passwordHash,
+      nombre: 'Julieta Ríos',
+      fechaNacimiento: new Date(2000, 1, 22),
+      avatar: 'https://i.pravatar.cc/300?img=44',
+      biografia: 'Instructora de yoga y meditación. No tengo mascota propia pero amo los animales. Busco grupos para actividades al aire libre.',
+      ubicacionLat: -31.6180,
+      ubicacionLng: -60.7120,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 2,
+      intereses: ['yoga', 'caminar', 'eventos'],
+      tipoUsuario: 'solo',
+      onboardingCompletado: true,
+      emailVerificado: true,
+    },
+  });
+
+  // Facundo - crossfit y perro rescatado
+  const facundo = await prisma.usuario.create({
+    data: {
+      email: 'facundo@sportpetmatch.com',
+      password: passwordHash,
+      nombre: 'Facundo Torres',
+      fechaNacimiento: new Date(1990, 10, 5),
+      avatar: 'https://i.pravatar.cc/300?img=11',
+      biografia: 'Entreno crossfit y mi perra rescatada Lola me acompaña a todos lados. Busco compañeros de entrenamiento.',
+      ubicacionLat: -31.6550,
+      ubicacionLng: -60.7200,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 4,
+      intereses: ['crossfit', 'correr', 'caminar'],
+      tipoUsuario: 'con_mascota',
+      onboardingCompletado: true,
+      emailVerificado: true,
+    },
+  });
+
+  await prisma.mascota.create({
+    data: {
+      usuarioId: facundo.id,
+      nombre: 'Lola',
+      tipo: 'Perro',
+      raza: 'Rescatada',
+      edad: 3,
+      peso: 18,
+      altura: 45,
+      color: 'Blanca con manchas',
+      genero: 'Hembra',
+      esterilizado: true,
+      nivelActividad: 4,
+      personalidad: ['leal', 'protectora', 'activa'],
+      intereses: ['correr', 'jugar', 'acompañar'],
+      vacunas: ['Rabia', 'Séxtuple'],
+      fotos: [],
+    },
+  });
+
+  // Natalia - caniche toy, busca paseos tranquilos
+  const natalia = await prisma.usuario.create({
+    data: {
+      email: 'natalia@sportpetmatch.com',
+      password: passwordHash,
+      nombre: 'Natalia Gómez',
+      fechaNacimiento: new Date(1995, 6, 30),
+      avatar: 'https://i.pravatar.cc/300?img=23',
+      biografia: 'Médica pediatra. Tengo un caniche toy divino. Busco paseos tranquilos y encuentros pet-friendly.',
+      ubicacionLat: -31.6307,
+      ubicacionLng: -60.6950,
+      ubicacionCiudad: 'Santa Fe Capital',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 1,
+      intereses: ['caminar', 'eventos', 'mascotas'],
+      tipoUsuario: 'con_mascota',
+      onboardingCompletado: true,
+      emailVerificado: true,
+    },
+  });
+
+  await prisma.mascota.create({
+    data: {
+      usuarioId: natalia.id,
+      nombre: 'Coco',
+      tipo: 'Perro',
+      raza: 'Caniche Toy',
+      edad: 5,
+      peso: 4.5,
+      altura: 28,
+      color: 'Blanco',
+      genero: 'Macho',
+      esterilizado: true,
+      nivelActividad: 2,
+      personalidad: ['tranquilo', 'cariñoso', 'sociable'],
+      intereses: ['paseos cortos', 'socializar', 'dormir'],
+      vacunas: ['Rabia', 'Séxtuple'],
+      fotos: [],
+    },
+  });
+
+  // Tomás - de Paraná, runner con weimaraner
+  const tomas = await prisma.usuario.create({
+    data: {
+      email: 'tomas@sportpetmatch.com',
+      password: passwordHash,
+      nombre: 'Tomás Ferrari',
+      fechaNacimiento: new Date(1991, 2, 12),
+      avatar: 'https://i.pravatar.cc/300?img=53',
+      biografia: 'De Paraná. Corro todos los días con mi weimaraner Uma. Siempre listo para cruzar a Santa Fe a eventos.',
+      ubicacionLat: -31.7410,
+      ubicacionLng: -60.5150,
+      ubicacionCiudad: 'Paraná',
+      ubicacionPais: 'Argentina',
+      nivelDeporte: 4,
+      intereses: ['correr', 'ciclismo', 'senderismo'],
+      tipoUsuario: 'con_mascota',
+      onboardingCompletado: true,
+      emailVerificado: true,
+    },
+  });
+
+  await prisma.mascota.create({
+    data: {
+      usuarioId: tomas.id,
+      nombre: 'Uma',
+      tipo: 'Perro',
+      raza: 'Weimaraner',
+      edad: 3,
+      peso: 28,
+      altura: 62,
+      color: 'Gris plata',
+      genero: 'Hembra',
+      esterilizado: true,
+      nivelActividad: 5,
+      personalidad: ['atlética', 'leal', 'cariñosa'],
+      intereses: ['correr', 'nadar', 'senderismo'],
+      vacunas: ['Rabia', 'Moquillo', 'Parvovirus'],
+      fotos: [],
+    },
+  });
+
+  console.log('✅ 13 usuarios totales (7 originales + 6 nuevos)');
+
+  // ============================================
   // EVENTOS - Fechas actuales, zona Santa Fe
   // ============================================
 
@@ -507,7 +739,48 @@ async function main() {
     },
   });
 
-  console.log('✅ 4 matches creados con mensajes');
+  // Más matches para la beta
+  const matchMS = await prisma.match.create({
+    data: { usuarioId: maria.id, usuarioMatchId: sofia.id, estado: 'aceptado' },
+  });
+
+  await prisma.mensaje.create({
+    data: { matchId: matchMS.id, usuarioId: sofia.id, contenido: 'Hola María! Vi que corrés con tu golden. Yo tengo un husky, ¿hacemos running juntas? 🏃‍♀️', tipo: 'texto' },
+  });
+
+  const matchMM = await prisma.match.create({
+    data: { usuarioId: martin.id, usuarioMatchId: maria.id, estado: 'pendiente' },
+  });
+
+  const matchFJ = await prisma.match.create({
+    data: { usuarioId: facundo.id, usuarioMatchId: julieta.id, estado: 'aceptado' },
+  });
+
+  await prisma.mensaje.create({
+    data: { matchId: matchFJ.id, usuarioId: julieta.id, contenido: 'Hola Facu! Me re interesa arrancar crossfit. Vi que tenés una perrita rescatada 😍', tipo: 'texto' },
+  });
+
+  const matchNT = await prisma.match.create({
+    data: { usuarioId: natalia.id, usuarioMatchId: tomas.id, estado: 'pendiente' },
+  });
+
+  const matchCT = await prisma.match.create({
+    data: { usuarioId: carlos.id, usuarioMatchId: tomas.id, estado: 'aceptado' },
+  });
+
+  await prisma.mensaje.create({
+    data: { matchId: matchCT.id, usuarioId: carlos.id, contenido: 'Tomás! Justo estaba buscando alguien para pedalear a Paraná. Hacemos ruta juntos? 🚴', tipo: 'texto' },
+  });
+
+  const matchPS = await prisma.match.create({
+    data: { usuarioId: pedro.id, usuarioMatchId: sofia.id, estado: 'aceptado' },
+  });
+
+  await prisma.mensaje.create({
+    data: { matchId: matchPS.id, usuarioId: pedro.id, contenido: 'Sofía! Tu husky es hermoso. Cruzo a Santa Fe seguido, ¿hacemos senderismo por el Puente Colgante?', tipo: 'texto' },
+  });
+
+  console.log('✅ 10 matches creados con mensajes');
 
   // ============================================
   // PARTICIPANTES EN EVENTOS
@@ -557,9 +830,9 @@ async function main() {
 ╔══════════════════════════════════════════════════╗
 ║     🌱 SEED PRODUCCIÓN COMPLETADO              ║
 ╠══════════════════════════════════════════════════╣
-║  7 usuarios   │  7 mascotas                     ║
-║  10 eventos   │  19 participaciones              ║
-║  4 matches    │  3 conversaciones                ║
+║  13 usuarios  │  13 mascotas                     ║
+║  10 eventos   │  +30 participaciones             ║
+║  10 matches   │  7 conversaciones                ║
 ╠══════════════════════════════════════════════════╣
 ║  🔑 TODOS los usuarios usan contraseña: 123456  ║
 ╠══════════════════════════════════════════════════╣
@@ -590,6 +863,30 @@ async function main() {
 ║  👤 pedro@sportpetmatch.com                     ║
 ║     Pedro López + Rocco (Border Collie)         ║
 ║     Paraná - Corredor                           ║
+╠══════════════════════════════════════════════════╣
+║  👤 sofia@sportpetmatch.com                     ║
+║     Sofía Benítez + Alaska (Husky Siberiano)    ║
+║     Santa Fe Capital - Runner                   ║
+╠══════════════════════════════════════════════════╣
+║  👤 martin@sportpetmatch.com                    ║
+║     Martín Díaz + Thor (Labrador Chocolate)     ║
+║     Santa Fe Capital - Runner                   ║
+╠══════════════════════════════════════════════════╣
+║  👤 julieta@sportpetmatch.com                   ║
+║     Julieta Ríos (sin mascota)                  ║
+║     Santa Fe Capital - Yoga                     ║
+╠══════════════════════════════════════════════════╣
+║  👤 facundo@sportpetmatch.com                   ║
+║     Facundo Torres + Lola (Rescatada)           ║
+║     Santa Fe Capital - Crossfit                 ║
+╠══════════════════════════════════════════════════╣
+║  👤 natalia@sportpetmatch.com                   ║
+║     Natalia Gómez + Coco (Caniche Toy)          ║
+║     Santa Fe Capital - Paseos                   ║
+╠══════════════════════════════════════════════════╣
+║  👤 tomas@sportpetmatch.com                     ║
+║     Tomás Ferrari + Uma (Weimaraner)            ║
+║     Paraná - Runner/Ciclista                    ║
 ╚══════════════════════════════════════════════════╝
 
 📅 Eventos destacados (Santa Fe / Paraná):
