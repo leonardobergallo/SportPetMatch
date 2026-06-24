@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 // IP local para desarrollo (movil/Expo Go). Opcional: EXPO_PUBLIC_LOCAL_IP en .env
 // Para encontrar tu IP: Windows: ipconfig | findstr IPv4 | Mac/Linux: ifconfig | grep "inet "
 export const LOCAL_IP =
-  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_LOCAL_IP?.trim()) || '192.168.0.174';
+  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_LOCAL_IP?.trim()) || '192.168.1.3';
 
 // Puerto del backend
 export const API_PORT = 3000;
