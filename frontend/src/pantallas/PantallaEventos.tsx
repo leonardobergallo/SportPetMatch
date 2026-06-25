@@ -133,7 +133,11 @@ export default function PantallaEventos(): JSX.Element {
       Alert.alert('¡Éxito!', 'Te has unido al evento exitosamente');
       cargarEventos(); // Recargar eventos
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'No se pudo unir al evento');
+      const mensaje =
+        error?.response?.data?.message ||
+        error?.message ||
+        'No se pudo unir al evento';
+      Alert.alert('Aviso', mensaje);
     }
   };
 
