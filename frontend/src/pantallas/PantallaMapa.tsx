@@ -210,60 +210,63 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
     );
   }
 
-  // En móvil, mostrar vista con marcadores visuales y botón para abrir en Google Maps
+  // En móvil, mostrar cabecera compacta con contadores y botón Google Maps
   return (
-    <View style={styles.mapaContainer}>
-      <View style={styles.mapaPlaceholderContainer}>
-        <View style={styles.mapaPlaceholder}>
-          <MaterialIcons name="map" size={64} color={temaApp.colors.primary} />
-          <Text style={styles.mapaPlaceholderTitulo}>Mapa de Indio</Text>
-          <Text style={styles.mapaPlaceholderTexto}>
-            Ubicación: Santa Fe Capital, Argentina
-          </Text>
-          
-          {/* Mostrar marcadores visuales */}
-          <View style={styles.marcadoresContainer}>
-            <View style={styles.marcadorItem}>
-              <View style={[styles.marcadorPunto, { backgroundColor: '#2196F3' }]} />
-              <Text style={styles.marcadorTexto}>Tu ubicación</Text>
-            </View>
-            {usuarios.length > 0 && (
-              <View style={styles.marcadorItem}>
-                <View style={[styles.marcadorPunto, { backgroundColor: '#4CAF50' }]} />
-                <Text style={styles.marcadorTexto}>{usuarios.length} usuarios cercanos</Text>
-              </View>
-            )}
-            {eventos.length > 0 && (
-              <TouchableOpacity style={styles.marcadorItem} onPress={onNavigateToEvents} activeOpacity={0.75}>
-                <View style={[styles.marcadorPunto, { backgroundColor: '#F44336' }]} />
-                <Text style={styles.marcadorTexto}>{eventos.length} eventos cercanos</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          
-          <TouchableOpacity
-            onPress={() => {
-              // Abrir Google Maps en la app nativa con todos los marcadores
-              const marcadoresUrl = [
-                `${coordenadas.latitud},${coordenadas.longitud}`,
-                ...usuarios.map(u => `${u.ubicacionLat},${u.ubicacionLng}`),
-                ...eventos.map(e => `${e.ubicacionLat},${e.ubicacionLng}`),
-              ].join('/');
-              const url = `https://www.google.com/maps/dir/${marcadoresUrl}`;
-              Linking.openURL(url).catch(err => console.error('Error abriendo Google Maps:', err));
-            }}
-            activeOpacity={0.8}
-            style={styles.mapaPlaceholderBoton}
-          >
-            <MaterialIcons name="open-in-new" size={20} color="#FFFFFF" />
-            <Text style={styles.mapaPlaceholderBotonTexto}>
-              Ver en Google Maps
-            </Text>
-          </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.mapaMobileHeader}>
+        <MaterialIcons name="map" size={32} color={temaApp.colors.primary} />
+        <View style={styles.mapaMobileInfo}>
+          <Text style={styles.mapaMobileTitulo}>Mapa de Indio</Text>
+          <Text style={styles.mapaMobileUbicacion}>Santa Fe Capital, Argentina</Text>
         </View>
       </View>
-      
-      <ScrollView style={styles.listaContainer}>
+
+      {/* Contadores de usuarios y eventos */}
+      <View style={styles.contadoresRow}>
+        <TouchableOpacity
+          style={styles.contadorCard}
+          onPress={() => onItemPress('usuario', usuarios[0])}
+          activeOpacity={0.75}
+        >
+          <View style={[styles.contadorPunto, { backgroundColor: '#4CAF50' }]} />
+          <Text style={styles.contadorNumero}>{usuarios.length}</Text>
+          <Text style={styles.contadorLabel}>usuarios</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.contadorCard}
+          onPress={onNavigateToEvents}
+          activeOpacity={0.75}
+        >
+          <View style={[styles.contadorPunto, { backgroundColor: '#F44336' }]} />
+          <Text style={styles.contadorNumero}>{eventos.length}</Text>
+          <Text style={styles.contadorLabel}>eventos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.contadorCard}
+          onPress={() => {
+            const marcadoresUrl = [
+              `${coordenadas.latitud},${coordenadas.longitud}`,
+              ...usuarios.map((u: any) => `${u.ubicacionLat},${u.ubicacionLng}`),
+              ...eventos.map((e: any) => `${e.ubicacionLat},${e.ubicacionLng}`),
+            ].join('/');
+            Linking.openURL(`https://www.google.com/maps/dir/${marcadoresUrl}`).catch(() => {});
+          }}
+          activeOpacity={0.75}
+        >
+          <View style={[styles.contadorPunto, { backgroundColor: '#2196F3' }]} />
+          <Text style={styles.contadorNumero}>
+            <MaterialIcons name="open-in-new" size={14} color={temaApp.colors.primary} />
+          </Text>
+          <Text style={styles.contadorLabel}>Google Maps</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        style={styles.listaContainer}
+        contentContainerStyle={styles.listaContent}
+      >
         <ListaUsuariosYEventos
           usuarios={usuarios}
           eventos={eventos}
@@ -817,6 +820,62 @@ const styles = StyleSheet.create({
   listaContainer: {
     flex: 1,
     backgroundColor: temaApp.colors.background,
+  },
+  listaContent: {
+    paddingBottom: 80,
+  },
+  mapaMobileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: espaciado.md,
+    backgroundColor: temaApp.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: temaApp.colors.border,
+    gap: espaciado.md,
+  },
+  mapaMobileInfo: {
+    flex: 1,
+  },
+  mapaMobileTitulo: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: temaApp.colors.onSurface,
+  },
+  mapaMobileUbicacion: {
+    fontSize: 12,
+    color: temaApp.colors.onSurfaceVariant,
+    marginTop: 2,
+  },
+  contadoresRow: {
+    flexDirection: 'row',
+    padding: espaciado.sm,
+    backgroundColor: temaApp.colors.surface,
+    gap: espaciado.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: temaApp.colors.border,
+  },
+  contadorCard: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: espaciado.sm,
+    borderRadius: 8,
+    backgroundColor: temaApp.colors.muted || '#F5F5F5',
+  },
+  contadorPunto: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginBottom: 4,
+  },
+  contadorNumero: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: temaApp.colors.onSurface,
+  },
+  contadorLabel: {
+    fontSize: 11,
+    color: temaApp.colors.onSurfaceVariant,
+    marginTop: 2,
   },
   seccionTitulo: {
     paddingVertical: espaciado.sm,
