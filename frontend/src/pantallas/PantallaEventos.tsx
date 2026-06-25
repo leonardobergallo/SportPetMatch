@@ -341,11 +341,11 @@ const estilos = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: espaciado.md,
-    paddingBottom: 100,
+    padding: 12,
+    paddingBottom: 80,
   },
   cardEvento: {
-    marginBottom: espaciado.md,
+    marginBottom: 12,
     overflow: 'hidden',
     ...sombras.media,
   },
@@ -353,8 +353,9 @@ const estilos = StyleSheet.create({
     width: '100%',
   },
   imagenContainer: {
-    height: 200,
+    height: 180,
     position: 'relative',
+    overflow: 'hidden',
   },
   imagenEvento: {
     width: '100%',
@@ -392,20 +393,20 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
   },
   tituloEvento: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
-    marginBottom: espaciado.xs,
+    marginBottom: 4,
   },
   descripcionEvento: {
-    fontSize: 14,
+    fontSize: 13,
     color: temaApp.colors.onSurfaceVariant,
-    marginBottom: espaciado.md,
+    lineHeight: 18,
+    marginBottom: 8,
   },
   infoEvento: {
     flexDirection: 'row',
-    gap: espaciado.md,
-    marginBottom: espaciado.md,
+    gap: 12,
   },
   infoItem: {
     flexDirection: 'row',
@@ -420,8 +421,9 @@ const estilos = StyleSheet.create({
     width: '100%',
   },
   footerAcciones: {
-    paddingHorizontal: espaciado.md,
-    paddingBottom: espaciado.md,
+    paddingHorizontal: 12,
+    paddingBottom: 12,
+    paddingTop: 4,
   },
   vacio: {
     flex: 1,
