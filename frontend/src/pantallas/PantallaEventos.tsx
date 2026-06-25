@@ -273,18 +273,6 @@ export default function PantallaEventos(): JSX.Element {
                   </View>
                 </CardContent>
               </Pressable>
-              {estaAutenticado && (
-                <View style={estilos.footerAcciones}>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onPress={() => manejarParticipar(evento.id)}
-                    style={estilos.botonParticipar}
-                  >
-                    Unirse
-                  </Button>
-                </View>
-              )}
             </Card>
           ))
         )}
