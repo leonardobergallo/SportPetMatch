@@ -203,7 +203,11 @@ export default function PantallaMapaReal() {
       Alert.alert('¡Listo!', 'Te has unido al evento exitosamente');
       cargarDatosCercanos();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'No se pudo unir al evento');
+      const mensaje =
+        error?.response?.data?.message ||
+        error?.message ||
+        'No se pudo unir al evento';
+      Alert.alert('Aviso', mensaje);
     }
   };
 

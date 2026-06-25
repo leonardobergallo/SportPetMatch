@@ -129,10 +129,14 @@ export default function PantallaDetalleEvento(): JSX.Element {
     try {
       setProcesando(true);
       await participarEnEvento(eventoId);
-      Alert.alert('¡Éxito!', 'Te has unido al evento exitosamente');
+      Alert.alert('¡Listo!', 'Te has unido al evento exitosamente');
       cargarEvento();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'No se pudo unir al evento');
+      const mensaje =
+        error?.response?.data?.message ||
+        error?.message ||
+        'No se pudo unir al evento';
+      Alert.alert('Aviso', mensaje);
     } finally {
       setProcesando(false);
     }
