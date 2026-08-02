@@ -25,13 +25,28 @@ import { Card, CardContent } from '@/components/ui/card';
 
 // Importar servicios y tema
 import { crearEvento, actualizarEvento, obtenerEvento, DatosCrearEvento } from '@/servicios/servicioEventos';
-import { temaApp, espaciado, sombras } from '@/constantes/tema';
+import { temaApp, espaciado, sombras, colores } from '@/constantes/tema';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 import { useAuth } from '@/contextos/ContextoAuth';
 import { mostrarAlerta } from '@/utilidades/alerta';
 
 type CrearEventoScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CrearEvento'>;
 type CrearEventoScreenRouteProp = RouteProp<RootStackParamList, 'CrearEvento'>;
+
+// Categorias fijas (coinciden con los tipos usados en el resto de la app:
+// filtros de Eventos, imagen de portada por tipo, etc). Antes esto era un
+// campo de texto libre, asi que cualquiera podia escribir algo distinto y
+// el evento quedaba fuera de los filtros y de la imagen automatica.
+const CATEGORIAS_EVENTO: { valor: string; etiqueta: string }[] = [
+  { valor: 'correr', etiqueta: 'Running' },
+  { valor: 'ciclismo', etiqueta: 'Ciclismo' },
+  { valor: 'encuentro', etiqueta: 'Encuentro' },
+  { valor: 'entrenamiento', etiqueta: 'Entrenamiento' },
+  { valor: 'yoga', etiqueta: 'Yoga' },
+  { valor: 'senderismo', etiqueta: 'Senderismo' },
+  { valor: 'social', etiqueta: 'Social' },
+  { valor: 'picnic', etiqueta: 'Picnic' },
+];
 
 /** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
 const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
@@ -586,18 +601,29 @@ export default function PantallaCrearEvento(): JSX.Element {
 
             {/* Tipo */}
             <View style={estilos.campoContainer}>
-              <TextInput
-                label="Categoría del evento *"
-                value={tipo}
-                onChangeText={setTipo}
-                mode="outlined"
-                style={estilos.campo}
-                placeholder="Ej: paseo, parque, merienda, encuentro..."
-                disabled={cargando}
-              />
-              <Text style={estilos.hint}>
-                Ejemplos: paseo, parque, cafetería pet-friendly, encuentro, adopción, socialización
-              </Text>
+              <Text style={estilos.etiquetaCategoria}>Categoría del evento *</Text>
+              <View style={estilos.categoriasContainer}>
+                {CATEGORIAS_EVENTO.map((categoria) => (
+                  <TouchableOpacity
+                    key={categoria.valor}
+                    style={[
+                      estilos.categoriaChip,
+                      tipo === categoria.valor && estilos.categoriaChipActiva,
+                    ]}
+                    onPress={() => setTipo(categoria.valor)}
+                    disabled={cargando}
+                  >
+                    <Text
+                      style={[
+                        estilos.categoriaChipTexto,
+                        tipo === categoria.valor && estilos.categoriaChipTextoActivo,
+                      ]}
+                    >
+                      {categoria.etiqueta}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             {/* Imagen opcional */}
@@ -1012,6 +1038,37 @@ const estilos = StyleSheet.create({
     color: temaApp.colors.onSurfaceVariant,
     marginTop: espaciado.xs,
     fontStyle: 'italic',
+  },
+  etiquetaCategoria: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: temaApp.colors.onSurfaceVariant,
+    marginBottom: espaciado.sm,
+  },
+  categoriasContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: espaciado.sm,
+  },
+  categoriaChip: {
+    paddingHorizontal: espaciado.md,
+    paddingVertical: espaciado.sm,
+    borderRadius: 999,
+    backgroundColor: temaApp.colors.muted || '#EDEDED',
+    borderWidth: 1,
+    borderColor: temaApp.colors.border,
+  },
+  categoriaChipActiva: {
+    backgroundColor: temaApp.colors.primary,
+    borderColor: temaApp.colors.primary,
+  },
+  categoriaChipTexto: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colores.textoSecundario,
+  },
+  categoriaChipTextoActivo: {
+    color: '#FFFFFF',
   },
   accionesImagen: {
     flexDirection: 'row',
