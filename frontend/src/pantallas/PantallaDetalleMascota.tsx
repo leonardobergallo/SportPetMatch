@@ -7,7 +7,6 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  Alert,
   RefreshControl,
   TouchableOpacity,
 } from 'react-native';
@@ -31,6 +30,7 @@ import {
 } from '../servicios/servicioMascotas';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 type DetalleMascotaRouteProp = RouteProp<RootStackParamList, 'DetalleMascota'>;
 type DetalleMascotaNavigationProp = StackNavigationProp<RootStackParamList, 'DetalleMascota'>;
@@ -63,7 +63,7 @@ export default function PantallaDetalleMascota(): JSX.Element {
       setMascota(datosMascota);
     } catch (error: any) {
       console.error('Error cargando mascota:', error);
-      Alert.alert('Error', 'No se pudo cargar la información de la mascota');
+      mostrarAlerta('Error', 'No se pudo cargar la información de la mascota');
       navigation.goBack();
     } finally {
       setCargando(false);
@@ -87,7 +87,7 @@ export default function PantallaDetalleMascota(): JSX.Element {
       return;
     }
 
-    Alert.alert(
+    mostrarAlerta(
       'Eliminar Mascota',
       `¿Estás seguro de que quieres eliminar a ${mascota.nombre}? Esta acción no se puede deshacer.`,
       [
@@ -99,10 +99,10 @@ export default function PantallaDetalleMascota(): JSX.Element {
             try {
               setProcesando(true);
               await eliminarMascota(mascotaId);
-              Alert.alert('Éxito', 'Mascota eliminada exitosamente');
+              mostrarAlerta('Éxito', 'Mascota eliminada exitosamente');
               navigation.goBack();
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'No se pudo eliminar la mascota');
+              mostrarAlerta('Error', error.message || 'No se pudo eliminar la mascota');
             } finally {
               setProcesando(false);
             }

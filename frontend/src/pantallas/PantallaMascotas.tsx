@@ -1,7 +1,7 @@
 // Pantalla de Mascotas de SportPetMatch
 // Adaptada con nuevos componentes y servicios API
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,12 +9,12 @@ import {
   RefreshControl,
   Image,
   TouchableOpacity,
-  Alert,
   Platform,
 } from 'react-native';
+import { mostrarAlerta } from '@/utilidades/alerta';
 import { Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 // Importar componentes UI
@@ -55,11 +55,16 @@ export default function PantallaMascotas(): JSX.Element {
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
 
-  useEffect(() => {
-    if (estaAutenticado) {
-      cargarMascotas();
-    }
-  }, [estaAutenticado]);
+  // Se ejecuta al montar, al cambiar el estado de auth y cada vez que la
+  // pantalla vuelve a tener foco (por ejemplo al volver de "Agregar
+  // Mascota"), asi la mascota recien creada aparece sin recargar la pagina.
+  useFocusEffect(
+    React.useCallback(() => {
+      if (estaAutenticado) {
+        cargarMascotas();
+      }
+    }, [estaAutenticado])
+  );
 
   /**
    * Cargar mascotas desde la API
@@ -72,7 +77,7 @@ export default function PantallaMascotas(): JSX.Element {
     } catch (error: any) {
       console.error('Error cargando mascotas:', error);
       if (error.message?.includes('No autenticado')) {
-        Alert.alert('Autenticación requerida', 'Debes iniciar sesión para ver tus mascotas');
+        mostrarAlerta('Autenticación requerida', 'Debes iniciar sesión para ver tus mascotas');
       }
     } finally {
       setCargando(false);
@@ -111,7 +116,7 @@ export default function PantallaMascotas(): JSX.Element {
    * Manejar eliminar mascota
    */
   const manejarEliminar = (mascotaId: string, nombreMascota: string) => {
-    Alert.alert(
+    mostrarAlerta(
       'Eliminar Mascota',
       `¿Estás seguro de que quieres eliminar a ${nombreMascota}?`,
       [
@@ -122,10 +127,10 @@ export default function PantallaMascotas(): JSX.Element {
           onPress: async () => {
             try {
               await eliminarMascota(mascotaId);
-              Alert.alert('Éxito', 'Mascota eliminada exitosamente');
+              mostrarAlerta('Éxito', 'Mascota eliminada exitosamente');
               cargarMascotas(); // Recargar lista
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'No se pudo eliminar la mascota');
+              mostrarAlerta('Error', error.message || 'No se pudo eliminar la mascota');
             }
           },
         },

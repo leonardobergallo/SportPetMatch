@@ -2,7 +2,10 @@
 // Chat individual con un usuario que hizo match
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import {
   View,
@@ -12,7 +15,6 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import {
@@ -33,6 +35,7 @@ import {
   Mensaje,
 } from '../servicios/servicioMensajes';
 import { obtenerMisMatches, Match } from '../servicios/servicioMatches';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Chat'>;
@@ -86,7 +89,7 @@ export default function PantallaChat(): JSX.Element {
       await Promise.all([cargarMatch(), cargarMensajes()]);
     } catch (error) {
       console.error('Error cargando datos del chat:', error);
-      Alert.alert('Error', 'No se pudieron cargar los datos del chat');
+      mostrarAlerta('Error', 'No se pudieron cargar los datos del chat');
     } finally {
       setCargando(false);
     }
@@ -128,7 +131,7 @@ export default function PantallaChat(): JSX.Element {
     } catch (error) {
       console.error('Error cargando mensajes:', error);
       if (!refrescando) {
-        Alert.alert('Error', 'No se pudieron cargar los mensajes');
+        mostrarAlerta('Error', 'No se pudieron cargar los mensajes');
       }
     }
   };
@@ -164,7 +167,7 @@ export default function PantallaChat(): JSX.Element {
       await cargarMensajes();
     } catch (error) {
       console.error('Error enviando mensaje:', error);
-      Alert.alert('Error', 'No se pudo enviar el mensaje');
+      mostrarAlerta('Error', 'No se pudo enviar el mensaje');
       setNuevoMensaje(contenido); // Restaurar mensaje
     } finally {
       setEnviando(false);

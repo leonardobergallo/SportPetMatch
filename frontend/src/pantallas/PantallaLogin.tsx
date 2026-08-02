@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import {
+  useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import {
   View,
@@ -8,12 +9,12 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Image,
   ImageBackground,
   Pressable,
   TextInput as RNTextInput,
 } from 'react-native';
+import { mostrarAlerta } from '@/utilidades/alerta';
 import {
   ActivityIndicator,
 } from 'react-native-paper';
@@ -97,8 +98,8 @@ export default function PantallaLogin(): JSX.Element {
   };
 
   const handleLogin = async () => {
-    if (!email.trim() || !pw.trim()) { Alert.alert('Error', 'Completá correo y contraseña'); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Alert.alert('Error', 'Correo no válido'); return; }
+    if (!email.trim() || !pw.trim()) { mostrarAlerta('Error', 'Completá correo y contraseña'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { mostrarAlerta('Error', 'Correo no válido'); return; }
     setLoading(true);
     try {
       const r = await servicioIniciarSesion({ email: email.trim(), password: pw });
@@ -115,24 +116,24 @@ export default function PantallaLogin(): JSX.Element {
           onboardingCompletado: u.onboardingCompletado || false,
         });
         await iniciarSesion(usuario, r.data.token);
-        Alert.alert('Bienvenido!', `Hola ${usuario.nombre}!`, [{ text: 'Continuar' }]);
+        mostrarAlerta('Bienvenido!', `Hola ${usuario.nombre}!`, [{ text: 'Continuar' }]);
       }
     } catch (e: any) {
-      Alert.alert('Error', e.message || 'Credenciales incorrectas');
+      mostrarAlerta('Error', e.message || 'Credenciales incorrectas');
     } finally { setLoading(false); }
   };
 
   const handleGoogle = async () => {
     setLoading(true);
-    try { await new Promise(r => setTimeout(r, 2000)); Alert.alert('Bienvenido!', 'Sesion con Google'); }
-    catch { Alert.alert('Error', 'No se pudo iniciar con Google.'); }
+    try { await new Promise(r => setTimeout(r, 2000)); mostrarAlerta('Bienvenido!', 'Sesion con Google'); }
+    catch { mostrarAlerta('Error', 'No se pudo iniciar con Google.'); }
     finally { setLoading(false); }
   };
 
   const handleSolicitarReset = async () => {
     const correo = email.trim();
-    if (!correo) { Alert.alert('Error', 'Ingresa el email de tu cuenta'); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { Alert.alert('Error', 'Correo no valido'); return; }
+    if (!correo) { mostrarAlerta('Error', 'Ingresa el email de tu cuenta'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { mostrarAlerta('Error', 'Correo no valido'); return; }
 
     setLoading(true);
     setResetMessage('');
@@ -145,27 +146,27 @@ export default function PantallaLogin(): JSX.Element {
         setResetMessage(r.message || 'Si el email existe, te enviamos un link de recuperacion.');
       }
     } catch (e: any) {
-      Alert.alert('No pudimos validar el usuario', e.message || 'Revisa el email ingresado');
+      mostrarAlerta('No pudimos validar el usuario', e.message || 'Revisa el email ingresado');
     } finally {
       setLoading(false);
     }
   };
 
   const handleConfirmarReset = async () => {
-    if (!resetToken) { Alert.alert('Error', 'Primero solicita un link de recuperacion'); return; }
-    if (newPw.length < 6) { Alert.alert('Error', 'La nueva contrasena debe tener al menos 6 caracteres'); return; }
+    if (!resetToken) { mostrarAlerta('Error', 'Primero solicita un link de recuperacion'); return; }
+    if (newPw.length < 6) { mostrarAlerta('Error', 'La nueva contrasena debe tener al menos 6 caracteres'); return; }
 
     setLoading(true);
     try {
       const r = await resetPassword(resetToken, newPw);
-      Alert.alert('Listo', r.message || 'Contrasena actualizada');
+      mostrarAlerta('Listo', r.message || 'Contrasena actualizada');
       setResetMode(false);
       setResetToken('');
       setNewPw('');
       setPw('');
       setResetMessage('');
     } catch (e: any) {
-      Alert.alert('No pudimos actualizar la contrasena', e.message || 'Solicita un link nuevo e intenta otra vez');
+      mostrarAlerta('No pudimos actualizar la contrasena', e.message || 'Solicita un link nuevo e intenta otra vez');
     } finally {
       setLoading(false);
     }

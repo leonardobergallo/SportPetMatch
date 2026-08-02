@@ -2,7 +2,7 @@
 // Versión optimizada para funcionar tanto en web como en móvil
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform, Alert } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform } from 'react-native';
 import { 
   Surface, 
   Appbar, 
@@ -21,6 +21,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useUbicacion } from '../contextos/ContextoUbicacion';
 import { participarEnEvento } from '../servicios/servicioEventos';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 // Importar MapView condicionalmente solo cuando esté disponible
 let MapView: any = null;
@@ -268,7 +269,7 @@ export default function PantallaMapaWebCompatible() {
       
     } catch (error) {
       console.error('Error cargando datos:', error);
-      Alert.alert('Error', 'No se pudieron cargar los datos del mapa');
+      mostrarAlerta('Error', 'No se pudieron cargar los datos del mapa');
     } finally {
       setCargando(false);
     }
@@ -288,7 +289,7 @@ export default function PantallaMapaWebCompatible() {
 
   const abrirChat = () => {
     cerrarDialog();
-    Alert.alert('Chat', 'Funcionalidad de chat próximamente');
+    mostrarAlerta('Chat', 'Funcionalidad de chat próximamente');
   };
 
   const unirseEvento = async () => {
@@ -296,14 +297,14 @@ export default function PantallaMapaWebCompatible() {
     try {
       await participarEnEvento(elementoSeleccionado.id);
       cerrarDialog();
-      Alert.alert('¡Listo!', 'Te has unido al evento exitosamente');
+      mostrarAlerta('¡Listo!', 'Te has unido al evento exitosamente');
       cargarDatosCercanos();
     } catch (error: any) {
       const mensaje =
         error?.response?.data?.message ||
         error?.message ||
         'No se pudo unir al evento';
-      Alert.alert('Aviso', mensaje);
+      mostrarAlerta('Aviso', mensaje);
     }
   };
 
@@ -407,7 +408,7 @@ export default function PantallaMapaWebCompatible() {
         style={styles.fab}
         icon="plus"
         onPress={() => {
-          Alert.alert('Crear Evento', 'Funcionalidad próximamente');
+          mostrarAlerta('Crear Evento', 'Funcionalidad próximamente');
         }}
       />
     </View>

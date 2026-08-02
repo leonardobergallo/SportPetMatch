@@ -7,7 +7,6 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import {
@@ -34,6 +33,7 @@ import {
 } from '../servicios/servicioEventos';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 type DetalleEventoRouteProp = RouteProp<RootStackParamList, 'DetalleEvento'>;
 type DetalleEventoNavigationProp = StackNavigationProp<RootStackParamList, 'DetalleEvento'>;
@@ -96,7 +96,7 @@ export default function PantallaDetalleEvento(): JSX.Element {
       setEsParticipante(!!(estaAutenticado && usuario && datosEvento.participantesIds?.includes(usuario.id)));
     } catch (error: any) {
       console.error('Error cargando evento:', error);
-      Alert.alert('Error', 'No se pudo cargar la información del evento');
+      mostrarAlerta('Error', 'No se pudo cargar la información del evento');
       navigation.goBack();
     } finally {
       setCargando(false);
@@ -117,26 +117,26 @@ export default function PantallaDetalleEvento(): JSX.Element {
    */
   const manejarParticipar = async () => {
     if (!estaAutenticado) {
-      Alert.alert('Autenticación requerida', 'Debes iniciar sesión para participar en eventos');
+      mostrarAlerta('Autenticación requerida', 'Debes iniciar sesión para participar en eventos');
       return;
     }
 
     if (evento && usuario && evento.organizadorId === usuario.id) {
-      Alert.alert('Este es tu evento', 'Como organizador no necesitas unirte como participante.');
+      mostrarAlerta('Este es tu evento', 'Como organizador no necesitas unirte como participante.');
       return;
     }
 
     try {
       setProcesando(true);
       await participarEnEvento(eventoId);
-      Alert.alert('¡Listo!', 'Te has unido al evento exitosamente');
+      mostrarAlerta('¡Listo!', 'Te has unido al evento exitosamente');
       cargarEvento();
     } catch (error: any) {
       const mensaje =
         error?.response?.data?.message ||
         error?.message ||
         'No se pudo unir al evento';
-      Alert.alert('Aviso', mensaje);
+      mostrarAlerta('Aviso', mensaje);
     } finally {
       setProcesando(false);
     }
@@ -146,7 +146,7 @@ export default function PantallaDetalleEvento(): JSX.Element {
    * Salir del evento
    */
   const manejarSalir = async () => {
-    Alert.alert(
+    mostrarAlerta(
       'Confirmar',
       '¿Estás seguro de que quieres salir de este evento?',
       [
@@ -158,10 +158,10 @@ export default function PantallaDetalleEvento(): JSX.Element {
             try {
               setProcesando(true);
               await salirDeEvento(eventoId);
-              Alert.alert('Éxito', 'Has salido del evento');
+              mostrarAlerta('Éxito', 'Has salido del evento');
               cargarEvento();
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'No se pudo salir del evento');
+              mostrarAlerta('Error', error.message || 'No se pudo salir del evento');
             } finally {
               setProcesando(false);
             }
@@ -179,7 +179,7 @@ export default function PantallaDetalleEvento(): JSX.Element {
       return;
     }
 
-    Alert.alert(
+    mostrarAlerta(
       'Eliminar Evento',
       '¿Estás seguro de que quieres eliminar este evento? Esta acción no se puede deshacer.',
       [
@@ -191,10 +191,10 @@ export default function PantallaDetalleEvento(): JSX.Element {
             try {
               setProcesando(true);
               await eliminarEvento(eventoId);
-              Alert.alert('Éxito', 'Evento eliminado exitosamente');
+              mostrarAlerta('Éxito', 'Evento eliminado exitosamente');
               navigation.goBack();
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'No se pudo eliminar el evento');
+              mostrarAlerta('Error', error.message || 'No se pudo eliminar el evento');
             } finally {
               setProcesando(false);
             }
@@ -391,16 +391,27 @@ export default function PantallaDetalleEvento(): JSX.Element {
           {/* Botones de acción */}
           <View style={estilos.botonesContainer}>
             {esOrganizador ? (
-              <Button
-                mode="outlined"
-                onPress={manejarEliminar}
-                disabled={procesando}
-                icon="delete"
-                textColor={temaApp.colors.error}
-                style={estilos.botonEliminar}
-              >
-                Eliminar Evento
-              </Button>
+              <View style={{ flexDirection: 'row', gap: espaciado.sm, width: '100%' }}>
+                <Button
+                  mode="outlined"
+                  onPress={() => navigation.navigate('CrearEvento', { eventoId })}
+                  disabled={procesando}
+                  icon="pencil"
+                  style={[estilos.botonEliminar, { flex: 1 }]}
+                >
+                  Editar
+                </Button>
+                <Button
+                  mode="outlined"
+                  onPress={manejarEliminar}
+                  disabled={procesando}
+                  icon="delete"
+                  textColor={temaApp.colors.error}
+                  style={[estilos.botonEliminar, { flex: 1 }]}
+                >
+                  Eliminar
+                </Button>
+              </View>
             ) : esParticipante ? (
               <Button
                 mode="outlined"

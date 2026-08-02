@@ -6,7 +6,6 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import {
@@ -26,6 +25,7 @@ import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { obtenerMisMatches, Match } from '../servicios/servicioMatches';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 type DetalleMatchRouteProp = RouteProp<RootStackParamList, 'DetalleMatch'>;
 type DetalleMatchNavigationProp = StackNavigationProp<RootStackParamList, 'DetalleMatch'>;
@@ -57,7 +57,7 @@ export default function PantallaDetalleMatch(): JSX.Element {
       const matchEncontrado = matches.find((m) => m.id === matchId);
       
       if (!matchEncontrado) {
-        Alert.alert('Error', 'Match no encontrado');
+        mostrarAlerta('Error', 'Match no encontrado');
         navigation.goBack();
         return;
       }
@@ -65,7 +65,7 @@ export default function PantallaDetalleMatch(): JSX.Element {
       setMatch(matchEncontrado);
     } catch (error: any) {
       console.error('Error cargando match:', error);
-      Alert.alert('Error', 'No se pudo cargar la información del match');
+      mostrarAlerta('Error', 'No se pudo cargar la información del match');
       navigation.goBack();
     } finally {
       setCargando(false);

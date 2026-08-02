@@ -8,7 +8,6 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  Alert,
   ActivityIndicator,
   Platform,
 } from 'react-native';
@@ -33,6 +32,7 @@ import {
   Mensaje,
   MensajesNoLeidos,
 } from '../servicios/servicioMensajes';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 type MatchesScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 type MatchesScreenRouteProp = RouteProp<TabParamList, 'Matches'>;
@@ -107,7 +107,7 @@ export default function PantallaMatches(): JSX.Element {
         !mensaje.includes('Demasiadas solicitudes') &&
         !mensaje.includes('Error de conexion')
       ) {
-        Alert.alert('Error', 'No se pudieron cargar las conversaciones');
+        mostrarAlerta('Error', 'No se pudieron cargar las conversaciones');
       }
     } finally {
       setCargando(false);

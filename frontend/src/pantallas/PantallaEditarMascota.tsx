@@ -6,11 +6,11 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Alert,
   Image,
   TouchableOpacity,
   Platform,
 } from 'react-native';
+import { mostrarAlerta } from '@/utilidades/alerta';
 import {
   Text,
   TextInput,
@@ -117,7 +117,7 @@ export default function PantallaEditarMascota(): JSX.Element {
       
       // Verificar que el usuario sea el propietario
       if (usuario && datosMascota.usuarioId !== usuario.id) {
-        Alert.alert('Error', 'No tienes permiso para editar esta mascota');
+        mostrarAlerta('Error', 'No tienes permiso para editar esta mascota');
         navigation.goBack();
         return;
       }
@@ -140,7 +140,7 @@ export default function PantallaEditarMascota(): JSX.Element {
       setFotos(datosMascota.fotos || []);
     } catch (error: any) {
       console.error('Error cargando mascota:', error);
-      Alert.alert('Error', 'No se pudo cargar la información de la mascota');
+      mostrarAlerta('Error', 'No se pudo cargar la información de la mascota');
       navigation.goBack();
     } finally {
       setCargando(false);
@@ -156,7 +156,7 @@ export default function PantallaEditarMascota(): JSX.Element {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permisos', 'Se necesitan permisos para acceder a la galería');
+          mostrarAlerta('Permisos', 'Se necesitan permisos para acceder a la galería');
           return;
         }
       }
@@ -175,7 +175,7 @@ export default function PantallaEditarMascota(): JSX.Element {
       }
     } catch (error) {
       console.error('Error seleccionando imagen:', error);
-      Alert.alert('Error', 'No se pudo seleccionar la imagen');
+      mostrarAlerta('Error', 'No se pudo seleccionar la imagen');
     }
   };
 
@@ -213,25 +213,25 @@ export default function PantallaEditarMascota(): JSX.Element {
    */
   const guardarCambios = async () => {
     if (!nombre.trim()) {
-      Alert.alert('Error', mensajesError.campoRequerido('El nombre'));
+      mostrarAlerta('Error', mensajesError.campoRequerido('El nombre'));
       return;
     }
 
     // Validar edad si se proporciona
     if (edad && !validarNumeroEntero(edad, 0, 30)) {
-      Alert.alert('Error', mensajesError.numeroFueraDeRango(0, 30));
+      mostrarAlerta('Error', mensajesError.numeroFueraDeRango(0, 30));
       return;
     }
 
     // Validar peso si se proporciona
     if (peso && !validarNumeroDecimal(peso, 0.1, 200)) {
-      Alert.alert('Error', mensajesError.numeroFueraDeRango(0.1, 200));
+      mostrarAlerta('Error', mensajesError.numeroFueraDeRango(0.1, 200));
       return;
     }
 
     // Validar altura si se proporciona
     if (altura && !validarNumeroDecimal(altura, 0.1, 200)) {
-      Alert.alert('Error', mensajesError.numeroFueraDeRango(0.1, 200));
+      mostrarAlerta('Error', mensajesError.numeroFueraDeRango(0.1, 200));
       return;
     }
 
@@ -270,7 +270,7 @@ export default function PantallaEditarMascota(): JSX.Element {
         } catch (error: any) {
           console.error('Error subiendo fotos:', error);
           // No fallar si las fotos no se suben, solo mostrar advertencia
-          Alert.alert(
+          mostrarAlerta(
             'Mascota actualizada',
             'La mascota se actualizó correctamente, pero algunas fotos no se pudieron subir. Puedes intentar agregarlas nuevamente.',
             [
@@ -289,11 +289,11 @@ export default function PantallaEditarMascota(): JSX.Element {
       
       // Mostrar mensaje de éxito (opcional, sin bloquear navegación)
       setTimeout(() => {
-        Alert.alert('Éxito', 'Mascota actualizada correctamente');
+        mostrarAlerta('Éxito', 'Mascota actualizada correctamente');
       }, 300);
     } catch (error: any) {
       console.error('Error guardando mascota:', error);
-      Alert.alert('Error', error.message || 'No se pudo actualizar la mascota');
+      mostrarAlerta('Error', error.message || 'No se pudo actualizar la mascota');
     } finally {
       setGuardando(false);
     }

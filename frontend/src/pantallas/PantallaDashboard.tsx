@@ -2,11 +2,10 @@
 // Dashboard principal con datos del usuario
 
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  StyleSheet, 
+import {
+  View,
+  StyleSheet,
   ScrollView,
-  Alert 
 } from 'react-native';
 import { 
   Text, 
@@ -22,6 +21,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { temaApp, espaciado } from '../constantes/tema';
 // Importar cliente API
 import apiClient from '../servicios/apiClient';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 interface DashboardData {
   usuario: {
@@ -68,11 +68,11 @@ export default function PantallaDashboard(): JSX.Element {
       if (response.data.success) {
         setDatos(response.data.data);
       } else {
-        Alert.alert('Error', 'No se pudieron cargar los datos');
+        mostrarAlerta('Error', 'No se pudieron cargar los datos');
       }
     } catch (error: any) {
       const errorMessage = error.message || 'Error de conexión';
-      Alert.alert('Error', errorMessage);
+      mostrarAlerta('Error', errorMessage);
       console.error('Error cargando dashboard:', error);
     } finally {
       setCargando(false);

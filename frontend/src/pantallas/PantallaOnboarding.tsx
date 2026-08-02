@@ -7,7 +7,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Animated,
   Dimensions,
 } from 'react-native';
@@ -23,6 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 import { mensajesError } from '@/utilidades/validaciones';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 type OnboardingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Onboarding'>;
 
@@ -119,7 +119,7 @@ export default function PantallaOnboarding(): JSX.Element {
   const siguientePaso = () => {
     const validacion = validarPaso(pasoActual);
     if (!validacion.valida) {
-      Alert.alert('Completa la información', validacion.mensaje || 'Por favor completa todos los campos requeridos');
+      mostrarAlerta('Completa la información', validacion.mensaje || 'Por favor completa todos los campos requeridos');
       return;
     }
     if (pasoActual < totalPasos) {
@@ -144,21 +144,21 @@ export default function PantallaOnboarding(): JSX.Element {
   const finalizarOnboarding = async () => {
     const validacion = validarPaso(pasoActual);
     if (!validacion.valida) {
-      Alert.alert('Completa la información', validacion.mensaje || 'Por favor completa todos los campos requeridos');
+      mostrarAlerta('Completa la información', validacion.mensaje || 'Por favor completa todos los campos requeridos');
       return;
     }
 
     // Validación final completa
     if (!tipoUsuario) {
-      Alert.alert('Error', 'Debes seleccionar cómo quieres usar la app');
+      mostrarAlerta('Error', 'Debes seleccionar cómo quieres usar la app');
       return;
     }
     if (interesesSeleccionados.length < 1) {
-      Alert.alert('Error', 'Debes seleccionar al menos un interés');
+      mostrarAlerta('Error', 'Debes seleccionar al menos un interés');
       return;
     }
     if (!tipoMascota) {
-      Alert.alert('Error', 'Debes seleccionar el tipo de mascota');
+      mostrarAlerta('Error', 'Debes seleccionar el tipo de mascota');
       return;
     }
 
@@ -182,7 +182,7 @@ export default function PantallaOnboarding(): JSX.Element {
       });
     } catch (error: any) {
       console.error('Error guardando onboarding:', error);
-      Alert.alert('Error', 'No se pudo guardar la configuración. Intenta de nuevo.');
+      mostrarAlerta('Error', 'No se pudo guardar la configuración. Intenta de nuevo.');
     } finally {
       setCargando(false);
     }

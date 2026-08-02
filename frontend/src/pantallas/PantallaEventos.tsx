@@ -1,7 +1,7 @@
 // Pantalla de Eventos de SportPetMatch
 // Adaptada con nuevos componentes y servicios API
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -10,12 +10,11 @@ import {
   Image,
   Pressable,
   TouchableOpacity,
-  Alert,
   Platform,
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 // Importar componentes UI
@@ -27,6 +26,7 @@ import { obtenerEventos, Evento, participarEnEvento } from '@/servicios/servicio
 import { temaApp, espaciado, sombras, colores } from '@/constantes/tema';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 import { useAuth } from '@/contextos/ContextoAuth';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 type EventosScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -42,6 +42,15 @@ const imagenesEventos: Record<string, any> = {
   default: require('../../assets/golden-retriever-playing.png'),
 };
 
+// Los chips "Paseos"/"Parques" son categorías amplias que no existen como
+// campo `tipo` en los eventos (los tipos reales son correr, ciclismo,
+// encuentro, entrenamiento, yoga, senderismo, social, picnic). Mapeamos cada
+// chip a los tipos reales que corresponden para que el filtro no quede vacío.
+const CATEGORIAS_FILTRO: Record<string, string[]> = {
+  paseo: ['correr', 'senderismo'],
+  parque: ['encuentro', 'picnic'],
+};
+
 /**
  * Pantalla de Eventos - Lista de eventos pet-friendly
  */
@@ -54,9 +63,14 @@ export default function PantallaEventos(): JSX.Element {
   const [refrescando, setRefrescando] = useState(false);
   const [filtroTipo, setFiltroTipo] = useState<string | null>(null);
 
-  useEffect(() => {
-    cargarEventos();
-  }, [filtroTipo]);
+  // Se ejecuta al montar, al cambiar de filtro y cada vez que la pantalla
+  // vuelve a tener foco (por ejemplo al volver de "Crear Evento"), asi el
+  // evento recien creado aparece sin necesidad de recargar la pagina.
+  useFocusEffect(
+    React.useCallback(() => {
+      cargarEventos();
+    }, [filtroTipo])
+  );
 
   /**
    * Cargar eventos desde la API
@@ -64,10 +78,12 @@ export default function PantallaEventos(): JSX.Element {
   const cargarEventos = async () => {
     try {
       setCargando(true);
-      const datosEventos = await obtenerEventos(
-        filtroTipo ? { tipo: filtroTipo } : undefined
-      );
-      setEventos(datosEventos);
+      const categorias = filtroTipo ? CATEGORIAS_FILTRO[filtroTipo] : null;
+      const datosEventos = await obtenerEventos();
+      const eventosFiltrados = categorias
+        ? datosEventos.filter((evento) => categorias.includes(evento.tipo))
+        : datosEventos;
+      setEventos(eventosFiltrados);
     } catch (error: any) {
       console.error('Error cargando eventos:', error);
     } finally {
@@ -131,26 +147,26 @@ export default function PantallaEventos(): JSX.Element {
    */
   const manejarParticipar = async (eventoId: string) => {
     if (!estaAutenticado) {
-      Alert.alert('Autenticación requerida', 'Debes iniciar sesión para participar en eventos');
+      mostrarAlerta('Autenticación requerida', 'Debes iniciar sesión para participar en eventos');
       return;
     }
 
     const evento = eventos.find((item) => item.id === eventoId);
     if (evento && usuario && evento.organizadorId === usuario.id) {
-      Alert.alert('Este es tu evento', 'Como organizador no necesitas unirte como participante.');
+      mostrarAlerta('Este es tu evento', 'Como organizador no necesitas unirte como participante.');
       return;
     }
 
     try {
       await participarEnEvento(eventoId);
-      Alert.alert('¡Éxito!', 'Te has unido al evento exitosamente');
+      mostrarAlerta('¡Éxito!', 'Te has unido al evento exitosamente');
       cargarEventos(); // Recargar eventos
     } catch (error: any) {
       const mensaje =
         error?.response?.data?.message ||
         error?.message ||
         'No se pudo unir al evento';
-      Alert.alert('Aviso', mensaje);
+      mostrarAlerta('Aviso', mensaje);
     }
   };
 
@@ -166,7 +182,7 @@ export default function PantallaEventos(): JSX.Element {
    */
   const navegarACrearEvento = () => {
     if (!estaAutenticado) {
-      Alert.alert('Autenticación requerida', 'Debes iniciar sesión para crear eventos');
+      mostrarAlerta('Autenticación requerida', 'Debes iniciar sesión para crear eventos');
       return;
     }
     navigation.navigate('CrearEvento');

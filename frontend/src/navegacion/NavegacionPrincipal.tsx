@@ -55,7 +55,7 @@ export type RootStackParamList = {
   EditarPerfil: undefined;
   AgregarMascota: undefined;
   EditarMascota: { mascotaId: string };
-  CrearEvento: undefined;
+  CrearEvento: { eventoId?: string } | undefined;
 };
 
 export type TabParamList = {

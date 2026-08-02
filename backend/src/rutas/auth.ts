@@ -8,6 +8,7 @@ import {
   obtenerDashboard,
   solicitarResetPassword,
   resetPassword,
+  cambiarPassword,
 } from '../controllers/authController';
 import { middlewareAutenticacion } from '../middleware/autenticacion';
 
@@ -19,5 +20,6 @@ router.post('/recuperar-password', solicitarResetPassword);
 router.post('/reset-password', resetPassword);
 
 router.get('/dashboard', middlewareAutenticacion, obtenerDashboard);
+router.put('/cambiar-password', middlewareAutenticacion, cambiarPassword);
 
 export default router;

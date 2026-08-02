@@ -6,11 +6,11 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Alert,
   Image,
   TouchableOpacity,
   Platform,
 } from 'react-native';
+import { mostrarAlerta } from '@/utilidades/alerta';
 import {
   Text,
   TextInput,
@@ -102,7 +102,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permisos', 'Se necesitan permisos para acceder a la galería');
+          mostrarAlerta('Permisos', 'Se necesitan permisos para acceder a la galería');
           return;
         }
       }
@@ -121,7 +121,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
       }
     } catch (error) {
       console.error('Error seleccionando imagen:', error);
-      Alert.alert('Error', 'No se pudo seleccionar la imagen');
+      mostrarAlerta('Error', 'No se pudo seleccionar la imagen');
     }
   };
 
@@ -159,7 +159,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
    */
   const guardarMascota = async () => {
     if (!nombre.trim()) {
-      Alert.alert('Error de validación', 'Solo el nombre es obligatorio.');
+      mostrarAlerta('Error de validación', 'Solo el nombre es obligatorio.');
       return;
     }
 
@@ -169,19 +169,19 @@ export default function PantallaAgregarMascota(): JSX.Element {
 
     // Validar edad si se proporciona
     if (edadLimpia && !validarNumeroEntero(edadLimpia, 0, 30)) {
-      Alert.alert('Error de validación', `Edad inválida. ${mensajesError.numeroFueraDeRango(0, 30)}`);
+      mostrarAlerta('Error de validación', `Edad inválida. ${mensajesError.numeroFueraDeRango(0, 30)}`);
       return;
     }
 
     // Validar peso si se proporciona
     if (pesoLimpio && !validarNumeroDecimal(pesoLimpio, 0.1, 200)) {
-      Alert.alert('Error de validación', `Peso inválido. ${mensajesError.numeroFueraDeRango(0.1, 200)}`);
+      mostrarAlerta('Error de validación', `Peso inválido. ${mensajesError.numeroFueraDeRango(0.1, 200)}`);
       return;
     }
 
     // Validar altura si se proporciona
     if (alturaLimpia && !validarNumeroDecimal(alturaLimpia, 0.1, 200)) {
-      Alert.alert('Error de validación', `Altura inválida. ${mensajesError.numeroFueraDeRango(0.1, 200)}`);
+      mostrarAlerta('Error de validación', `Altura inválida. ${mensajesError.numeroFueraDeRango(0.1, 200)}`);
       return;
     }
 
@@ -220,7 +220,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
         } catch (error: any) {
           console.error('Error subiendo fotos:', error);
           // No fallar si las fotos no se suben, solo mostrar advertencia
-          Alert.alert(
+          mostrarAlerta(
             'Mascota creada',
             'La mascota se creó correctamente, pero algunas fotos no se pudieron subir. Puedes agregarlas después editando la mascota.',
             [
@@ -239,12 +239,12 @@ export default function PantallaAgregarMascota(): JSX.Element {
       
       // Mostrar mensaje de éxito (opcional, sin bloquear navegación)
       setTimeout(() => {
-        Alert.alert('Éxito', 'Mascota agregada correctamente');
+        mostrarAlerta('Éxito', 'Mascota agregada correctamente');
       }, 300);
     } catch (error: any) {
       console.error('Error guardando mascota:', error);
       const mensajeError = error.response?.data?.message || error.message || 'No se pudo agregar la mascota';
-      Alert.alert('Error de validación', mensajeError);
+      mostrarAlerta('Error de validación', mensajeError);
     } finally {
       setGuardando(false);
     }

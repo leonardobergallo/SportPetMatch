@@ -8,10 +8,10 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Pressable,
   TextInput as RNTextInput,
 } from 'react-native';
+import { mostrarAlerta } from '@/utilidades/alerta';
 import { Text, TextInput, ActivityIndicator } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -59,7 +59,7 @@ export default function PantallaRegistro(): JSX.Element {
     });
 
     if (!resultado.valida) {
-      Alert.alert('Error', resultado.mensaje || 'Revisa los datos ingresados');
+      mostrarAlerta('Error', resultado.mensaje || 'Revisa los datos ingresados');
       return false;
     }
 
@@ -96,7 +96,7 @@ export default function PantallaRegistro(): JSX.Element {
 
         await iniciarSesion(usuario, respuesta.data.token);
 
-        Alert.alert(
+        mostrarAlerta(
           'Bienvenido',
           `Cuenta creada exitosamente. Bienvenido ${usuario.nombre}!`,
           [{ text: 'Continuar' }]
@@ -105,7 +105,7 @@ export default function PantallaRegistro(): JSX.Element {
     } catch (error: any) {
       console.error('Error en registro:', error);
       const mensajeError = error.response?.data?.message || error.message || 'No se pudo crear la cuenta. Intenta de nuevo.';
-      Alert.alert('Error', mensajeError);
+      mostrarAlerta('Error', mensajeError);
     } finally {
       setCargando(false);
     }

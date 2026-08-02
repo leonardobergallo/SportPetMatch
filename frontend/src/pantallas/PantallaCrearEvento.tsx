@@ -8,7 +8,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   TouchableOpacity,
   Dimensions,
   Image,
@@ -16,7 +15,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { Text, TextInput, Portal, Dialog, Button as PaperButton } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { format, addDays } from 'date-fns';
 
@@ -25,12 +24,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 // Importar servicios y tema
-import { crearEvento, DatosCrearEvento } from '@/servicios/servicioEventos';
+import { crearEvento, actualizarEvento, obtenerEvento, DatosCrearEvento } from '@/servicios/servicioEventos';
 import { temaApp, espaciado, sombras } from '@/constantes/tema';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 import { useAuth } from '@/contextos/ContextoAuth';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 type CrearEventoScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CrearEvento'>;
+type CrearEventoScreenRouteProp = RouteProp<RootStackParamList, 'CrearEvento'>;
 
 /** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
 const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
@@ -41,7 +42,12 @@ const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", syste
  */
 export default function PantallaCrearEvento(): JSX.Element {
   const navigation = useNavigation<CrearEventoScreenNavigationProp>();
+  const route = useRoute<CrearEventoScreenRouteProp>();
   const { estaAutenticado } = useAuth();
+
+  const eventoId = route.params?.eventoId;
+  const esEdicion = !!eventoId;
+  const [cargandoEvento, setCargandoEvento] = useState(esEdicion);
 
   // Estados del formulario
   const [titulo, setTitulo] = useState('');
@@ -64,6 +70,61 @@ export default function PantallaCrearEvento(): JSX.Element {
   const [mostrarFechaFin, setMostrarFechaFin] = useState(false);
   const [fechaTemp, setFechaTemp] = useState({ fecha: '', hora: '' });
   const [campoFechaActivo, setCampoFechaActivo] = useState<'inicio' | 'fin' | null>(null);
+
+  /**
+   * Convierte el valor "YYYY-MM-DDTHH:mm" del input datetime-local (hora local
+   * de Argentina, que no tiene DST) a un ISO string con el offset -03:00
+   * explicito. Sin esto, el backend interpreta el string ambiguo con su
+   * propia zona horaria (UTC en el servidor), lo que desfasaba el evento
+   * 3 horas respecto a lo que el usuario eligio.
+   */
+  const aFechaArgentina = (valor: string): string => {
+    if (!valor) return valor;
+    const conSegundos = valor.length === 16 ? `${valor}:00` : valor;
+    return `${conSegundos}-03:00`;
+  };
+
+  /** Inverso de aFechaArgentina: de un ISO guardado a "YYYY-MM-DDTHH:mm" en hora Argentina, para precargar el input datetime-local al editar. */
+  const deFechaArgentina = (iso?: string | null): string => {
+    if (!iso) return '';
+    const fecha = new Date(iso);
+    const argentina = new Date(fecha.getTime() - 3 * 60 * 60 * 1000);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${argentina.getUTCFullYear()}-${pad(argentina.getUTCMonth() + 1)}-${pad(argentina.getUTCDate())}T${pad(argentina.getUTCHours())}:${pad(argentina.getUTCMinutes())}`;
+  };
+
+  // En modo edicion, precargar el formulario con los datos del evento
+  useEffect(() => {
+    if (!eventoId) return;
+    let cancelado = false;
+    (async () => {
+      try {
+        setCargandoEvento(true);
+        const evento = await obtenerEvento(eventoId);
+        if (cancelado) return;
+        setTitulo(evento.titulo);
+        setDescripcion(evento.descripcion);
+        setTipo(evento.tipo);
+        setImagenUrl(evento.imagenUrl || '');
+        setNivelDificultad(String(evento.nivelDificultad || 1));
+        setFechaInicio(deFechaArgentina(evento.fechaInicio));
+        setFechaFin(deFechaArgentina(evento.fechaFin));
+        setDuracion(evento.duracion ? String(evento.duracion) : '');
+        setMaxParticipantes(evento.maxParticipantes ? String(evento.maxParticipantes) : '');
+        setPrecio(evento.precio ? String(evento.precio) : '');
+        setEsPetFriendly(evento.esPetFriendly);
+        setEsPremium(evento.esPremium);
+      } catch (error: any) {
+        mostrarAlerta('Error', 'No se pudo cargar el evento para editar');
+        navigation.goBack();
+      } finally {
+        if (!cancelado) setCargandoEvento(false);
+      }
+    })();
+    return () => {
+      cancelado = true;
+    };
+  }, [eventoId]);
 
   const obtenerMinFechaHora = (): string => {
     const ahora = new Date();
@@ -149,7 +210,7 @@ export default function PantallaCrearEvento(): JSX.Element {
    */
   const confirmarFecha = () => {
     if (!fechaTemp.fecha || !fechaTemp.hora) {
-      Alert.alert('Error', 'Por favor selecciona fecha y hora');
+      mostrarAlerta('Error', 'Por favor selecciona fecha y hora');
       return;
     }
 
@@ -202,7 +263,7 @@ export default function PantallaCrearEvento(): JSX.Element {
           };
           reader.onerror = () => {
             setCargandoImagen(false);
-            Alert.alert('Error', 'No se pudo leer la imagen seleccionada.');
+            mostrarAlerta('Error', 'No se pudo leer la imagen seleccionada.');
           };
           reader.readAsDataURL(file);
         };
@@ -213,7 +274,7 @@ export default function PantallaCrearEvento(): JSX.Element {
 
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería para elegir una imagen.');
+        mostrarAlerta('Permiso requerido', 'Necesitamos acceso a tu galería para elegir una imagen.');
         setCargandoImagen(false);
         return;
       }
@@ -237,7 +298,7 @@ export default function PantallaCrearEvento(): JSX.Element {
       }
     } catch (error) {
       console.error('Error seleccionando imagen:', error);
-      Alert.alert('Error', 'No se pudo seleccionar la imagen.');
+      mostrarAlerta('Error', 'No se pudo seleccionar la imagen.');
     } finally {
       setCargandoImagen(false);
     }
@@ -248,39 +309,39 @@ export default function PantallaCrearEvento(): JSX.Element {
    */
   const validarFormulario = (): boolean => {
     if (!titulo.trim()) {
-      Alert.alert('Error', 'El título es requerido');
+      mostrarAlerta('Error', 'El título es requerido');
       return false;
     }
     if (!descripcion.trim()) {
-      Alert.alert('Error', 'La descripción es requerida');
+      mostrarAlerta('Error', 'La descripción es requerida');
       return false;
     }
     if (!tipo) {
-      Alert.alert('Error', 'La categoría del evento es requerida');
+      mostrarAlerta('Error', 'La categoría del evento es requerida');
       return false;
     }
     if (!fechaInicio) {
-      Alert.alert('Error', 'La fecha de inicio es requerida');
+      mostrarAlerta('Error', 'La fecha de inicio es requerida');
       return false;
     }
     
     // Validar formato de fecha (YYYY-MM-DDTHH:mm)
     const fechaRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
     if (!fechaRegex.test(fechaInicio)) {
-      Alert.alert('Error', 'Formato de fecha inválido. Usa: YYYY-MM-DDTHH:mm (ej: 2024-12-25T10:00)');
+      mostrarAlerta('Error', 'Formato de fecha inválido. Usa: YYYY-MM-DDTHH:mm (ej: 2024-12-25T10:00)');
       return false;
     }
 
     // Validar que la fecha de inicio sea en el futuro
     const fechaInicioDate = new Date(fechaInicio);
     if (fechaInicioDate < new Date()) {
-      Alert.alert('Error', 'La fecha de inicio debe ser en el futuro');
+      mostrarAlerta('Error', 'La fecha de inicio debe ser en el futuro');
       return false;
     }
 
     // Si hay fecha fin, debe ser después de la fecha inicio
     if (fechaFin && new Date(fechaFin) < fechaInicioDate) {
-      Alert.alert('Error', 'La fecha de fin debe ser después de la fecha de inicio');
+      mostrarAlerta('Error', 'La fecha de fin debe ser después de la fecha de inicio');
       return false;
     }
 
@@ -288,11 +349,11 @@ export default function PantallaCrearEvento(): JSX.Element {
   };
 
   /**
-   * Manejar creación del evento
+   * Manejar creación o edición del evento
    */
   const manejarCrearEvento = async () => {
     if (!estaAutenticado) {
-      Alert.alert('Error', 'Debes iniciar sesión para crear eventos');
+      mostrarAlerta('Error', 'Debes iniciar sesión para crear eventos');
       navigation.goBack();
       return;
     }
@@ -310,8 +371,8 @@ export default function PantallaCrearEvento(): JSX.Element {
         tipo,
         imagenUrl: imagenUrl.trim() || undefined,
         nivelDificultad: parseInt(nivelDificultad) || 1,
-        fechaInicio,
-        fechaFin: fechaFin || undefined,
+        fechaInicio: aFechaArgentina(fechaInicio),
+        fechaFin: fechaFin ? aFechaArgentina(fechaFin) : undefined,
         duracion: duracion ? parseInt(duracion) : undefined,
         maxParticipantes: maxParticipantes ? parseInt(maxParticipantes) : undefined,
         precio: precio ? parseFloat(precio) : undefined,
@@ -319,30 +380,34 @@ export default function PantallaCrearEvento(): JSX.Element {
         esPremium,
       };
 
-      const nuevoEvento = await crearEvento(datosEvento);
+      const eventoResultado = esEdicion && eventoId
+        ? await actualizarEvento(eventoId, datosEvento)
+        : await crearEvento(datosEvento);
+
+      const mensajeExito = esEdicion ? '¡Evento actualizado exitosamente!' : '¡Éxito! Evento creado exitosamente.';
 
       // En web, usar window.confirm en lugar de Alert.alert si es necesario
       if (Platform.OS === 'web') {
-        const verEvento = window.confirm('¡Éxito! Evento creado exitosamente. ¿Deseas ver el evento?');
+        const verEvento = window.confirm(`${mensajeExito} ¿Deseas ver el evento?`);
         if (verEvento) {
           navigation.goBack();
           setTimeout(() => {
-            navigation.navigate('DetalleEvento', { eventoId: nuevoEvento.id });
+            navigation.navigate('DetalleEvento', { eventoId: eventoResultado.id });
           }, 500);
         } else {
           navigation.goBack();
         }
       } else {
-        Alert.alert(
+        mostrarAlerta(
           '¡Éxito!',
-          'Evento creado exitosamente',
+          esEdicion ? 'Evento actualizado exitosamente' : 'Evento creado exitosamente',
           [
             {
               text: 'Ver Evento',
               onPress: () => {
                 navigation.goBack();
                 setTimeout(() => {
-                  navigation.navigate('DetalleEvento', { eventoId: nuevoEvento.id });
+                  navigation.navigate('DetalleEvento', { eventoId: eventoResultado.id });
                 }, 500);
               },
             },
@@ -354,7 +419,7 @@ export default function PantallaCrearEvento(): JSX.Element {
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'No se pudo crear el evento');
+      mostrarAlerta('Error', error.message || (esEdicion ? 'No se pudo actualizar el evento' : 'No se pudo crear el evento'));
     } finally {
       setCargando(false);
     }
@@ -460,6 +525,14 @@ export default function PantallaCrearEvento(): JSX.Element {
     }
   }, [isWeb]);
 
+  if (cargandoEvento) {
+    return (
+      <View style={[estilos.contenedor, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Cargando evento...</Text>
+      </View>
+    );
+  }
+
   const contenido = (
     <>
     <ScrollView
@@ -478,8 +551,10 @@ export default function PantallaCrearEvento(): JSX.Element {
     >
         <Card style={[estilos.card, { maxWidth }]}>
           <CardContent>
-            <Text style={estilos.titulo}>Crear nuevo evento</Text>
-            <Text style={estilos.subtitulo}>Completa los datos de tu encuentro pet-friendly</Text>
+            <Text style={estilos.titulo}>{esEdicion ? 'Editar evento' : 'Crear nuevo evento'}</Text>
+            <Text style={estilos.subtitulo}>
+              {esEdicion ? 'Actualiza los datos de tu encuentro pet-friendly' : 'Completa los datos de tu encuentro pet-friendly'}
+            </Text>
 
             {/* Título */}
             <View style={estilos.campoContainer}>
@@ -768,7 +843,9 @@ export default function PantallaCrearEvento(): JSX.Element {
               loading={cargando}
               style={estilos.botonCrear}
             >
-              {cargando ? 'Creando...' : 'Crear Evento'}
+              {cargando
+                ? (esEdicion ? 'Guardando...' : 'Creando...')
+                : (esEdicion ? 'Guardar Cambios' : 'Crear Evento')}
             </Button>
 
             {/* Botón cancelar */}

@@ -6,7 +6,6 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Alert,
   TouchableOpacity,
   Platform,
 } from 'react-native';
@@ -17,6 +16,9 @@ import {
   Divider,
   List,
   Button,
+  Portal,
+  Dialog,
+  TextInput as PaperTextInput,
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -26,6 +28,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
+import { mostrarAlerta } from '@/utilidades/alerta';
+import { cambiarPassword } from '@/servicios/servicioAuth';
 
 type ConfiguracionNavigationProp = StackNavigationProp<RootStackParamList, 'Configuracion'>;
 
@@ -45,11 +49,55 @@ export default function PantallaConfiguracion(): JSX.Element {
   const [notificacionesEventos, setNotificacionesEventos] = useState(true);
   const [modoOscuro, setModoOscuro] = useState(false);
 
+  const [mostrarDialogoPassword, setMostrarDialogoPassword] = useState(false);
+  const [passwordActual, setPasswordActual] = useState('');
+  const [passwordNueva, setPasswordNueva] = useState('');
+  const [passwordConfirmar, setPasswordConfirmar] = useState('');
+  const [guardandoPassword, setGuardandoPassword] = useState(false);
+
+  const limpiarDialogoPassword = () => {
+    setMostrarDialogoPassword(false);
+    setPasswordActual('');
+    setPasswordNueva('');
+    setPasswordConfirmar('');
+  };
+
+  /**
+   * Cambiar contraseña: pide la actual, valida la nueva, confirma el cambio
+   */
+  const manejarCambiarPassword = async () => {
+    if (!passwordActual || !passwordNueva || !passwordConfirmar) {
+      mostrarAlerta('Error', 'Completa los tres campos');
+      return;
+    }
+    if (passwordNueva.length < 6) {
+      mostrarAlerta('Error', 'La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    if (passwordNueva !== passwordConfirmar) {
+      mostrarAlerta('Error', 'La confirmación no coincide con la nueva contraseña');
+      return;
+    }
+
+    try {
+      setGuardandoPassword(true);
+      await cambiarPassword(passwordActual, passwordNueva);
+      limpiarDialogoPassword();
+      mostrarAlerta('¡Listo!', 'Tu contraseña se actualizó correctamente');
+    } catch (error: any) {
+      const mensaje =
+        error?.response?.data?.message || error?.message || 'No se pudo cambiar la contraseña';
+      mostrarAlerta('Error', mensaje);
+    } finally {
+      setGuardandoPassword(false);
+    }
+  };
+
   /**
    * Manejar cerrar sesión
    */
   const manejarCerrarSesion = () => {
-    Alert.alert(
+    mostrarAlerta(
       'Cerrar Sesión',
       '¿Estás seguro de que quieres cerrar sesión?',
       [
@@ -62,7 +110,7 @@ export default function PantallaConfiguracion(): JSX.Element {
               await cerrarSesion();
               // La navegación se manejará automáticamente por el contexto
             } catch (error) {
-              Alert.alert('Error', 'No se pudo cerrar sesión');
+              mostrarAlerta('Error', 'No se pudo cerrar sesión');
             }
           },
         },
@@ -81,28 +129,28 @@ export default function PantallaConfiguracion(): JSX.Element {
    * Navegar a privacidad
    */
   const navegarAPrivacidad = () => {
-    Alert.alert('Privacidad', 'Política de privacidad próximamente');
+    mostrarAlerta('Privacidad', 'Política de privacidad próximamente');
   };
 
   /**
    * Navegar a términos
    */
   const navegarATerminos = () => {
-    Alert.alert('Términos', 'Términos y condiciones próximamente');
+    mostrarAlerta('Términos', 'Términos y condiciones próximamente');
   };
 
   /**
    * Navegar a ayuda
    */
   const navegarAAyuda = () => {
-    Alert.alert('Ayuda', 'Centro de ayuda próximamente');
+    mostrarAlerta('Ayuda', 'Centro de ayuda próximamente');
   };
 
   /**
    * Navegar a acerca de
    */
   const navegarAAcercaDe = () => {
-    Alert.alert(
+    mostrarAlerta(
       'Acerca de',
       'Indio v1.0.0\n\nConecta personas con mascotas, matches y eventos pet-friendly.'
     );
@@ -128,6 +176,23 @@ export default function PantallaConfiguracion(): JSX.Element {
               <Text style={estilos.itemDescripcion}>
                 {usuario?.nombre || 'Usuario'}
               </Text>
+            </View>
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={temaApp.colors.onSurfaceVariant}
+            />
+          </TouchableOpacity>
+
+          <Divider style={estilos.divisor} />
+
+          <TouchableOpacity
+            style={estilos.item}
+            onPress={() => setMostrarDialogoPassword(true)}
+          >
+            <MaterialIcons name="lock" size={24} color={temaApp.colors.primary} />
+            <View style={estilos.itemContent}>
+              <Text style={estilos.itemTitulo}>Cambiar Contraseña</Text>
             </View>
             <MaterialIcons
               name="chevron-right"
@@ -323,6 +388,46 @@ export default function PantallaConfiguracion(): JSX.Element {
           </Button>
         </Card.Content>
       </Card>
+
+      <Portal>
+        <Dialog visible={mostrarDialogoPassword} onDismiss={limpiarDialogoPassword}>
+          <Dialog.Title>Cambiar Contraseña</Dialog.Title>
+          <Dialog.Content>
+            <PaperTextInput
+              label="Contraseña actual"
+              value={passwordActual}
+              onChangeText={setPasswordActual}
+              secureTextEntry
+              style={estilos.inputPassword}
+              mode="outlined"
+            />
+            <PaperTextInput
+              label="Nueva contraseña"
+              value={passwordNueva}
+              onChangeText={setPasswordNueva}
+              secureTextEntry
+              style={estilos.inputPassword}
+              mode="outlined"
+            />
+            <PaperTextInput
+              label="Confirmar nueva contraseña"
+              value={passwordConfirmar}
+              onChangeText={setPasswordConfirmar}
+              secureTextEntry
+              style={estilos.inputPassword}
+              mode="outlined"
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={limpiarDialogoPassword} disabled={guardandoPassword}>
+              Cancelar
+            </Button>
+            <Button onPress={manejarCambiarPassword} loading={guardandoPassword} disabled={guardandoPassword}>
+              Guardar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </ScrollView>
   );
 }
@@ -389,6 +494,9 @@ const estilos = StyleSheet.create({
   botonCerrarSesion: {
     marginTop: espaciado.sm,
     borderColor: temaApp.colors.error,
+  },
+  inputPassword: {
+    marginBottom: espaciado.sm,
   },
 });
 

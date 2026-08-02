@@ -3,7 +3,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   Dimensions,
   ImageBackground,
@@ -20,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { temaApp } from '../constantes/tema';
 import { Coordenadas, useUbicacion } from '../contextos/ContextoUbicacion';
 import { crearMatch, obtenerRecomendaciones } from '../servicios/servicioMatches';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 interface UsuarioPotencial {
   id: string;
@@ -148,7 +148,7 @@ export default function PantallaMatching(): JSX.Element {
       setUsuarios([]);
       setUsuarioActual(0);
       setErrorCarga(error instanceof Error ? error.message : 'No se pudieron cargar las recomendaciones');
-      Alert.alert('Error', 'No se pudieron cargar los usuarios');
+      mostrarAlerta('Error', 'No se pudieron cargar los usuarios');
       console.error('Error cargando usuarios:', error);
     } finally {
       setCargando(false);
@@ -162,7 +162,7 @@ export default function PantallaMatching(): JSX.Element {
     resetAnimaciones();
 
     if (usuariosRestantes.length === 0) {
-      Alert.alert(
+      mostrarAlerta(
         'Sin mas usuarios',
         'Ya viste todas las recomendaciones por ahora.',
         [{ text: 'Buscar mas', onPress: () => cargarUsuariosPotenciales() }]
@@ -185,7 +185,7 @@ export default function PantallaMatching(): JSX.Element {
         navegarAlChat(match.id);
         return true;
       } else {
-        Alert.alert(
+        mostrarAlerta(
           'Like enviado',
           'Si la otra persona tambien te da like, el chat se habilita automaticamente.',
           [{ text: 'OK' }]
@@ -193,7 +193,7 @@ export default function PantallaMatching(): JSX.Element {
       }
     } catch (error: any) {
       console.error('Error enviando like:', error);
-      Alert.alert('Error', error.message || 'No se pudo enviar el like');
+      mostrarAlerta('Error', error.message || 'No se pudo enviar el like');
     }
 
     return false;

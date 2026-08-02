@@ -113,3 +113,17 @@ export async function obtenerDashboard(): Promise<DatosDashboard> {
   const response = await apiClient.get<{ success: boolean; data: DatosDashboard }>('/auth/dashboard');
   return response.data.data;
 }
+
+/**
+ * Cambiar la contraseña del usuario autenticado (pide la actual)
+ */
+export async function cambiarPassword(
+  passwordActual: string,
+  passwordNueva: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await apiClient.put<{ success: boolean; message: string }>('/auth/cambiar-password', {
+    passwordActual,
+    passwordNueva,
+  });
+  return response.data;
+}

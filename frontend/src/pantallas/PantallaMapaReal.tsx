@@ -3,7 +3,7 @@
 // Esta pantalla será reactivada cuando se resuelvan los problemas de dependencias
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform, Alert } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform } from 'react-native';
 // import MapView, { Marker, PROVIDER_GOOGLE, PROVIDER_DEFAULT } from 'react-native-maps';
 import { 
   Surface, 
@@ -22,6 +22,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useUbicacion } from '../contextos/ContextoUbicacion';
 import { participarEnEvento } from '../servicios/servicioEventos';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 // Tipos para los datos del mapa
 interface UsuarioMapa {
@@ -171,7 +172,7 @@ export default function PantallaMapaReal() {
       
     } catch (error) {
       console.error('Error cargando datos:', error);
-      Alert.alert('Error', 'No se pudieron cargar los datos del mapa');
+      mostrarAlerta('Error', 'No se pudieron cargar los datos del mapa');
     } finally {
       setCargando(false);
     }
@@ -192,7 +193,7 @@ export default function PantallaMapaReal() {
   const abrirChat = () => {
     cerrarDialog();
     // TODO: Navegar al chat
-    Alert.alert('Chat', 'Funcionalidad de chat próximamente');
+    mostrarAlerta('Chat', 'Funcionalidad de chat próximamente');
   };
 
   const unirseEvento = async () => {
@@ -200,14 +201,14 @@ export default function PantallaMapaReal() {
     try {
       await participarEnEvento(elementoSeleccionado.id);
       cerrarDialog();
-      Alert.alert('¡Listo!', 'Te has unido al evento exitosamente');
+      mostrarAlerta('¡Listo!', 'Te has unido al evento exitosamente');
       cargarDatosCercanos();
     } catch (error: any) {
       const mensaje =
         error?.response?.data?.message ||
         error?.message ||
         'No se pudo unir al evento';
-      Alert.alert('Aviso', mensaje);
+      mostrarAlerta('Aviso', mensaje);
     }
   };
 
@@ -396,7 +397,7 @@ export default function PantallaMapaReal() {
         icon="plus"
         onPress={() => {
           // TODO: Navegar a crear evento
-          Alert.alert('Crear Evento', 'Funcionalidad próximamente');
+          mostrarAlerta('Crear Evento', 'Funcionalidad próximamente');
         }}
       />
     </View>

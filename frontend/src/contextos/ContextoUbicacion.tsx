@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as Location from 'expo-location';
-import { Alert } from 'react-native';
+import { mostrarAlerta } from '@/utilidades/alerta';
 
 // Tipos para la ubicación
 export interface Coordenadas {
@@ -94,7 +94,7 @@ export function ProveedorUbicacion({ children }: { children: ReactNode }) {
       const { status } = await Location.requestForegroundPermissionsAsync();
       
       if (status !== 'granted') {
-        Alert.alert(
+        mostrarAlerta(
           'Permisos de Ubicación',
           'SportPetMatch necesita acceso a tu ubicación para mostrarte eventos cercanos y conectar con personas de tu zona.',
           [
@@ -102,7 +102,7 @@ export function ProveedorUbicacion({ children }: { children: ReactNode }) {
               text: 'Configurar', 
               onPress: () => {
                 // En una app real, abriríamos la configuración
-                Alert.alert('Configuración', 'Ve a Configuración > Privacidad > Ubicación para habilitar los permisos');
+                mostrarAlerta('Configuración', 'Ve a Configuración > Privacidad > Ubicación para habilitar los permisos');
               }
             },
             { text: 'Cancelar', style: 'cancel' }

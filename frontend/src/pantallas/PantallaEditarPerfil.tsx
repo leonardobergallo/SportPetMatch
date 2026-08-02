@@ -6,11 +6,11 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Alert,
   Image,
   TouchableOpacity,
   Platform,
 } from 'react-native';
+import { mostrarAlerta } from '@/utilidades/alerta';
 import {
   Text,
   TextInput,
@@ -105,7 +105,7 @@ export default function PantallaEditarPerfil(): JSX.Element {
       setAvatar(datosUsuario.avatar || null);
     } catch (error: any) {
       console.error('Error cargando perfil:', error);
-      Alert.alert('Error', 'No se pudo cargar el perfil');
+      mostrarAlerta('Error', 'No se pudo cargar el perfil');
       navigation.goBack();
     } finally {
       setCargando(false);
@@ -121,7 +121,7 @@ export default function PantallaEditarPerfil(): JSX.Element {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permisos', 'Se necesitan permisos para acceder a la galería');
+          mostrarAlerta('Permisos', 'Se necesitan permisos para acceder a la galería');
           return;
         }
       }
@@ -145,13 +145,13 @@ export default function PantallaEditarPerfil(): JSX.Element {
             console.log('✅ Imagen subida correctamente');
           } catch (error: any) {
             console.error('Error subiendo avatar:', error);
-            Alert.alert('Error', error.message || 'No se pudo subir la imagen');
+            mostrarAlerta('Error', error.message || 'No se pudo subir la imagen');
           }
         }
       }
     } catch (error) {
       console.error('Error seleccionando imagen:', error);
-      Alert.alert('Error', 'No se pudo seleccionar la imagen');
+      mostrarAlerta('Error', 'No se pudo seleccionar la imagen');
     }
   };
 
@@ -171,13 +171,13 @@ export default function PantallaEditarPerfil(): JSX.Element {
    */
   const guardarCambios = async () => {
     if (!nombre.trim()) {
-      Alert.alert('Error', mensajesError.campoRequerido('El nombre'));
+      mostrarAlerta('Error', mensajesError.campoRequerido('El nombre'));
       return;
     }
 
     // Validar teléfono si se proporciona
     if (telefono.trim() && !validarTelefono(telefono.trim())) {
-      Alert.alert('Error', mensajesError.telefonoInvalido);
+      mostrarAlerta('Error', mensajesError.telefonoInvalido);
       return;
     }
 
@@ -204,12 +204,12 @@ export default function PantallaEditarPerfil(): JSX.Element {
       
       // Mostrar mensaje de éxito (opcional, sin bloquear navegación)
       setTimeout(() => {
-        Alert.alert('Éxito', 'Perfil actualizado correctamente');
+        mostrarAlerta('Éxito', 'Perfil actualizado correctamente');
       }, 300);
     } catch (error: any) {
       console.error('Error guardando perfil:', error);
       const mensajeError = error.response?.data?.message || error.message || 'No se pudo actualizar el perfil';
-      Alert.alert('Error', mensajeError);
+      mostrarAlerta('Error', mensajeError);
     } finally {
       setGuardando(false);
     }

@@ -462,6 +462,84 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 };
 
 /**
+ * Cambiar la contrasena del usuario autenticado (pide la actual, valida la nueva)
+ */
+export const cambiarPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.usuario) {
+      res.status(401).json({
+        success: false,
+        message: 'No autenticado',
+      });
+      return;
+    }
+
+    const passwordActual = String(req.body.passwordActual || '');
+    const passwordNueva = String(req.body.passwordNueva || '');
+
+    if (!passwordActual || !passwordNueva) {
+      res.status(400).json({
+        success: false,
+        message: 'La contrasena actual y la nueva son requeridas',
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    if (passwordNueva.length < 6) {
+      res.status(400).json({
+        success: false,
+        message: 'La nueva contrasena debe tener al menos 6 caracteres',
+        code: 'INVALID_PASSWORD',
+      });
+      return;
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuario.usuarioId },
+      select: { id: true, password: true },
+    });
+
+    if (!usuario || !usuario.password) {
+      res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado',
+        code: 'USER_NOT_FOUND',
+      });
+      return;
+    }
+
+    const passwordValida = await bcrypt.compare(passwordActual, usuario.password);
+    if (!passwordValida) {
+      res.status(401).json({
+        success: false,
+        message: 'La contrasena actual es incorrecta',
+        code: 'INVALID_PASSWORD',
+      });
+      return;
+    }
+
+    const nuevoHash = await bcrypt.hash(passwordNueva, 10);
+    await prisma.usuario.update({
+      where: { id: usuario.id },
+      data: { password: nuevoHash },
+    });
+
+    res.json({
+      success: true,
+      message: 'Contrasena actualizada exitosamente',
+    });
+  } catch (error) {
+    console.error('Error cambiando password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al cambiar la contrasena',
+      error: process.env.NODE_ENV === 'development' ? error : undefined,
+    });
+  }
+};
+
+/**
  * Obtener datos del dashboard del usuario autenticado
  */
 export const obtenerDashboard = async (req: Request, res: Response): Promise<void> => {
