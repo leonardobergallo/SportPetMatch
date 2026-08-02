@@ -32,6 +32,10 @@ import { useAuth } from '@/contextos/ContextoAuth';
 
 type CrearEventoScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CrearEvento'>;
 
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
+
 /**
  * Pantalla de Crear Evento
  */
@@ -886,6 +890,7 @@ const estilos = StyleSheet.create({
       marginBottom: 0,
       maxWidth: SCREEN_WIDTH >= 768 ? 800 : '100%',
       padding: SCREEN_WIDTH >= 768 ? espaciado.xl : espaciado.lg,
+      borderRadius: 20,
     }),
   },
   titulo: {
@@ -896,6 +901,9 @@ const estilos = StyleSheet.create({
     ...(isWeb && {
       fontSize: SCREEN_WIDTH >= 768 ? 32 : 24,
       textAlign: SCREEN_WIDTH >= 768 ? 'center' : 'left',
+      color: temaApp.colors.primary,
+      fontWeight: '800' as const,
+      ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
     }),
   },
   subtitulo: {
@@ -905,6 +913,7 @@ const estilos = StyleSheet.create({
     ...(isWeb && {
       fontSize: SCREEN_WIDTH >= 768 ? 16 : 14,
       textAlign: SCREEN_WIDTH >= 768 ? 'center' : 'left',
+      ...(fontSans ? { fontFamily: fontSans } : {}),
     }),
   },
   campoContainer: {
@@ -1027,6 +1036,7 @@ const estilos = StyleSheet.create({
     marginBottom: espaciado.xs,
     ...(isWeb && {
       fontSize: SCREEN_WIDTH >= 768 ? 16 : 14,
+      ...(fontSans ? { fontFamily: fontSans } : {}),
     }),
   },
   dialog: {

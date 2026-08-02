@@ -39,6 +39,10 @@ import { validarTelefono, mensajesError } from '../utilidades/validaciones';
 
 type EditarPerfilNavigationProp = StackNavigationProp<RootStackParamList, 'EditarPerfil'>;
 
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
+
 // Intereses disponibles
 const INTERESES_DISPONIBLES = [
   'Paseos',
@@ -391,6 +395,7 @@ const estilos = StyleSheet.create({
   card: {
     margin: espaciado.md,
     ...sombras.media,
+    ...(Platform.OS === 'web' ? { borderRadius: 20 } : {}),
   },
   avatarContainer: {
     alignItems: 'center',
@@ -430,6 +435,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     color: temaApp.colors.onSurface,
     marginBottom: espaciado.sm,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   input: {
     backgroundColor: temaApp.colors.surface,

@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import {
   Text,
@@ -27,6 +28,10 @@ import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
 
 type ConfiguracionNavigationProp = StackNavigationProp<RootStackParamList, 'Configuracion'>;
+
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
 
 /**
  * Pantalla de Configuración
@@ -337,12 +342,14 @@ const estilos = StyleSheet.create({
     margin: espaciado.md,
     marginBottom: 0,
     ...sombras.media,
+    ...(Platform.OS === 'web' ? { borderRadius: 20 } : {}),
   },
   seccionTitulo: {
     fontSize: 18,
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
     marginBottom: espaciado.md,
+    ...(Platform.OS === 'web' ? { color: temaApp.colors.primary, ...(fontDisplay ? { fontFamily: fontDisplay } : {}) } : {}),
   },
   item: {
     flexDirection: 'row',
@@ -369,6 +376,7 @@ const estilos = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: temaApp.colors.onSurface,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   itemDescripcion: {
     fontSize: 12,

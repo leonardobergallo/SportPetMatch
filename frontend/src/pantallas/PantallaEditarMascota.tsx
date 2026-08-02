@@ -40,6 +40,10 @@ import { validarNumeroEntero, validarNumeroDecimal, mensajesError } from '../uti
 type EditarMascotaRouteProp = RouteProp<RootStackParamList, 'EditarMascota'>;
 type EditarMascotaNavigationProp = StackNavigationProp<RootStackParamList, 'EditarMascota'>;
 
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
+
 // Tipos de mascotas
 const TIPOS_MASCOTAS = ['Perro', 'Gato', 'Otro'];
 
@@ -616,6 +620,7 @@ const estilos = StyleSheet.create({
   card: {
     margin: espaciado.md,
     ...sombras.media,
+    ...(Platform.OS === 'web' ? { borderRadius: 20 } : {}),
   },
   seccionTitulo: {
     fontSize: 18,
@@ -623,6 +628,7 @@ const estilos = StyleSheet.create({
     color: temaApp.colors.onSurface,
     marginTop: espaciado.lg,
     marginBottom: espaciado.md,
+    ...(Platform.OS === 'web' ? { color: temaApp.colors.primary, ...(fontDisplay ? { fontFamily: fontDisplay } : {}) } : {}),
   },
   campoContainer: {
     marginBottom: espaciado.lg,
@@ -632,6 +638,7 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
     color: temaApp.colors.onSurface,
     marginBottom: espaciado.sm,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   input: {
     backgroundColor: temaApp.colors.surface,
