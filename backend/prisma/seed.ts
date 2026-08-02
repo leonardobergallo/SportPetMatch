@@ -72,7 +72,7 @@ async function main() {
       personalidad: ['sociable', 'activo', 'curioso', 'cariñoso'],
       intereses: ['paseos', 'encuentros', 'jugar', 'correr'],
       vacunas: ['Rabia', 'Séxtuple'],
-      fotos: [],
+      fotos: ['https://images.unsplash.com/photo-1724367269355-3fcfa12e99c1?w=400'],
     },
   });
 
@@ -279,7 +279,7 @@ async function main() {
       personalidad: ['inteligente', 'activo', 'obediente'],
       intereses: ['correr', 'jugar frisbee', 'senderismo'],
       vacunas: ['Rabia', 'Séxtuple'],
-      fotos: [],
+      fotos: ['https://images.unsplash.com/photo-1611062282376-74979b79f613?w=400'],
     },
   });
 
@@ -326,7 +326,7 @@ async function main() {
       personalidad: ['enérgico', 'aventurero', 'sociable'],
       intereses: ['correr', 'senderismo', 'nieve'],
       vacunas: ['Rabia', 'Séxtuple'],
-      fotos: [],
+      fotos: ['https://images.unsplash.com/photo-1611738027568-882251d8b9bc?w=400'],
     },
   });
 
@@ -367,7 +367,7 @@ async function main() {
       personalidad: ['juguetón', 'cariñoso', 'obediente'],
       intereses: ['correr', 'nadar', 'buscar objetos'],
       vacunas: ['Rabia', 'Moquillo', 'Parvovirus'],
-      fotos: [],
+      fotos: ['https://images.unsplash.com/photo-1546826225-da57010ffbe4?w=400'],
     },
   });
 
@@ -429,7 +429,7 @@ async function main() {
       personalidad: ['leal', 'protectora', 'activa'],
       intereses: ['correr', 'jugar', 'acompañar'],
       vacunas: ['Rabia', 'Séxtuple'],
-      fotos: [],
+      fotos: ['https://images.unsplash.com/photo-1689585190323-19b28892fb16?w=400'],
     },
   });
 
@@ -470,7 +470,7 @@ async function main() {
       personalidad: ['tranquilo', 'cariñoso', 'sociable'],
       intereses: ['paseos cortos', 'socializar', 'dormir'],
       vacunas: ['Rabia', 'Séxtuple'],
-      fotos: [],
+      fotos: ['https://images.unsplash.com/photo-1513189643435-49f97650b367?w=400'],
     },
   });
 
@@ -511,7 +511,7 @@ async function main() {
       personalidad: ['atlética', 'leal', 'cariñosa'],
       intereses: ['correr', 'nadar', 'senderismo'],
       vacunas: ['Rabia', 'Moquillo', 'Parvovirus'],
-      fotos: [],
+      fotos: ['https://images.unsplash.com/photo-1759700535958-4157b3033eed?w=400'],
     },
   });
 
