@@ -24,7 +24,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 // Importar servicios y tema
 import { obtenerEventos, Evento, participarEnEvento } from '@/servicios/servicioEventos';
-import { temaApp, espaciado, sombras } from '@/constantes/tema';
+import { temaApp, espaciado, sombras, colores } from '@/constantes/tema';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 import { useAuth } from '@/contextos/ContextoAuth';
 
@@ -106,6 +106,14 @@ export default function PantallaEventos(): JSX.Element {
       return { uri: evento.imagenUrl };
     }
     return obtenerImagenEvento(evento.tipo);
+  };
+
+  /**
+   * Etiqueta de precio del evento (pastilla)
+   */
+  const formatearPrecio = (evento: Evento): string => {
+    if (!evento.esPremium) return 'Gratis';
+    return evento.precio ? `$${evento.precio}` : 'Premium';
   };
 
   /**
@@ -258,19 +266,31 @@ export default function PantallaEventos(): JSX.Element {
                       <Text style={estilos.badgePetTexto}>🐾 Pet Friendly</Text>
                     </View>
                   )}
+                  <View style={estilos.overlayTitulo}>
+                    <Text style={estilos.tituloEvento} numberOfLines={1}>
+                      {evento.titulo}
+                    </Text>
+                  </View>
                 </View>
                 <CardContent>
-                  <Text style={estilos.tituloEvento}>{evento.titulo}</Text>
                   <Text style={estilos.descripcionEvento} numberOfLines={2}>
                     {evento.descripcion}
                   </Text>
                   <View style={estilos.infoEvento}>
-                    <View style={estilos.infoItem}>
-                      <MaterialIcons name="event" size={16} color={temaApp.colors.primary} />
-                      <Text style={estilos.infoTexto}>{formatearFecha(evento.fechaInicio)}</Text>
+                    <View style={estilos.pillCategoria}>
+                      <Text style={estilos.pillCategoriaTexto}>{evento.tipo.toUpperCase()}</Text>
                     </View>
                     <View style={estilos.infoItem}>
-                      <MaterialIcons name="people" size={16} color={temaApp.colors.primary} />
+                      <MaterialIcons name="event" size={14} color={temaApp.colors.onSurfaceVariant} />
+                      <Text style={estilos.infoTexto}>{formatearFecha(evento.fechaInicio)}</Text>
+                    </View>
+                  </View>
+                  <View style={estilos.infoEvento}>
+                    <View style={estilos.pillPrecio}>
+                      <Text style={estilos.pillPrecioTexto}>{formatearPrecio(evento)}</Text>
+                    </View>
+                    <View style={estilos.infoItem}>
+                      <MaterialIcons name="people" size={14} color={temaApp.colors.onSurfaceVariant} />
                       <Text style={estilos.infoTexto}>
                         {evento.participantesCount || 0} participantes
                       </Text>
@@ -379,7 +399,7 @@ const estilos = StyleSheet.create({
     position: 'absolute',
     top: 12,
     right: 12,
-    backgroundColor: temaApp.colors.secondary,
+    backgroundColor: temaApp.colors.primary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -389,23 +409,33 @@ const estilos = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+  overlayTitulo: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(20, 24, 20, 0.72)',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
   tituloEvento: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
-    color: temaApp.colors.onSurface,
-    marginBottom: 4,
+    color: '#FFFFFF',
     ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   descripcionEvento: {
     fontSize: 13,
     color: temaApp.colors.onSurfaceVariant,
     lineHeight: 18,
-    marginBottom: 8,
+    marginBottom: 10,
     ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   infoEvento: {
     flexDirection: 'row',
-    gap: 12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
   infoItem: {
     flexDirection: 'row',
@@ -415,6 +445,30 @@ const estilos = StyleSheet.create({
   infoTexto: {
     fontSize: 12,
     color: temaApp.colors.onSurfaceVariant,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  pillCategoria: {
+    backgroundColor: colores.primarioClaro,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  pillCategoriaTexto: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colores.primarioVariant,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  pillPrecio: {
+    backgroundColor: colores.secundarioClaro,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  pillPrecioTexto: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colores.secundarioVariant,
     ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   botonParticipar: {

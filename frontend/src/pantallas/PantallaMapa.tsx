@@ -82,6 +82,8 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
   // URL de OpenStreetMap (gratis, sin API key)
   
   // En web, usar OpenStreetMap con marcadores visuales
+  const [medidaContenedor, setMedidaContenedor] = useState<{ width: number; height: number } | null>(null);
+
   if (Platform.OS === 'web') {
     // Calcular bounding box para incluir todos los puntos
     const todasLasLatitudes = [coordenadas.latitud, ...usuarios.map(u => u.ubicacionLat), ...eventos.map(e => e.ubicacionLat)];
@@ -107,10 +109,9 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
     ];
     const googleMapsUrl = `https://www.google.com/maps/dir/${todosLosPuntos.join('/')}`;
     
-    // Calcular posiciones relativas para los marcadores visuales
-    const { width: mapWidth, height: mapHeight } = Dimensions.get('window');
-    const mapContainerWidth = mapWidth - (espaciado.md * 2); // Ancho del contenedor del mapa
-    const mapContainerHeight = 400; // Altura del iframe
+    // Ancho/alto reales del contenedor (medidos con onLayout), con fallback mientras se mide
+    const mapContainerWidth = medidaContenedor?.width || Dimensions.get('window').width - (espaciado.md * 2);
+    const mapContainerHeight = medidaContenedor?.height || 400;
     
     const calcularPosicion = (lat: number, lng: number) => {
       const latRange = maxLat - minLat + (latPadding * 2);
@@ -138,12 +139,16 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
             }}
             activeOpacity={0.9}
             style={styles.mapaClickable}
+            onLayout={(e) => {
+              const { width, height } = e.nativeEvent.layout;
+              setMedidaContenedor((prev) => (prev?.width === width && prev?.height === height ? prev : { width, height }));
+            }}
           >
             {/* @ts-ignore - iframe funciona en web */}
             <iframe
               width="100%"
               height="400"
-              style={{ border: 0, borderRadius: 8 }}
+              style={{ border: 0, borderRadius: 8, width: '100%', display: 'block' }}
               loading="lazy"
               src={mapUrl}
               title="Mapa de Indio"
@@ -668,6 +673,7 @@ const styles = StyleSheet.create({
   mapaContainer: {
     flex: 1,
     position: 'relative',
+    ...(Platform.OS === 'web' ? { paddingHorizontal: espaciado.lg } : {}),
   },
   mapaWebContainer: {
     margin: espaciado.md,
@@ -675,10 +681,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: temaApp.colors.surface,
     position: 'relative',
+    ...(Platform.OS === 'web' ? { margin: 0, marginVertical: espaciado.md, width: '100%' as any } : {}),
   },
   mapaClickable: {
     position: 'relative',
     cursor: 'pointer',
+    ...(Platform.OS === 'web' ? { width: '100%' as any } : {}),
   },
   marcadoresOverlay: {
     position: 'absolute',

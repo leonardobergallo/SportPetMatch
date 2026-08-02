@@ -27,15 +27,45 @@ import AdBanner from '@/componentes/AdBanner';
 // Importar servicios
 import { obtenerDashboard } from '@/servicios/servicioAuth';
 import { obtenerEventos, Evento } from '@/servicios/servicioEventos';
+import { obtenerMisMatches, Match } from '@/servicios/servicioMatches';
 
 // Importar tema y constantes
-import { temaApp, espaciado, sombras } from '@/constantes/tema';
+import { temaApp, espaciado, sombras, colores } from '@/constantes/tema';
 import { useAuth } from '@/contextos/ContextoAuth';
 
 // Rutas a imágenes
 const images = {
   placeholder: require('../../assets/placeholder.jpg'),
 };
+
+// Imágenes de eventos según su tipo (fallback cuando el evento no trae imagenUrl)
+const imagenesEventos: Record<string, any> = {
+  golden: require('../../assets/golden-retriever-playing.png'),
+  husky: require('../../assets/husky-running-mountain.jpg'),
+  labrador: require('../../assets/labrador-playing-tennis.jpg'),
+  default: require('../../assets/golden-retriever-playing.png'),
+};
+
+function obtenerImagenEventoPorTipo(tipo: string): any {
+  const tipoLower = tipo.toLowerCase();
+  if (tipoLower.includes('parque') || tipoLower.includes('encuentro')) {
+    return imagenesEventos.golden;
+  }
+  if (tipoLower.includes('paseo') || tipoLower.includes('caminata') || tipoLower.includes('senderismo')) {
+    return imagenesEventos.husky;
+  }
+  if (tipoLower.includes('cafe') || tipoLower.includes('merienda') || tipoLower.includes('social')) {
+    return imagenesEventos.labrador;
+  }
+  return imagenesEventos.default;
+}
+
+function resolverImagenEvento(evento: Evento): any {
+  if (evento.imagenUrl && (/^https?:\/\//i.test(evento.imagenUrl) || /^data:image\//i.test(evento.imagenUrl))) {
+    return { uri: evento.imagenUrl };
+  }
+  return obtenerImagenEventoPorTipo(evento.tipo);
+}
 
 type InicioScreenNavigationProp = StackNavigationProp<RootStackParamList> & BottomTabNavigationProp<TabParamList>;
 
@@ -55,27 +85,23 @@ export default function PantallaInicio(): JSX.Element {
   const [cargando, setCargando] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [eventos, setEventos] = useState<Evento[]>([]);
+  const [matchesRecientes, setMatchesRecientes] = useState<Match[]>([]);
 
-  const matches = [
-    {
-      id: 'match1',
-      name: 'María González',
-      pet: 'Golden Retriever',
-      matchDate: 'Quiere ir a un parque este finde',
-      image: images.placeholder,
-    },
-    {
-      id: 'match2',
-      name: 'Carlos Ruiz',
-      pet: 'Husky',
-      matchDate: 'Busca compartir una salida pet-friendly',
-      image: images.placeholder,
-    },
-  ];
+  const eventosFiltrados = searchText.trim()
+    ? eventos.filter((evento) => {
+        const consulta = searchText.trim().toLowerCase();
+        return (
+          evento.titulo.toLowerCase().includes(consulta) ||
+          evento.tipo.toLowerCase().includes(consulta) ||
+          evento.descripcion.toLowerCase().includes(consulta)
+        );
+      })
+    : eventos;
 
   useEffect(() => {
     cargarDatos();
     cargarEventos();
+    cargarMatches();
   }, []);
 
   const cargarEventos = async () => {
@@ -84,6 +110,23 @@ export default function PantallaInicio(): JSX.Element {
       setEventos(data);
     } catch (error: any) {
       console.error('Error cargando eventos:', error);
+    }
+  };
+
+  const cargarMatches = async () => {
+    if (!estaAutenticado) {
+      setMatchesRecientes([]);
+      return;
+    }
+    try {
+      const data = await obtenerMisMatches();
+      const aceptados = data
+        .filter((match) => match.estado === 'aceptado')
+        .sort((a, b) => new Date(b.fechaMatch).getTime() - new Date(a.fechaMatch).getTime())
+        .slice(0, 3);
+      setMatchesRecientes(aceptados);
+    } catch (error: any) {
+      console.error('Error cargando matches recientes:', error);
     }
   };
 
@@ -100,10 +143,14 @@ export default function PantallaInicio(): JSX.Element {
 
   const manejarRefresh = React.useCallback(() => {
     setRefrescando(true);
-    Promise.all([cargarDatos(), cargarEventos()]).finally(() => {
+    Promise.all([cargarDatos(), cargarEventos(), cargarMatches()]).finally(() => {
       setRefrescando(false);
     });
-  }, []);
+  }, [estaAutenticado]);
+
+  const abrirChatDeMatch = (matchId: string) => {
+    navigation.navigate('Chat', { matchId });
+  };
 
   const manejarCrearEvento = () => {
     if (!estaAutenticado) {
@@ -150,12 +197,18 @@ export default function PantallaInicio(): JSX.Element {
             <View style={estilos.buscador}>
               <MaterialIcons name="search" size={20} color={temaApp.colors.onSurfaceVariant} />
               <TextInput
-                placeholder="Buscar..."
+                placeholder="Buscar eventos..."
                 placeholderTextColor={temaApp.colors.onSurfaceVariant}
                 value={searchText}
                 onChangeText={setSearchText}
                 style={estilos.inputBuscar}
+                returnKeyType="search"
               />
+              {searchText.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchText('')} hitSlop={8}>
+                  <MaterialIcons name="close" size={18} color={temaApp.colors.onSurfaceVariant} />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -165,14 +218,19 @@ export default function PantallaInicio(): JSX.Element {
           <View style={estilos.headerSeccion}>
             <Text style={estilos.tituloSeccion}>Eventos Pet-Friendly</Text>
             <View style={estilos.badge}>
-              <Text style={estilos.badgeTexto}>{eventos.length} eventos</Text>
+              <Text style={estilos.badgeTexto}>{eventosFiltrados.length} eventos</Text>
             </View>
           </View>
+          {eventosFiltrados.length === 0 ? (
+            <Text style={estilos.textoSinResultados}>
+              No encontramos eventos para "{searchText}"
+            </Text>
+          ) : (
           <View style={estilos.listaEventos}>
-            {eventos.map((evento) => (
+            {eventosFiltrados.map((evento) => (
               <Card key={evento.id} style={estilos.cardEvento}>
                 <View style={estilos.imagenContainer}>
-                  <Image source={images.placeholder} style={estilos.imagenEvento} resizeMode="cover" />
+                  <Image source={resolverImagenEvento(evento)} style={estilos.imagenEvento} resizeMode="cover" />
                   {evento.esPetFriendly && (
                     <View style={estilos.badgeMatch}>
                       <MaterialIcons name="pets" size={14} color="#FFFFFF" />
@@ -186,13 +244,12 @@ export default function PantallaInicio(): JSX.Element {
                 <CardContent>
                   <View style={estilos.infoEvento}>
                     <View style={estilos.filaEvento}>
-                      <View style={estilos.infoItem}>
-                        <MaterialIcons name="category" size={14} color={temaApp.colors.primary} />
-                        <Text style={estilos.textoInfo}>{evento.tipo}</Text>
+                      <View style={estilos.pillCategoria}>
+                        <Text style={estilos.pillCategoriaTexto}>{evento.tipo.toUpperCase()}</Text>
                       </View>
                       <View style={estilos.badgeDistancia}>
                         <Text style={estilos.badgeDistanciaTexto}>
-                          {evento.esPremium ? 'Premium' : 'Gratis'}
+                          {evento.esPremium ? (evento.precio ? `$${evento.precio}` : 'Premium') : 'Gratis'}
                         </Text>
                       </View>
                     </View>
@@ -211,6 +268,7 @@ export default function PantallaInicio(): JSX.Element {
               </Card>
             ))}
           </View>
+          )}
         </View>
 
         {/* Recent Matches */}
@@ -218,26 +276,48 @@ export default function PantallaInicio(): JSX.Element {
           <View style={estilos.headerSeccion}>
             <Text style={estilos.tituloSeccion}>Matches Recientes</Text>
             <View style={estilos.badge}>
-              <Text style={estilos.badgeTexto}>{matches.length} nuevos</Text>
+              <Text style={estilos.badgeTexto}>{matchesRecientes.length} nuevos</Text>
             </View>
           </View>
+          {!estaAutenticado ? (
+            <Text style={estilos.textoSinResultados}>
+              Iniciá sesión para ver tus matches y chatear con otros dueños de mascotas.
+            </Text>
+          ) : matchesRecientes.length === 0 ? (
+            <Text style={estilos.textoSinResultados}>
+              Todavía no tenés matches. ¡Andá a Matching para conocer gente cerca tuyo!
+            </Text>
+          ) : (
           <View style={estilos.listaMatches}>
-            {matches.map((match) => (
-              <Card key={match.id} style={estilos.cardMatch}>
-                <CardContent>
-                  <View style={estilos.matchItem}>
-                    <Image source={match.image} style={estilos.avatarMatch} />
-                    <View style={estilos.matchInfo}>
-                      <Text style={estilos.matchNombre}>{match.name}</Text>
-                      <Text style={estilos.matchPet}>{match.pet}</Text>
-                      <Text style={estilos.matchFecha}>{match.matchDate}</Text>
-                    </View>
-                    <MaterialIcons name="favorite" size={20} color={temaApp.colors.like} />
-                  </View>
-                </CardContent>
-              </Card>
-            ))}
+            {matchesRecientes.map((match) => {
+              const otroUsuario = match.usuarioId === usuario?.id ? match.usuarioMatch : match.usuario;
+              return (
+                <TouchableOpacity key={match.id} onPress={() => abrirChatDeMatch(match.id)} activeOpacity={0.7}>
+                  <Card style={estilos.cardMatch}>
+                    <CardContent>
+                      <View style={estilos.matchItem}>
+                        <Image
+                          source={otroUsuario.avatar ? { uri: otroUsuario.avatar } : images.placeholder}
+                          style={estilos.avatarMatch}
+                        />
+                        <View style={estilos.matchInfo}>
+                          <Text style={estilos.matchNombre}>{otroUsuario.nombre}</Text>
+                          <Text style={estilos.matchPet}>
+                            {match.eventoPropuesto ? match.eventoPropuesto.titulo : 'Nuevo match'}
+                          </Text>
+                          <Text style={estilos.matchFecha}>
+                            {match.mensajeInicial || 'Toca para chatear'}
+                          </Text>
+                        </View>
+                        <MaterialIcons name="favorite" size={20} color={temaApp.colors.like} />
+                      </View>
+                    </CardContent>
+                  </Card>
+                </TouchableOpacity>
+              );
+            })}
           </View>
+          )}
         </View>
 
         <AdBanner minHeight={50} />
@@ -275,6 +355,12 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  textoSinResultados: {
+    color: temaApp.colors.onSurfaceVariant,
+    textAlign: 'center',
+    paddingVertical: espaciado.lg,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   accionesRapidas: {
     flexDirection: 'row',
@@ -322,7 +408,7 @@ const estilos = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(20, 24, 20, 0.72)',
     padding: 12,
   },
   tituloImagen: {
@@ -367,15 +453,27 @@ const estilos = StyleSheet.create({
     ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   badgeDistancia: {
-    backgroundColor: `${temaApp.colors.primary}1A`,
-    paddingHorizontal: 8,
+    backgroundColor: colores.secundarioClaro,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 999,
   },
   badgeDistanciaTexto: {
-    color: temaApp.colors.primary,
+    color: colores.secundarioVariant,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  pillCategoria: {
+    backgroundColor: colores.primarioClaro,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  pillCategoriaTexto: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colores.primarioVariant,
     ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   badge: {
