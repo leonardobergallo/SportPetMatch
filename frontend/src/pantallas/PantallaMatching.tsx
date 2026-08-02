@@ -49,6 +49,10 @@ const CARD_HEIGHT = Platform.OS === 'web'
   : SCREEN_HEIGHT * 0.76;
 const SWIPE_THRESHOLD = 120;
 
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que Login/Registro/Inicio */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
+
 const MATCH_SAMPLE_IMAGES: ImageSourcePropType[] = [
   require('../../assets/golden-retriever-playing.png'),
   require('../../assets/husky-running-mountain.jpg'),
@@ -598,14 +602,17 @@ const estilos = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     marginRight: 8,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   heroCiudad: {
     color: 'rgba(255,255,255,0.92)',
     fontWeight: '600',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   heroBio: {
     color: '#FFFFFF',
     lineHeight: 20,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   cardContent: {
     flex: 1,
@@ -651,6 +658,7 @@ const estilos = StyleSheet.create({
     marginBottom: 10,
     fontWeight: '700',
     color: temaApp.colors.onSurface,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   mascotasList: {
     flexDirection: 'row',

@@ -11,6 +11,7 @@ import {
   Pressable,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -28,6 +29,10 @@ import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 import { useAuth } from '@/contextos/ContextoAuth';
 
 type EventosScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
 
 // Imágenes de eventos
 const imagenesEventos: Record<string, any> = {
@@ -331,11 +336,15 @@ const estilos = StyleSheet.create({
   scrollContent: {
     padding: 12,
     paddingBottom: 80,
+    ...(Platform.OS === 'web'
+      ? { maxWidth: 1100, width: '100%', alignSelf: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: 20, paddingTop: 20 }
+      : {}),
   },
   cardEvento: {
     marginBottom: 12,
     overflow: 'hidden',
     ...sombras.media,
+    ...(Platform.OS === 'web' ? { width: 320, marginBottom: 0, borderRadius: 16 } : {}),
   },
   cardPressable: {
     width: '100%',
@@ -385,12 +394,14 @@ const estilos = StyleSheet.create({
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
     marginBottom: 4,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   descripcionEvento: {
     fontSize: 13,
     color: temaApp.colors.onSurfaceVariant,
     lineHeight: 18,
     marginBottom: 8,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   infoEvento: {
     flexDirection: 'row',
@@ -404,6 +415,7 @@ const estilos = StyleSheet.create({
   infoTexto: {
     fontSize: 12,
     color: temaApp.colors.onSurfaceVariant,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   botonParticipar: {
     width: '100%',

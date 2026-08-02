@@ -2,14 +2,15 @@
 // Adaptada de la estructura con nuevos componentes y estilos
 
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  ScrollView, 
+import {
+  View,
+  StyleSheet,
+  ScrollView,
   RefreshControl,
   Image,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -37,6 +38,10 @@ const images = {
 };
 
 type InicioScreenNavigationProp = StackNavigationProp<RootStackParamList> & BottomTabNavigationProp<TabParamList>;
+
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que Login y Registro */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
 
 /**
  * Pantalla de Inicio - Feed principal de la aplicación
@@ -253,6 +258,7 @@ const estilos = StyleSheet.create({
   contentContainer: {
     padding: 16,
     paddingBottom: 100,
+    ...(Platform.OS === 'web' ? { maxWidth: 1100, width: '100%', alignSelf: 'center', paddingTop: 24 } : {}),
   },
   seccion: {
     marginBottom: 24,
@@ -262,6 +268,7 @@ const estilos = StyleSheet.create({
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
     marginBottom: 12,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   headerSeccion: {
     flexDirection: 'row',
@@ -299,6 +306,7 @@ const estilos = StyleSheet.create({
   },
   cardEvento: {
     overflow: 'hidden',
+    ...(Platform.OS === 'web' ? { borderRadius: 16 } : {}),
   },
   imagenContainer: {
     height: 192,
@@ -321,6 +329,7 @@ const estilos = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 'bold',
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   badgeMatch: {
     position: 'absolute',
@@ -355,6 +364,7 @@ const estilos = StyleSheet.create({
   textoInfo: {
     fontSize: 12,
     color: temaApp.colors.onSurfaceVariant,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   badgeDistancia: {
     backgroundColor: `${temaApp.colors.primary}1A`,
@@ -366,6 +376,7 @@ const estilos = StyleSheet.create({
     color: temaApp.colors.primary,
     fontSize: 12,
     fontWeight: '600',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   badge: {
     backgroundColor: `${temaApp.colors.accent}33`,
@@ -377,6 +388,7 @@ const estilos = StyleSheet.create({
     color: temaApp.colors.accent,
     fontSize: 12,
     fontWeight: '600',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   listaMatches: {
     gap: 8,
@@ -401,15 +413,18 @@ const estilos = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: temaApp.colors.onSurface,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   matchPet: {
     fontSize: 12,
     color: temaApp.colors.onSurfaceVariant,
     marginTop: 2,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   matchFecha: {
     fontSize: 12,
     color: temaApp.colors.onSurfaceVariant,
     marginTop: 2,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
 });

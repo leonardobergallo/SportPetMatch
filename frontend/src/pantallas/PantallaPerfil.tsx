@@ -2,7 +2,7 @@
 // Perfil del usuario y configuración
 
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Image, LinearGradient } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image, LinearGradient, Platform } from 'react-native';
 import { Text, Card, Avatar, Switch, Divider, List } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -16,6 +16,10 @@ import { Button } from '@/components/ui/button';
 // import { Card, CardContent } from '@/components/ui/card';
 
 type PerfilScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
 
 export default function PantallaPerfil(): JSX.Element {
   const navigation = useNavigation<PerfilScreenNavigationProp>();
@@ -189,6 +193,7 @@ const estilos = StyleSheet.create({
     paddingBottom: 150, // Espacio al final para asegurar scroll completo
     flexGrow: 1,
     minHeight: '100%', // Asegura que el contenido pueda hacer scroll
+    ...(Platform.OS === 'web' ? { maxWidth: 600, width: '100%', alignSelf: 'center' } : {}),
   },
   profileHeader: {
     backgroundColor: temaApp.colors.surface,
@@ -220,11 +225,13 @@ const estilos = StyleSheet.create({
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
     marginBottom: espaciado.xs,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   emailUsuario: {
     fontSize: 14,
     color: temaApp.colors.onSurfaceVariant,
     marginBottom: espaciado.sm,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   ubicacionContainer: {
     flexDirection: 'row',
@@ -280,6 +287,7 @@ const estilos = StyleSheet.create({
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
     marginBottom: espaciado.md,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   configItem: {
     flexDirection: 'row',

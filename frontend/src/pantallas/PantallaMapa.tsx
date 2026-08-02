@@ -38,6 +38,10 @@ const PUNTOS_SANTA_FE = [
   { latitud: -31.6350, longitud: -60.7000, ciudad: 'Costanera, Santa Fe' },
 ];
 
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
+
 const fechaFutura = (dias: number, hora = 9): string => {
   const fecha = new Date();
   fecha.setDate(fecha.getDate() + dias);
@@ -816,6 +820,7 @@ const styles = StyleSheet.create({
   leyendaTexto: {
     fontSize: 11,
     color: temaApp.colors.onSurfaceVariant,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   listaContainer: {
     flex: 1,
@@ -882,6 +887,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: espaciado.md,
     backgroundColor: temaApp.colors.surface,
     fontWeight: '600',
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   listItem: {
     backgroundColor: temaApp.colors.surface,

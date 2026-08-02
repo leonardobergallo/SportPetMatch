@@ -10,6 +10,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -31,6 +32,10 @@ import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 import { useAuth } from '@/contextos/ContextoAuth';
 
 type MascotasScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
 
 // Imágenes de mascotas por tipo
 const imagenesMascotas: Record<string, any> = {
@@ -284,6 +289,7 @@ const estilos = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   scrollView: {
     flex: 1,
@@ -291,10 +297,14 @@ const estilos = StyleSheet.create({
   scrollContent: {
     padding: espaciado.md,
     paddingBottom: 100,
+    ...(Platform.OS === 'web'
+      ? { maxWidth: 1100, width: '100%', alignSelf: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: 20, paddingTop: 20 }
+      : {}),
   },
   cardMascota: {
     marginBottom: espaciado.md,
     ...sombras.media,
+    ...(Platform.OS === 'web' ? { width: 340, marginBottom: 0, borderRadius: 16 } : {}),
   },
   contenidoCard: {
     flexDirection: 'row',
@@ -321,6 +331,7 @@ const estilos = StyleSheet.create({
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
     flex: 1,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   badgesContainer: {
     flexDirection: 'row',
@@ -341,6 +352,7 @@ const estilos = StyleSheet.create({
     fontSize: 14,
     color: temaApp.colors.onSurfaceVariant,
     marginBottom: espaciado.xs,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   interesesContainer: {
     flexDirection: 'row',

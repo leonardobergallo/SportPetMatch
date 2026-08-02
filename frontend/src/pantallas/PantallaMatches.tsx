@@ -10,6 +10,7 @@ import {
   RefreshControl,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import {
   Text,
@@ -35,6 +36,10 @@ import {
 
 type MatchesScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 type MatchesScreenRouteProp = RouteProp<TabParamList, 'Matches'>;
+
+/** Tipografia web (Plus Jakarta / Outfit), misma familia que el resto de la app en web */
+const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
+const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
 
 interface Conversacion {
   match: Match;
@@ -403,6 +408,7 @@ const estilos = StyleSheet.create({
   listaConversaciones: {
     paddingHorizontal: espaciado.md,
     paddingBottom: 100,
+    ...(Platform.OS === 'web' ? { maxWidth: 720, width: '100%', alignSelf: 'center', paddingTop: 12 } : {}),
   },
   conversacionItem: {
     marginBottom: espaciado.sm,
@@ -453,9 +459,11 @@ const estilos = StyleSheet.create({
   nombreUsuario: {
     fontWeight: '600',
     color: temaApp.colors.onSurface,
+    ...(fontDisplay ? { fontFamily: fontDisplay } : {}),
   },
   tiempo: {
     color: temaApp.colors.onSurfaceVariant,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   detallesUsuario: {
     marginBottom: espaciado.xs,
@@ -470,6 +478,7 @@ const estilos = StyleSheet.create({
   ultimoMensaje: {
     flex: 1,
     color: temaApp.colors.onSurfaceVariant,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   mensajeNoLeido: {
     fontWeight: '600',
