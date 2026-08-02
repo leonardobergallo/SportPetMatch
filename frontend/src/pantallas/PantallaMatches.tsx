@@ -408,7 +408,7 @@ const estilos = StyleSheet.create({
   listaConversaciones: {
     paddingHorizontal: espaciado.md,
     paddingBottom: 100,
-    ...(Platform.OS === 'web' ? { maxWidth: 720, width: '100%', alignSelf: 'center', paddingTop: 12 } : {}),
+    ...(Platform.OS === 'web' ? { paddingHorizontal: 32, paddingTop: 12 } : {}),
   },
   conversacionItem: {
     marginBottom: espaciado.sm,

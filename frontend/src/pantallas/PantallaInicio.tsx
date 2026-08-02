@@ -258,7 +258,7 @@ const estilos = StyleSheet.create({
   contentContainer: {
     padding: 16,
     paddingBottom: 100,
-    ...(Platform.OS === 'web' ? { maxWidth: 1100, width: '100%', alignSelf: 'center', paddingTop: 24 } : {}),
+    ...(Platform.OS === 'web' ? { paddingHorizontal: 32, paddingTop: 24 } : {}),
   },
   seccion: {
     marginBottom: 24,

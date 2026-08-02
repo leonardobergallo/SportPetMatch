@@ -298,7 +298,7 @@ const estilos = StyleSheet.create({
     padding: espaciado.md,
     paddingBottom: 100,
     ...(Platform.OS === 'web'
-      ? { maxWidth: 1100, width: '100%', alignSelf: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: 20, paddingTop: 20 }
+      ? { paddingHorizontal: 32, flexDirection: 'row', flexWrap: 'wrap', gap: 20, paddingTop: 20 }
       : {}),
   },
   cardMascota: {

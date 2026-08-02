@@ -193,7 +193,7 @@ const estilos = StyleSheet.create({
     paddingBottom: 150, // Espacio al final para asegurar scroll completo
     flexGrow: 1,
     minHeight: '100%', // Asegura que el contenido pueda hacer scroll
-    ...(Platform.OS === 'web' ? { maxWidth: 600, width: '100%', alignSelf: 'center' } : {}),
+    ...(Platform.OS === 'web' ? { paddingHorizontal: 32 } : {}),
   },
   profileHeader: {
     backgroundColor: temaApp.colors.surface,
