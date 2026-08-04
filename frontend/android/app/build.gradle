@@ -88,7 +88,7 @@ android {
 
     namespace 'com.sportpetmatch.app'
     defaultConfig {
-        applicationId 'com.sportpetmatch.app'
+        applicationId 'ar.com.indio.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
