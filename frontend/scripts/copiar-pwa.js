@@ -16,6 +16,8 @@ const filesToCopy = [
   'sw.js',
   'landing.html',
   'privacidad.html',
+  'terminos.html',
+  'eliminar-cuenta.html',
   'icon-72x72.png',
   'icon-96x96.png',
   'icon-128x128.png',
