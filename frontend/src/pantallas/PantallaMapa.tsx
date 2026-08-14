@@ -42,13 +42,6 @@ const PUNTOS_SANTA_FE = [
 const fontSans = Platform.select({ web: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif', default: undefined });
 const fontDisplay = Platform.select({ web: '"Outfit", "Plus Jakarta Sans", system-ui, sans-serif', default: undefined });
 
-const fechaFutura = (dias: number, hora = 9): string => {
-  const fecha = new Date();
-  fecha.setDate(fecha.getDate() + dias);
-  fecha.setHours(hora, 0, 0, 0);
-  return fecha.toISOString();
-};
-
 // Tipos para los datos del mapa
 interface UsuarioMapa {
   id: string;
@@ -422,56 +415,27 @@ export default function PantallaMapa() {
         }
       ];
 
-      const eventosPrueba: EventoMapa[] = [
-        {
-          id: '1',
-          titulo: 'Paseo matutino en Costanera',
-          tipo: 'paseo',
-          fechaInicio: '2025-11-01T07:00:00',
-          ubicacionLat: -31.6280,
-          ubicacionLng: -60.6900,
-          participantes: 8,
-          maxParticipantes: 15
-        },
-        {
-          id: '2',
-          titulo: 'Encuentro en Parque Sur',
-          tipo: 'parque',
-          fechaInicio: '2025-11-02T09:00:00',
-          ubicacionLat: -31.6450,
-          ubicacionLng: -60.6950,
-          participantes: 5,
-          maxParticipantes: 10
-        },
-        {
-          id: '3',
-          titulo: 'Caminata en Laguna Setúbal',
-          tipo: 'caminata',
-          fechaInicio: '2025-11-03T17:00:00',
-          ubicacionLat: -31.6200,
-          ubicacionLng: -60.6800,
-          participantes: 12,
-          maxParticipantes: 20
-        },
-        {
-          id: '4',
-          titulo: 'Merienda pet-friendly por Boulevard Gálvez',
-          tipo: 'merienda',
-          fechaInicio: '2025-11-04T08:00:00',
-          ubicacionLat: -31.6350,
-          ubicacionLng: -60.7000,
-          participantes: 6,
-          maxParticipantes: 12
-        }
-      ];
-
       const [usuariosRecomendados, eventosApi] = await Promise.all([
         obtenerRecomendaciones().catch(() => []),
         obtenerEventos({
           fechaDesde: new Date().toISOString(),
           limit: 20,
           esPetFriendly: true,
-        }).catch(() => []),
+        })
+          .then(async (eventosFuturos) => {
+            if (eventosFuturos.length > 0) {
+              return eventosFuturos;
+            }
+
+            // Si no hay eventos futuros, conservar IDs reales de la API.
+            // Los eventos de prueba usan IDs ficticios y no pueden abrirse
+            // en la pantalla de detalle.
+            return obtenerEventos({
+              limit: 20,
+              esPetFriendly: true,
+            });
+          })
+          .catch(() => []),
       ]);
 
       const usuariosMapa = usuariosRecomendados.length > 0
@@ -489,24 +453,19 @@ export default function PantallaMapa() {
           })
         : usuariosPrueba;
 
-      const eventosMapa = eventosApi.length > 0
-        ? eventosApi.slice(0, 12).map((evento, index) => {
-            const punto = PUNTOS_SANTA_FE[(index + 1) % PUNTOS_SANTA_FE.length];
-            return {
-              id: evento.id,
-              titulo: evento.titulo,
-              tipo: evento.tipo,
-              fechaInicio: evento.fechaInicio,
-              ubicacionLat: punto.latitud,
-              ubicacionLng: punto.longitud,
-              participantes: evento.participantesCount || 0,
-              maxParticipantes: evento.maxParticipantes || 20,
-            };
-          })
-        : eventosPrueba.map((evento, index) => ({
-            ...evento,
-            fechaInicio: fechaFutura(index + 3, index % 2 === 0 ? 9 : 17),
-          }));
+      const eventosMapa = eventosApi.slice(0, 12).map((evento, index) => {
+        const punto = PUNTOS_SANTA_FE[(index + 1) % PUNTOS_SANTA_FE.length];
+        return {
+          id: evento.id,
+          titulo: evento.titulo,
+          tipo: evento.tipo,
+          fechaInicio: evento.fechaInicio,
+          ubicacionLat: punto.latitud,
+          ubicacionLng: punto.longitud,
+          participantes: evento.participantesCount || 0,
+          maxParticipantes: evento.maxParticipantes || 20,
+        };
+      });
 
       setUsuarios(usuariosMapa);
       setEventos(eventosMapa);
