@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
+  Linking,
 } from 'react-native';
 import {
   Text,
@@ -128,8 +129,13 @@ export default function PantallaConfiguracion(): JSX.Element {
   /**
    * Navegar a privacidad
    */
-  const navegarAPrivacidad = () => {
-    mostrarAlerta('Privacidad', 'Política de privacidad próximamente');
+  const navegarAPrivacidad = async () => {
+    const url = 'https://indio.com.ar/politica-de-privacidad';
+    try {
+      await Linking.openURL(url);
+    } catch {
+      mostrarAlerta('Privacidad', `Podés consultar la política en ${url}`);
+    }
   };
 
   /**
