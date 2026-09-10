@@ -152,15 +152,6 @@ export default function PantallaEditarMascota(): JSX.Element {
    */
   const seleccionarImagen = async () => {
     try {
-      // Solicitar permisos solo en mobile
-      if (Platform.OS !== 'web') {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          mostrarAlerta('Permisos', 'Se necesitan permisos para acceder a la galería');
-          return;
-        }
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images', // Nueva API sin deprecación
         allowsEditing: true,

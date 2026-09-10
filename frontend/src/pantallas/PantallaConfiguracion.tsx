@@ -138,6 +138,24 @@ export default function PantallaConfiguracion(): JSX.Element {
     }
   };
 
+  const denunciarProblema = async () => {
+    const asunto = encodeURIComponent('Denuncia de seguridad - Indio');
+    const cuerpo = encodeURIComponent(
+      `Describí el usuario, contenido o situación que querés denunciar:\n\n` +
+      `Tu usuario: ${usuario?.email || 'sin indicar'}\n\n` +
+      'No incluyas imágenes sensibles. El equipo de Indio revisará el caso y podrá solicitar información adicional.'
+    );
+    const url = `mailto:it360tecnologia@gmail.com?subject=${asunto}&body=${cuerpo}`;
+    try {
+      await Linking.openURL(url);
+    } catch {
+      mostrarAlerta(
+        'Denunciar un problema',
+        'Enviá la denuncia a it360tecnologia@gmail.com indicando el usuario o contenido involucrado.'
+      );
+    }
+  };
+
   /**
    * Navegar a términos
    */
@@ -320,6 +338,27 @@ export default function PantallaConfiguracion(): JSX.Element {
             />
             <View style={estilos.itemContent}>
               <Text style={estilos.itemTitulo}>Privacidad</Text>
+            </View>
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={temaApp.colors.onSurfaceVariant}
+            />
+          </TouchableOpacity>
+
+          <Divider style={estilos.divisor} />
+
+          <TouchableOpacity style={estilos.item} onPress={denunciarProblema}>
+            <MaterialIcons
+              name="report"
+              size={24}
+              color={temaApp.colors.error}
+            />
+            <View style={estilos.itemContent}>
+              <Text style={estilos.itemTitulo}>Denunciar usuario o contenido</Text>
+              <Text style={estilos.itemDescripcion}>
+                Informá abuso, explotación o cualquier problema de seguridad
+              </Text>
             </View>
             <MaterialIcons
               name="chevron-right"

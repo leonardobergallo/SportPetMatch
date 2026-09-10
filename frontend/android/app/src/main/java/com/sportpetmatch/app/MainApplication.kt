@@ -1,4 +1,4 @@
-package com.sportpetmatch.app
+package com.it360.indio
 
 import android.app.Application
 import android.content.res.Configuration

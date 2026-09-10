@@ -1,4 +1,4 @@
-package com.sportpetmatch.app
+package com.it360.indio
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

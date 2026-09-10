@@ -117,15 +117,6 @@ export default function PantallaEditarPerfil(): JSX.Element {
    */
   const seleccionarImagen = async () => {
     try {
-      // Solicitar permisos solo en mobile
-      if (Platform.OS !== 'web') {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          mostrarAlerta('Permisos', 'Se necesitan permisos para acceder a la galería');
-          return;
-        }
-      }
-
       // Usar la API correcta - en expo-image-picker 17+ se usa MediaType
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images', // Nueva API sin deprecación

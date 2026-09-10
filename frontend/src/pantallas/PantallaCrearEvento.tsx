@@ -287,13 +287,6 @@ export default function PantallaCrearEvento(): JSX.Element {
         return;
       }
 
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        mostrarAlerta('Permiso requerido', 'Necesitamos acceso a tu galería para elegir una imagen.');
-        setCargandoImagen(false);
-        return;
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: true,

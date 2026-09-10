@@ -16,6 +16,7 @@ const filesToCopy = [
   'sw.js',
   'landing.html',
   'politica-de-privacidad.html',
+  'seguridad-infantil.html',
   'privacidad.html',
   'terminos.html',
   'eliminar-cuenta.html',

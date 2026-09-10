@@ -10,3 +10,13 @@ yarn-error.log*
 android/.gradle/
 android/app/build/
 android/build/
+.git/
+*.md
+.DS_Store
+Thumbs.db
+*.tgz
+*.gz
+coverage/
+.codex-logs/
+*.apk
+*.aab
