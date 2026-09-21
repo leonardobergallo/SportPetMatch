@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import prisma from '../utilidades/prisma';
 import { generarTokens } from '../servicios/jwtService';
+import { notificarNuevoRegistro } from '../servicios/correoService';
 
 function normalizarEmail(email: unknown): string {
   return String(email || '').trim().toLowerCase();
@@ -138,9 +139,18 @@ export const registro = async (req: Request, res: Response): Promise<void> => {
         nombre: true,
         avatar: true,
         esPremium: true,
+        telefono: true,
+        fechaNacimiento: true,
+        tipoUsuario: true,
         createdAt: true,
       },
     });
+
+    try {
+      await notificarNuevoRegistro(nuevoUsuario);
+    } catch (error) {
+      console.error('El usuario se registro, pero fallo la notificacion a IT360:', error);
+    }
 
     const tokens = generarTokens({
       usuarioId: nuevoUsuario.id,
@@ -151,7 +161,14 @@ export const registro = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: 'Usuario registrado exitosamente',
       data: {
-        usuario: nuevoUsuario,
+        usuario: {
+          id: nuevoUsuario.id,
+          email: nuevoUsuario.email,
+          nombre: nuevoUsuario.nombre,
+          avatar: nuevoUsuario.avatar,
+          esPremium: nuevoUsuario.esPremium,
+          createdAt: nuevoUsuario.createdAt,
+        },
         ...tokens,
       },
     });

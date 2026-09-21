@@ -41,7 +41,7 @@ for (const name of fs.readdirSync(webDir)) {
   }
 }
 
-['manifest.json', 'sw.js', 'landing.html'].forEach((f) => {
+['manifest.json', 'sw.js', 'landing.html', 'admin.html'].forEach((f) => {
   copyIfExists(path.join(webDir, f), path.join(publicDir, f));
 });
 

@@ -103,15 +103,22 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (System.getenv('INDIO_UPLOAD_KEYSTORE_PATH')) {
+            upload {
+                storeFile file(System.getenv('INDIO_UPLOAD_KEYSTORE_PATH'))
+                storePassword System.getenv('INDIO_UPLOAD_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('INDIO_UPLOAD_KEY_ALIAS')
+                keyPassword System.getenv('INDIO_UPLOAD_KEY_PASSWORD')
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // Local diagnostic builds use debug signing; Play builds provide the upload key via process environment.
+            signingConfig System.getenv('INDIO_UPLOAD_KEYSTORE_PATH') ? signingConfigs.upload : signingConfigs.debug
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds

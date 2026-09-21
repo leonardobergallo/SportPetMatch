@@ -2,6 +2,7 @@
 // Aplicación principal con contexto de autenticación, ubicación y navegación
 
 import React from 'react';
+import { Platform } from 'react-native';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 
@@ -11,6 +12,7 @@ import { ProveedorUbicacion } from './src/contextos/ContextoUbicacion';
 import NavegacionPrincipal from './src/navegacion/NavegacionPrincipal';
 import ErrorBoundary from './src/componentes/ErrorBoundary';
 import InstallPrompt from './src/componentes/InstallPrompt';
+import IndioWebAndroid from './src/componentes/IndioWebAndroid';
 
 // Configurar tema personalizado
 const tema = {
@@ -33,6 +35,10 @@ const tema = {
 };
 
 export default function App() {
+  if (Platform.OS === 'android') {
+    return <IndioWebAndroid />;
+  }
+
   return (
     <PaperProvider theme={tema}>
       <ErrorBoundary>

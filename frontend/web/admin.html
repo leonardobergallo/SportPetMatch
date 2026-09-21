@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel de control | Indio</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#18211b;background:#f5f7f5;--green:#268536;--orange:#ff7900;--muted:#67726a;--line:#dfe6e0}
+    *{box-sizing:border-box}body{margin:0}.top{background:#237b31;color:#fff;padding:18px 5vw;display:flex;align-items:center;justify-content:space-between}.brand{font-size:22px;font-weight:800}.brand small{display:block;font-size:12px;font-weight:500;opacity:.86}.wrap{width:min(1180px,92vw);margin:28px auto}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 18px #15351b0d}.card{padding:18px}.card b{display:block;font-size:28px;color:var(--green)}.card span{color:var(--muted);font-size:13px}.panel{padding:20px}.tools{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:16px}h1{font-size:24px;margin:0}input,button{font:inherit;border-radius:10px;padding:10px 13px}input{border:1px solid #bfc9c1;min-width:280px}button{border:0;background:var(--green);color:#fff;font-weight:700;cursor:pointer}.secondary{background:#edf5ee;color:#216c2e}.danger{background:#b3261e}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:900px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #edf0ed;font-size:14px}th{color:#536059;font-size:12px;text-transform:uppercase}.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#eaf5eb;color:#1d6f2a;font-size:12px}.badge.off{background:#f3f3f3;color:#747474}.pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:16px;color:var(--muted)}.empty,.error{padding:24px;text-align:center;color:var(--muted)}.error{color:#a11}.login{width:min(420px,92vw);margin:12vh auto;padding:26px}.login input{width:100%;margin:16px 0}.hidden{display:none!important}@media(max-width:650px){.wrap{width:94vw}.top{padding:15px 3vw}.panel{padding:14px}input{min-width:100%}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="brand">🐾 Indio <small>Panel de control web</small></div><button id="logout" class="danger hidden">Salir</button></header>
+  <main>
+    <section id="login" class="panel login">
+      <h1>Acceso administrativo</h1>
+      <p>Ingresá la clave configurada para Indio. Se conserva sólo en esta pestaña.</p>
+      <form id="loginForm"><input id="key" type="password" autocomplete="current-password" placeholder="Clave administrativa" required /><button type="submit">Ingresar</button></form>
+      <div id="loginError" class="error hidden"></div>
+    </section>
+    <section id="dashboard" class="wrap hidden">
+      <div id="cards" class="cards"></div>
+      <div class="panel">
+        <div class="tools"><h1>Personas registradas</h1><form id="searchForm"><input id="search" type="search" placeholder="Buscar nombre, email, teléfono o ciudad" /><button>Buscar</button></form></div>
+        <div id="content" class="table-wrap"></div>
+        <div class="pager"><button id="prev" class="secondary">Anterior</button><span id="pageInfo"></span><button id="next" class="secondary">Siguiente</button></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const state={key:sessionStorage.getItem('indio_admin_key')||'',page:1,pages:1,search:''};
+      const $=id=>document.getElementById(id);
+      const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+      const date=v=>v?new Intl.DateTimeFormat('es-AR',{dateStyle:'short',timeStyle:'short'}).format(new Date(v)):'—';
+      async function api(path){const r=await fetch('/api/admin'+path,{headers:{'X-Admin-Key':state.key}});if(r.status===401||r.status===503)throw new Error('Clave incorrecta o ADMIN_SECRET no configurado.');if(!r.ok)throw new Error('No se pudo cargar la información.');return r.json()}
+      function showDashboard(){ $('login').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden') }
+      function cards(r){const items=[['Usuarios',r.totalUsuarios],['Altas últimos 7 días',r.usuariosUltimosSieteDias],['Usuarios activos',r.usuariosActivos],['Mascotas',r.totalMascotas],['Eventos',r.totalEventos],['Matches',r.totalMatches],['Mensajes',r.totalMensajes]];$('cards').innerHTML=items.map(([l,v])=>`<div class="card"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}
+      function table(users){if(!users.length){$('content').innerHTML='<div class="empty">No se encontraron registros.</div>';return}$('content').innerHTML=`<table><thead><tr><th>Alta</th><th>Persona</th><th>Contacto</th><th>Ubicación</th><th>Estado</th><th>Actividad</th></tr></thead><tbody>${users.map(u=>`<tr><td>${date(u.createdAt)}</td><td><strong>${esc(u.nombre)}</strong><br><small>${esc(u.tipoUsuario||'')}</small></td><td>${esc(u.email)}<br><small>${esc(u.telefono||'Sin teléfono')}</small></td><td>${esc([u.ubicacionCiudad,u.ubicacionPais].filter(Boolean).join(', ')||'—')}</td><td><span class="badge ${u.isActive?'':'off'}">${u.isActive?'Activo':'Inactivo'}</span><br><small>${u.emailVerificado?'Email verificado':'Email pendiente'}</small></td><td>${u._count.mascotas} mascotas · ${u._count.eventosCreados} eventos · ${u._count.matches} matches</td></tr>`).join('')}</tbody></table>`}
+      async function load(){try{showDashboard();$('content').innerHTML='<div class="empty">Cargando…</div>';const [s,u]=await Promise.all([api('/stats'),api(`/usuarios?pagina=${state.page}&limite=25&buscar=${encodeURIComponent(state.search)}`)]);cards(s.resumen);table(u.usuarios);state.pages=u.paginacion.paginas;$('pageInfo').textContent=`Página ${state.page} de ${state.pages} · ${u.paginacion.total} registros`;$('prev').disabled=state.page<=1;$('next').disabled=state.page>=state.pages}catch(e){sessionStorage.removeItem('indio_admin_key');state.key='';$('dashboard').classList.add('hidden');$('logout').classList.add('hidden');$('login').classList.remove('hidden');$('loginError').textContent=e.message;$('loginError').classList.remove('hidden')}}
+      $('loginForm').addEventListener('submit',e=>{e.preventDefault();state.key=$('key').value;sessionStorage.setItem('indio_admin_key',state.key);load()});
+      $('searchForm').addEventListener('submit',e=>{e.preventDefault();state.search=$('search').value.trim();state.page=1;load()});
+      $('prev').onclick=()=>{if(state.page>1){state.page--;load()}};$('next').onclick=()=>{if(state.page<state.pages){state.page++;load()}};
+      $('logout').onclick=()=>{sessionStorage.removeItem('indio_admin_key');location.reload()};
+      if(state.key)load();
+    })();
+  </script>
+</body>
+</html>
