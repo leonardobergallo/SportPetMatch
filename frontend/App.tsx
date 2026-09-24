@@ -1,55 +1,19 @@
-// Archivo principal de SportPetMatch
-// Aplicación principal con contexto de autenticación, ubicación y navegación
-
 import React from 'react';
 import { Platform } from 'react-native';
-import { PaperProvider, MD3LightTheme } from 'react-native-paper';
-import { StatusBar } from 'expo-status-bar';
 
-// Importar contextos, navegación y error boundary
-import { ProveedorAuth } from './src/contextos/ContextoAuth';
-import { ProveedorUbicacion } from './src/contextos/ContextoUbicacion';
-import NavegacionPrincipal from './src/navegacion/NavegacionPrincipal';
-import ErrorBoundary from './src/componentes/ErrorBoundary';
-import InstallPrompt from './src/componentes/InstallPrompt';
 import IndioWebAndroid from './src/componentes/IndioWebAndroid';
 
-// Configurar tema personalizado
-const tema = {
-  ...MD3LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-    primary: '#6200ea',
-    secondary: '#03dac6',
-    tertiary: '#018786',
-    surface: '#ffffff',
-    background: '#f5f5f5',
-    error: '#b00020',
-    onPrimary: '#ffffff',
-    onSecondary: '#000000',
-    onTertiary: '#ffffff',
-    onSurface: '#000000',
-    onBackground: '#000000',
-    onError: '#ffffff',
-  },
-};
+// Android es un contenedor web. No cargamos la aplicación React Native completa
+// en esa plataforma: varios de sus módulos no se usan allí y cualquier error de
+// inicialización impediría que la WebView llegue a mostrarse.
+const AppCompleta: React.ComponentType | null =
+  Platform.OS === 'android' ? null : require('./AppCompleta').default;
 
 export default function App() {
   if (Platform.OS === 'android') {
     return <IndioWebAndroid />;
   }
 
-  return (
-    <PaperProvider theme={tema}>
-      <ErrorBoundary>
-        <ProveedorAuth>
-          <ProveedorUbicacion>
-            <StatusBar style="auto" />
-            <NavegacionPrincipal />
-            <InstallPrompt />
-          </ProveedorUbicacion>
-        </ProveedorAuth>
-      </ErrorBoundary>
-    </PaperProvider>
-  );
+  if (!AppCompleta) return null;
+  return <AppCompleta />;
 }

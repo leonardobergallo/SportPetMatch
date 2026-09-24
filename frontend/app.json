@@ -30,7 +30,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.it360.indio",
-      "versionCode": 4,
+      "versionCode": 5,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
@@ -71,7 +71,8 @@
           "photosPermission": "La app necesita acceso a tus fotos para que puedas seleccionar imágenes de tu mascota."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "extra": {
       "slogan": "Indio, mi mejor amigo",
