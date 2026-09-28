@@ -194,7 +194,7 @@ async function main() {
       ubicacionPais: 'Argentina',
       nivelDeporte: 5,
       intereses: ['crossfit', 'correr', 'ciclismo'],
-      tipoUsuario: 'dueno',
+      tipoUsuario: 'familia',
       esPremium: true,
       onboardingCompletado: true,
       emailVerificado: true,
