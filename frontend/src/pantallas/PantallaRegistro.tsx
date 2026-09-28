@@ -332,7 +332,7 @@ export default function PantallaRegistro(): JSX.Element {
                 style={estilos.iconoCampo}
               />
               <TextInput
-                label="Contrasena"
+                label="Contraseña"
                 value={password}
                 onChangeText={setPassword}
                 mode="outlined"
@@ -356,7 +356,7 @@ export default function PantallaRegistro(): JSX.Element {
                 style={estilos.iconoCampo}
               />
               <TextInput
-                label="Confirmar contrasena"
+                label="Confirmar contraseña"
                 value={confirmarPassword}
                 onChangeText={setConfirmarPassword}
                 mode="outlined"
@@ -379,13 +379,13 @@ export default function PantallaRegistro(): JSX.Element {
         </Card>
 
         <View style={estilos.contenedorLogin}>
-          <Text style={estilos.textoLogin}>Ya tienes cuenta? </Text>
+          <Text style={estilos.textoLogin}>¿Ya tenés cuenta? </Text>
           <Button
             variant="link"
             onPress={navegarALogin}
             style={estilos.botonLogin}
           >
-            Inicia sesion aqui
+            Inicia sesión aquí
           </Button>
         </View>
       </ScrollView>

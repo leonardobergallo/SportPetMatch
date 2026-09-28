@@ -373,7 +373,7 @@ export default function PantallaMatching(): JSX.Element {
 
             <View style={estilos.mascotasPanel}>
               <Text variant="titleSmall" style={estilos.mascotasTitle}>
-                Fotos de ejemplo y companeros de plan
+                Fotos de ejemplo y compañeros de plan
               </Text>
               <View style={estilos.mascotasList}>
                 {usuario.mascotas.slice(0, 3).map((mascota, mascotaIdx) => (

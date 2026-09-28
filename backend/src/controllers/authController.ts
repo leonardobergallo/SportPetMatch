@@ -63,7 +63,7 @@ export const registro = async (req: Request, res: Response): Promise<void> => {
     if (!emailNormalizado || !password || !nombreNormalizado) {
       res.status(400).json({
         success: false,
-        message: 'Email, contrasena y nombre son requeridos',
+        message: 'Email, contraseña y nombre son requeridos',
         code: 'VALIDATION_ERROR',
       });
       return;
@@ -91,7 +91,7 @@ export const registro = async (req: Request, res: Response): Promise<void> => {
     if (String(password).length < 6) {
       res.status(400).json({
         success: false,
-        message: 'La contrasena debe tener al menos 6 caracteres',
+        message: 'La contraseña debe tener al menos 6 caracteres',
         code: 'INVALID_PASSWORD',
       });
       return;
@@ -193,7 +193,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!emailNormalizado || !password) {
       res.status(400).json({
         success: false,
-        message: 'Email y contrasena son requeridos',
+        message: 'Email y contraseña son requeridos',
         code: 'VALIDATION_ERROR',
       });
       return;
@@ -248,7 +248,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!passwordValida) {
       res.status(401).json({
         success: false,
-        message: 'La contrasena ingresada es incorrecta',
+        message: 'La contraseña ingresada es incorrecta',
         code: 'INVALID_PASSWORD',
       });
       return;
@@ -273,14 +273,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.error('Error en login:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al iniciar sesion',
+      message: 'Error al iniciar sesión',
       error: process.env.NODE_ENV === 'development' ? error : undefined,
     });
   }
 };
 
 /**
- * Solicitar recuperacion de password.
+ * Solicitar recuperación de password.
  * En produccion envia link por email si SMTP esta configurado.
  * En desarrollo devuelve resetToken para poder probar el flujo completo.
  */
@@ -325,7 +325,7 @@ export const solicitarResetPassword = async (req: Request, res: Response): Promi
     if (!secret) {
       res.status(500).json({
         success: false,
-        message: 'No se pudo generar el token de recuperacion',
+        message: 'No se pudo generar el token de recuperación',
         code: 'JWT_NOT_CONFIGURED',
       });
       return;
@@ -348,12 +348,12 @@ export const solicitarResetPassword = async (req: Request, res: Response): Promi
       await transporter.sendMail({
         from: process.env.SMTP_FROM || process.env.SMTP_USER,
         to: usuario.email,
-        subject: 'Recuperar contrasena de Indio',
-        text: `Hola ${usuario.nombre}. Para crear una nueva contrasena entra a este link: ${resetUrl}`,
-        html: `<p>Hola ${usuario.nombre},</p><p>Para crear una nueva contrasena en Indio, entra a este link:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>El link vence en 30 minutos.</p>`,
+        subject: 'Recuperar contraseña de Indio',
+        text: `Hola ${usuario.nombre}. Para crear una nueva contraseña entra a este link: ${resetUrl}`,
+        html: `<p>Hola ${usuario.nombre},</p><p>Para crear una nueva contraseña en Indio, entra a este link:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>El link vence en 30 minutos.</p>`,
       });
     } else {
-      console.warn('SMTP no configurado. Link de recuperacion generado:', resetUrl);
+      console.warn('SMTP no configurado. Link de recuperación generado:', resetUrl);
     }
 
     const esHostLocal = ['localhost', '127.0.0.1', '::1'].includes(req.hostname);
@@ -362,10 +362,10 @@ export const solicitarResetPassword = async (req: Request, res: Response): Promi
     res.json({
       success: true,
       message: transporter
-        ? 'Te enviamos un link para recuperar tu contrasena'
+        ? 'Te enviamos un link para recuperar tu contraseña'
         : exponerTokenPrueba
           ? 'SMTP no configurado. Usa el token de prueba para completar el reset.'
-          : 'No hay envio de email configurado. Contacta al administrador para recuperar tu contrasena.',
+          : 'No hay envío de email configurado. Contacta al administrador para recuperar tu contraseña.',
       data: {
         email: usuario.email,
         resetToken: exponerTokenPrueba ? resetToken : undefined,
@@ -373,17 +373,17 @@ export const solicitarResetPassword = async (req: Request, res: Response): Promi
       },
     });
   } catch (error) {
-    console.error('Error solicitando recuperacion de password:', error);
+    console.error('Error solicitando recuperación de password:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al solicitar recuperacion de contrasena',
+      message: 'Error al solicitar recuperación de contraseña',
       error: process.env.NODE_ENV === 'development' ? error : undefined,
     });
   }
 };
 
 /**
- * Confirmar nueva password usando token de recuperacion.
+ * Confirmar nueva password usando token de recuperación.
  */
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -393,7 +393,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     if (!token || !nuevaPassword) {
       res.status(400).json({
         success: false,
-        message: 'Token y nueva contrasena son requeridos',
+        message: 'Token y nueva contraseña son requeridos',
         code: 'VALIDATION_ERROR',
       });
       return;
@@ -402,7 +402,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     if (nuevaPassword.length < 6) {
       res.status(400).json({
         success: false,
-        message: 'La nueva contrasena debe tener al menos 6 caracteres',
+        message: 'La nueva contraseña debe tener al menos 6 caracteres',
         code: 'INVALID_PASSWORD',
       });
       return;
@@ -412,7 +412,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     if (!secret) {
       res.status(500).json({
         success: false,
-        message: 'No se pudo validar el token de recuperacion',
+        message: 'No se pudo validar el token de recuperación',
         code: 'JWT_NOT_CONFIGURED',
       });
       return;
@@ -428,7 +428,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     if (payload.purpose !== 'password-reset') {
       res.status(400).json({
         success: false,
-        message: 'Token de recuperacion invalido',
+        message: 'Token de recuperación invalido',
         code: 'INVALID_RESET_TOKEN',
       });
       return;
@@ -465,13 +465,13 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 
     res.json({
       success: true,
-      message: 'Contrasena actualizada exitosamente',
+      message: 'Contraseña actualizada exitosamente',
     });
   } catch (error) {
     const isJwtError = error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError;
     res.status(isJwtError ? 400 : 500).json({
       success: false,
-      message: isJwtError ? 'El link de recuperacion es invalido o expiro' : 'Error al actualizar la contrasena',
+      message: isJwtError ? 'El link de recuperación es inválido o expiró' : 'Error al actualizar la contraseña',
       code: isJwtError ? 'INVALID_RESET_TOKEN' : 'RESET_PASSWORD_ERROR',
       error: process.env.NODE_ENV === 'development' ? error : undefined,
     });
@@ -479,7 +479,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 };
 
 /**
- * Cambiar la contrasena del usuario autenticado (pide la actual, valida la nueva)
+ * Cambiar la contraseña del usuario autenticado (pide la actual, valida la nueva)
  */
 export const cambiarPassword = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -497,7 +497,7 @@ export const cambiarPassword = async (req: Request, res: Response): Promise<void
     if (!passwordActual || !passwordNueva) {
       res.status(400).json({
         success: false,
-        message: 'La contrasena actual y la nueva son requeridas',
+        message: 'La contraseña actual y la nueva son requeridas',
         code: 'VALIDATION_ERROR',
       });
       return;
@@ -506,7 +506,7 @@ export const cambiarPassword = async (req: Request, res: Response): Promise<void
     if (passwordNueva.length < 6) {
       res.status(400).json({
         success: false,
-        message: 'La nueva contrasena debe tener al menos 6 caracteres',
+        message: 'La nueva contraseña debe tener al menos 6 caracteres',
         code: 'INVALID_PASSWORD',
       });
       return;
@@ -530,7 +530,7 @@ export const cambiarPassword = async (req: Request, res: Response): Promise<void
     if (!passwordValida) {
       res.status(401).json({
         success: false,
-        message: 'La contrasena actual es incorrecta',
+        message: 'La contraseña actual es incorrecta',
         code: 'INVALID_PASSWORD',
       });
       return;
@@ -544,13 +544,13 @@ export const cambiarPassword = async (req: Request, res: Response): Promise<void
 
     res.json({
       success: true,
-      message: 'Contrasena actualizada exitosamente',
+      message: 'Contraseña actualizada exitosamente',
     });
   } catch (error) {
     console.error('Error cambiando password:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al cambiar la contrasena',
+      message: 'Error al cambiar la contraseña',
       error: process.env.NODE_ENV === 'development' ? error : undefined,
     });
   }

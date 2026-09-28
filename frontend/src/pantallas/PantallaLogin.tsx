@@ -85,7 +85,7 @@ export default function PantallaLogin(): JSX.Element {
     if (token) {
       setResetToken(token);
       setResetMode(true);
-      setResetMessage('Ingresa tu nueva contrasena para recuperar el acceso.');
+      setResetMessage('Ingresá tu nueva contraseña para recuperar el acceso.');
     }
   }, []);
 
@@ -125,7 +125,7 @@ export default function PantallaLogin(): JSX.Element {
 
   const handleGoogle = async () => {
     setLoading(true);
-    try { await new Promise(r => setTimeout(r, 2000)); mostrarAlerta('Bienvenido!', 'Sesion con Google'); }
+    try { await new Promise(r => setTimeout(r, 2000)); mostrarAlerta('Bienvenido!', 'Sesión con Google'); }
     catch { mostrarAlerta('Error', 'No se pudo iniciar con Google.'); }
     finally { setLoading(false); }
   };
@@ -141,7 +141,7 @@ export default function PantallaLogin(): JSX.Element {
       const r = await solicitarResetPassword(correo);
       if (r.data?.resetToken) {
         setResetToken(r.data.resetToken);
-        setResetMessage('Usuario validado. Ingresa una nueva contrasena.');
+        setResetMessage('Usuario validado. Ingresá una nueva contraseña.');
       } else {
         setResetMessage(r.message || 'Si el email existe, te enviamos un link de recuperacion.');
       }
@@ -154,19 +154,19 @@ export default function PantallaLogin(): JSX.Element {
 
   const handleConfirmarReset = async () => {
     if (!resetToken) { mostrarAlerta('Error', 'Primero solicita un link de recuperacion'); return; }
-    if (newPw.length < 6) { mostrarAlerta('Error', 'La nueva contrasena debe tener al menos 6 caracteres'); return; }
+    if (newPw.length < 6) { mostrarAlerta('Error', 'La nueva contraseña debe tener al menos 6 caracteres'); return; }
 
     setLoading(true);
     try {
       const r = await resetPassword(resetToken, newPw);
-      mostrarAlerta('Listo', r.message || 'Contrasena actualizada');
+      mostrarAlerta('Listo', r.message || 'Contraseña actualizada');
       setResetMode(false);
       setResetToken('');
       setNewPw('');
       setPw('');
       setResetMessage('');
     } catch (e: any) {
-      mostrarAlerta('No pudimos actualizar la contrasena', e.message || 'Solicita un link nuevo e intenta otra vez');
+      mostrarAlerta('No pudimos actualizar la contraseña', e.message || 'Solicita un link nuevo e intenta otra vez');
     } finally {
       setLoading(false);
     }
@@ -225,7 +225,7 @@ export default function PantallaLogin(): JSX.Element {
                   disabled={loading}
                 >
                   <Text style={st.heroLinkMoreTxt}>
-                    {resetMode ? 'Volver al inicio de sesion' : 'Olvide mi contrasena'}
+                    {resetMode ? 'Volver al inicio de sesión' : 'Olvidé mi contraseña'}
                   </Text>
                 </Pressable>
                 {resetMode && (
@@ -234,7 +234,7 @@ export default function PantallaLogin(): JSX.Element {
                       <>
                         <RNTextInput
                           style={st.heroInput}
-                          placeholder="Nueva contrasena"
+                          placeholder="Nueva contraseña"
                           placeholderTextColor="rgba(255,255,255,0.88)"
                           value={newPw}
                           onChangeText={setNewPw}
@@ -243,7 +243,7 @@ export default function PantallaLogin(): JSX.Element {
                           editable={!loading}
                         />
                         <Pressable style={st.heroLoginBtn} onPress={handleConfirmarReset} disabled={loading}>
-                          {loading ? <ActivityIndicator color="#6200ea" /> : <Text style={st.heroLoginBtnTxt}>Guardar contrasena</Text>}
+                          {loading ? <ActivityIndicator color="#6200ea" /> : <Text style={st.heroLoginBtnTxt}>Guardar contraseña</Text>}
                         </Pressable>
                       </>
                     ) : (

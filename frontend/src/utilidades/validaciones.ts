@@ -78,7 +78,7 @@ export const validarRegistro = (datos: {
   }
 
   if (!validarCampoRequerido(datos.password)) {
-    return { valida: false, mensaje: mensajesError.campoRequerido('La contrasena') };
+    return { valida: false, mensaje: mensajesError.campoRequerido('La contraseña') };
   }
 
   if (!validarContrasena(datos.password)) {
@@ -86,7 +86,7 @@ export const validarRegistro = (datos: {
   }
 
   if (datos.password !== datos.confirmarPassword) {
-    return { valida: false, mensaje: 'Las contrasenas no coinciden' };
+    return { valida: false, mensaje: 'Las contraseñas no coinciden' };
   }
 
   if (datos.telefono?.trim() && !validarTelefono(datos.telefono)) {
@@ -98,7 +98,7 @@ export const validarRegistro = (datos: {
 
 export const validarLogin = (datos: { email: string; password: string }): ResultadoValidacion => {
   if (!validarCampoRequerido(datos.email) || !validarCampoRequerido(datos.password)) {
-    return { valida: false, mensaje: 'Completa correo y contrasena' };
+    return { valida: false, mensaje: 'Completa correo y contraseña' };
   }
 
   if (!validarEmail(datos.email)) {
@@ -169,9 +169,9 @@ export const mensajesError = {
   campoRequerido: (campo: string) => `${campo} es requerido`,
   emailInvalido: 'El formato del email no es valido',
   telefonoInvalido: 'El formato del telefono no es valido',
-  contrasenaCorta: 'La contrasena debe tener al menos 6 caracteres',
+  contrasenaCorta: 'La contraseña debe tener al menos 6 caracteres',
   // Alias de compatibilidad con codigo legacy
-  contraseñaCorta: 'La contrasena debe tener al menos 6 caracteres',
+  contraseñaCorta: 'La contraseña debe tener al menos 6 caracteres',
   numeroInvalido: 'Debe ser un numero valido',
   numeroFueraDeRango: (min?: number, max?: number) => {
     if (min !== undefined && max !== undefined) {

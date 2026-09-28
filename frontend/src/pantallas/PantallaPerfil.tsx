@@ -1,7 +1,7 @@
 // Pantalla de Perfil de SportPetMatch
 // Perfil del usuario y configuración
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Image, LinearGradient, Platform } from 'react-native';
 import { Text, Card, Avatar, Switch, Divider, List } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { Button } from '@/components/ui/button';
+import { obtenerDashboard } from '../servicios/servicioAuth';
 
 // Importar componente Card si existe
 // import { Card, CardContent } from '@/components/ui/card';
@@ -26,6 +27,30 @@ export default function PantallaPerfil(): JSX.Element {
   const { usuario, cerrarSesion } = useAuth();
   const [notificacionesHabilitadas, setNotificacionesHabilitadas] = useState(true);
   const [modoOscuro, setModoOscuro] = useState(false);
+  const [estadisticas, setEstadisticas] = useState({ eventos: 0, matches: 0, mascotas: 0 });
+  const [cargandoEstadisticas, setCargandoEstadisticas] = useState(true);
+
+  useEffect(() => {
+    let activo = true;
+    obtenerDashboard()
+      .then((data) => {
+        if (!activo) return;
+        setEstadisticas({
+          eventos: data.estadisticas?.eventosParticipados ?? 0,
+          matches: data.estadisticas?.matchesRealizados ?? 0,
+          mascotas: data.estadisticas?.mascotasRegistradas ?? 0,
+        });
+      })
+      .catch((error) => {
+        console.error('Error cargando estadísticas del perfil:', error);
+      })
+      .finally(() => {
+        if (activo) setCargandoEstadisticas(false);
+      });
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   return (
     <ScrollView 
@@ -153,17 +178,17 @@ export default function PantallaPerfil(): JSX.Element {
           <View style={estilos.statsGrid}>
             <View style={estilos.statItem}>
               <MaterialIcons name="event" size={32} color={temaApp.colors.primary} />
-              <Text style={estilos.statValue}>5</Text>
+              <Text style={estilos.statValue}>{cargandoEstadisticas ? '—' : estadisticas.eventos}</Text>
               <Text style={estilos.statLabel}>Eventos</Text>
             </View>
             <View style={estilos.statItem}>
               <MaterialIcons name="favorite" size={32} color={temaApp.colors.like} />
-              <Text style={estilos.statValue}>12</Text>
+              <Text style={estilos.statValue}>{cargandoEstadisticas ? '—' : estadisticas.matches}</Text>
               <Text style={estilos.statLabel}>Matches</Text>
             </View>
             <View style={estilos.statItem}>
               <MaterialIcons name="pets" size={32} color={temaApp.colors.accent} />
-              <Text style={estilos.statValue}>3</Text>
+              <Text style={estilos.statValue}>{cargandoEstadisticas ? '—' : estadisticas.mascotas}</Text>
               <Text style={estilos.statLabel}>Mascotas</Text>
             </View>
           </View>

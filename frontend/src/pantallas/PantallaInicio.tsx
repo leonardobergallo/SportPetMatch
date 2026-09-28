@@ -86,6 +86,8 @@ export default function PantallaInicio(): JSX.Element {
   const [searchText, setSearchText] = useState('');
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [matchesRecientes, setMatchesRecientes] = useState<Match[]>([]);
+  const [cargandoEventos, setCargandoEventos] = useState(true);
+  const [cargandoMatches, setCargandoMatches] = useState(true);
 
   const eventosFiltrados = searchText.trim()
     ? eventos.filter((evento) => {
@@ -105,19 +107,24 @@ export default function PantallaInicio(): JSX.Element {
   }, []);
 
   const cargarEventos = async () => {
+    setCargandoEventos(true);
     try {
       const data = await obtenerEventos({ limit: 3 });
       setEventos(data);
     } catch (error: any) {
       console.error('Error cargando eventos:', error);
+    } finally {
+      setCargandoEventos(false);
     }
   };
 
   const cargarMatches = async () => {
     if (!estaAutenticado) {
       setMatchesRecientes([]);
+      setCargandoMatches(false);
       return;
     }
+    setCargandoMatches(true);
     try {
       const data = await obtenerMisMatches();
       const aceptados = data
@@ -127,6 +134,8 @@ export default function PantallaInicio(): JSX.Element {
       setMatchesRecientes(aceptados);
     } catch (error: any) {
       console.error('Error cargando matches recientes:', error);
+    } finally {
+      setCargandoMatches(false);
     }
   };
 
@@ -221,9 +230,13 @@ export default function PantallaInicio(): JSX.Element {
               <Text style={estilos.badgeTexto}>{eventosFiltrados.length} eventos</Text>
             </View>
           </View>
-          {eventosFiltrados.length === 0 ? (
+          {cargandoEventos ? (
+            <Text style={estilos.textoSinResultados}>Cargando eventos...</Text>
+          ) : eventosFiltrados.length === 0 ? (
             <Text style={estilos.textoSinResultados}>
-              No encontramos eventos para "{searchText}"
+              {searchText.trim()
+                ? `No encontramos eventos para "${searchText}"`
+                : 'Todavía no hay eventos disponibles.'}
             </Text>
           ) : (
           <View style={estilos.listaEventos}>
@@ -283,6 +296,8 @@ export default function PantallaInicio(): JSX.Element {
             <Text style={estilos.textoSinResultados}>
               Iniciá sesión para ver tus matches y chatear con otros dueños de mascotas.
             </Text>
+          ) : cargandoMatches ? (
+            <Text style={estilos.textoSinResultados}>Cargando matches...</Text>
           ) : matchesRecientes.length === 0 ? (
             <Text style={estilos.textoSinResultados}>
               Todavía no tenés matches. ¡Andá a Matching para conocer gente cerca tuyo!
