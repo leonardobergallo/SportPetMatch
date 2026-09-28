@@ -154,9 +154,24 @@ async function req(method, path, body, token) {
   return { status: res.status, json };
 }
 
+// Espera a que la API responda (útil al correr como post-deploy en el contenedor)
+async function esperarApi(maxIntentos = 30) {
+  for (let i = 1; i <= maxIntentos; i++) {
+    try {
+      const r = await req('GET', '/salud');
+      if (r.status === 200) return true;
+    } catch { /* reintentar */ }
+    await new Promise((res) => setTimeout(res, 2000));
+  }
+  return false;
+}
+
 async function main() {
   console.log(`API: ${API}${DRY ? '  (DRY RUN)' : ''}`);
   console.log(`Usuarios a procesar: ${usuarios.length}\n`);
+
+  const apiLista = await esperarApi();
+  console.log(`API disponible: ${apiLista ? 'sí' : 'NO (se intenta igual)'}`);
 
   const evRes = await req('GET', '/eventos');
   const eventos = Array.isArray(evRes.json?.data) ? evRes.json.data : [];
@@ -214,8 +229,18 @@ async function main() {
     }, token);
     console.log(`  perfil: ${r.status}`);
 
-    // 4) Mascotas
+    // 4) Mascotas (idempotente: no duplica si ya existe una con el mismo nombre)
+    const misMascotas = await req('GET', '/mascotas', null, token);
+    const nombresExistentes = new Set(
+      (Array.isArray(misMascotas.json?.data) ? misMascotas.json.data : []).map((m) =>
+        String(m.nombre || '').toLowerCase()
+      )
+    );
     for (const m of u.mascotas) {
+      if (nombresExistentes.has(String(m.nombre).toLowerCase())) {
+        console.log(`  mascota ${m.nombre}: ya existe, sin cambios`);
+        continue;
+      }
       r = await req('POST', '/mascotas', m, token);
       console.log(`  mascota ${m.nombre}: ${r.status} ${r.json?.message || ''}`.trim());
     }
@@ -250,7 +275,12 @@ async function main() {
   console.log('(No se envía ningún correo a estas cuentas.)');
 }
 
-main().catch((e) => {
-  console.error('Error inesperado:', e);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    // Salida segura para post-deploy: nunca marcar el deploy como fallido
+    process.exit(0);
+  })
+  .catch((e) => {
+    console.error('Error inesperado:', e);
+    process.exit(0);
+  });
