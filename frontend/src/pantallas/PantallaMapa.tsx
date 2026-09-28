@@ -23,6 +23,7 @@ import { useUbicacion } from '../contextos/ContextoUbicacion';
 import { temaApp, espaciado } from '../constantes/tema';
 import { obtenerEventos } from '../servicios/servicioEventos';
 import { obtenerRecomendaciones } from '../servicios/servicioMatches';
+import { calcularEdad } from '../utilidades/edad';
 
 // Coordenadas de Santa Fe Capital, Argentina (por defecto)
 const SANTA_FE_CAPITAL = {
@@ -444,7 +445,7 @@ export default function PantallaMapa() {
             return {
               id: usuario.id,
               nombre: usuario.nombre,
-              edad: 25,
+              edad: calcularEdad(usuario.fechaNacimiento),
               ubicacionLat: usuario.ubicacionLat || punto.latitud,
               ubicacionLng: usuario.ubicacionLng || punto.longitud,
               ubicacionCiudad: usuario.ubicacionCiudad || punto.ciudad,

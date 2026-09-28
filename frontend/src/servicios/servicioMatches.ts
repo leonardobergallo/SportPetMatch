@@ -14,9 +14,11 @@ export interface UsuarioRecomendado {
   intereses: string[];
   tipoUsuario: string | null;
   nivelDeporte: number;
+  fechaNacimiento?: string | null;
   mascotas: Array<{
     nombre: string;
     tipo: string;
+    edad?: number | null;
     fotos: string[];
     intereses: string[];
   }>;

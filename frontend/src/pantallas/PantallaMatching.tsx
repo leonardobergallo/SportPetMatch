@@ -19,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { temaApp } from '../constantes/tema';
 import { Coordenadas, useUbicacion } from '../contextos/ContextoUbicacion';
 import { crearMatch, obtenerRecomendaciones } from '../servicios/servicioMatches';
+import { calcularEdad } from '../utilidades/edad';
 import { mostrarAlerta } from '@/utilidades/alerta';
 
 interface UsuarioPotencial {
@@ -122,7 +123,7 @@ export default function PantallaMatching(): JSX.Element {
       const usuariosConvertidos: UsuarioPotencial[] = recomendaciones.map((usuario, idx) => ({
         id: usuario.id,
         nombre: usuario.nombre,
-        edad: 25,
+        edad: calcularEdad(usuario.fechaNacimiento),
         avatar: usuario.avatar || null,
         biografia: usuario.biografia || 'Le gustan los paseos, los eventos y los encuentros con mascotas.',
         distancia: usuario.distancia || 0,
@@ -135,7 +136,7 @@ export default function PantallaMatching(): JSX.Element {
           id: `${usuario.id}-mascota-${mascotaIdx}`,
           nombre: m.nombre,
           tipo: m.tipo,
-          edad: 3,
+          edad: m.edad ?? 3,
           foto: m.fotos && m.fotos.length > 0 ? m.fotos[0] : null,
         })),
         esPremium: idx < 3,

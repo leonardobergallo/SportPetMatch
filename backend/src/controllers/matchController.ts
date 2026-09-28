@@ -115,10 +115,12 @@ export const obtenerRecomendaciones = async (req: Request, res: Response): Promi
         intereses: true,
         tipoUsuario: true,
         nivelDeporte: true,
+        fechaNacimiento: true,
         mascotas: {
           select: {
             nombre: true,
             tipo: true,
+            edad: true,
             fotos: true,
             intereses: true,
           },
