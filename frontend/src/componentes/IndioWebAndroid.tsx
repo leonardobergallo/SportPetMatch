@@ -8,6 +8,21 @@ const AndroidWebView = WebView as unknown as React.ComponentType<AndroidWebViewP
 
 const INDIO_URL = 'https://indio.com.ar/app.html?app=1';
 const INDIO_HOST = /^https:\/\/(?:www\.)?indio\.com\.ar(?:[/:?#]|$)/i;
+const FORCE_APP_MODE = `
+  (function () {
+    function showApp() {
+      if (document.body) document.body.classList.add('expo-show-app');
+    }
+    showApp();
+    var observer = new MutationObserver(showApp);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () {
+      showApp();
+      observer.disconnect();
+    }, 10000);
+  })();
+  true;
+`;
 
 export default function IndioWebAndroid() {
   const webView = useRef<WebView>(null);
@@ -41,6 +56,7 @@ export default function IndioWebAndroid() {
         key={loadKey}
         ref={webView}
         source={{ uri: INDIO_URL }}
+        injectedJavaScriptBeforeContentLoaded={FORCE_APP_MODE}
         originWhitelist={['https://*']}
         javaScriptEnabled
         domStorageEnabled
