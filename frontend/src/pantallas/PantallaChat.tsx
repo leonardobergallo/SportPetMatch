@@ -39,6 +39,7 @@ import { mostrarAlerta } from '@/utilidades/alerta';
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Chat'>;
+const EMOJIS_CHAT = ['😊', '😂', '❤️', '👍', '🐶', '🐾', '🎉', '👋'];
 
 /**
  * Pantalla de Chat - Conversación individual con un match
@@ -51,11 +52,14 @@ export default function PantallaChat(): JSX.Element {
 
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [nuevoMensaje, setNuevoMensaje] = useState('');
+  const [mostrarEmojis, setMostrarEmojis] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [refrescando, setRefrescando] = useState(false);
   const [match, setMatch] = useState<Match | null>(null);
   const flatListRef = useRef<FlatList>(null);
+  const inputRef = useRef<TextInput>(null);
+  const envioEnCurso = useRef(false);
 
   // Cargar mensajes y información del match
   useEffect(() => {
@@ -140,11 +144,12 @@ export default function PantallaChat(): JSX.Element {
    * Enviar un mensaje
    */
   const manejarEnviarMensaje = async () => {
-    if (!nuevoMensaje.trim() || enviando) {
+    if (!nuevoMensaje.trim() || envioEnCurso.current) {
       return;
     }
 
     const contenido = nuevoMensaje.trim();
+    envioEnCurso.current = true;
     setNuevoMensaje('');
     setEnviando(true);
 
@@ -168,8 +173,9 @@ export default function PantallaChat(): JSX.Element {
     } catch (error) {
       console.error('Error enviando mensaje:', error);
       mostrarAlerta('Error', 'No se pudo enviar el mensaje');
-      setNuevoMensaje(contenido); // Restaurar mensaje
+      setNuevoMensaje(actual => actual ? contenido + '\n' + actual : contenido);
     } finally {
+      envioEnCurso.current = false;
       setEnviando(false);
     }
   };
@@ -339,17 +345,58 @@ export default function PantallaChat(): JSX.Element {
         }
       />
 
+      {mostrarEmojis && (
+        <View style={estilos.selectorEmojis}>
+          {EMOJIS_CHAT.map(emoji => (
+            <TouchableOpacity
+              key={emoji}
+              accessibilityRole="button"
+              accessibilityLabel={`Insertar emoji ${emoji}`}
+              style={estilos.botonEmoji}
+              onPress={() => {
+                setNuevoMensaje(actual => actual.length + emoji.length <= 500 ? actual + emoji : actual);
+                setMostrarEmojis(false);
+                inputRef.current?.focus();
+              }}
+            >
+              <Text style={estilos.emoji}>{emoji}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
       <View style={estilos.contenedorInput}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Emojis"
+          accessibilityState={{ expanded: mostrarEmojis }}
+          style={estilos.botonEmoji}
+          onPress={() => setMostrarEmojis(actual => !actual)}
+        >
+          <MaterialIcons name="insert-emoticon" size={24} color={temaApp.colors.primary} />
+        </TouchableOpacity>
         <TextInput
+          ref={inputRef}
           style={estilos.input}
           placeholder="Escribe un mensaje..."
           placeholderTextColor={temaApp.colors.onSurfaceVariant}
           value={nuevoMensaje}
           onChangeText={setNuevoMensaje}
+          returnKeyType="send"
+          submitBehavior={Platform.OS === 'web' ? 'newline' : 'submit'}
+          onSubmitEditing={Platform.OS === 'web' ? undefined : manejarEnviarMensaje}
+          onKeyPress={Platform.OS === 'web' ? event => {
+            const tecla = event.nativeEvent as KeyboardEvent;
+            if (tecla.key === 'Enter' && !tecla.shiftKey && !tecla.isComposing && tecla.keyCode !== 229) {
+              event.preventDefault();
+              if (!tecla.repeat) void manejarEnviarMensaje();
+            }
+          } : undefined}
           multiline
           maxLength={500}
         />
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Enviar mensaje"
           style={[
             estilos.botonEnviar,
             (!nuevoMensaje.trim() || enviando) && estilos.botonEnviarDeshabilitado,
@@ -417,7 +464,7 @@ const estilos = StyleSheet.create({
     maxWidth: '75%',
     padding: espaciado.md,
     borderRadius: 16,
-    ...sombras.sm,
+    ...sombras.pequena,
   },
   burbujaMensajeMio: {
     backgroundColor: temaApp.colors.primary,
@@ -462,6 +509,21 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: temaApp.colors.outline,
   },
+  selectorEmojis: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: espaciado.md,
+    backgroundColor: temaApp.colors.surface,
+  },
+  botonEmoji: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emoji: {
+    fontSize: 22,
+  },
   input: {
     flex: 1,
     minHeight: 40,
@@ -481,7 +543,7 @@ const estilos = StyleSheet.create({
     backgroundColor: temaApp.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...sombras.sm,
+    ...sombras.pequena,
   },
   botonEnviarDeshabilitado: {
     backgroundColor: temaApp.colors.surfaceVariant,
@@ -490,7 +552,7 @@ const estilos = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: espaciado.xxxl,
+    paddingVertical: espaciado.xxl,
   },
   textoVacio: {
     fontSize: 18,

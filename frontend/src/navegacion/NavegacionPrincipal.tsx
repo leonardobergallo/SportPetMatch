@@ -146,7 +146,7 @@ function NavegadorTabs(): JSX.Element {
           fontWeight: '600',
           fontSize: 18,
         },
-        header: () => <Header />,
+        header: () => <Header seccionActiva={route.name} />,
       })}
     >
       {/* Tab de Inicio - Pantalla principal con feed de actividades */}
@@ -253,6 +253,16 @@ function NavegadorPrincipal(): JSX.Element {
           fontSize: 18,
         },
         // Configuración de transiciones
+        header: ({ navigation, back, route }) => (
+          <Header
+            onVolver={back ? () => navigation.goBack() : undefined}
+            seccionActiva={
+              route.name === 'CrearEvento' || route.name === 'DetalleEvento' ? 'Eventos'
+                : route.name === 'Chat' || route.name === 'DetalleMatch' ? 'Matches'
+                : route.name.includes('Mascota') ? 'Mascotas' : 'Perfil'
+            }
+          />
+        ),
         cardStyle: {
           backgroundColor: temaApp.colors.background,
         },

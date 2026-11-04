@@ -2,13 +2,17 @@
 // Header con logo, título y menú de usuario
 
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { Text, Avatar, Menu, Divider } from 'react-native-paper';
+import { View, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import { Text, Avatar, Menu, Divider, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contextos/ContextoAuth';
 import { temaApp, espaciado, MARCA } from '../constantes/tema';
 
 type HeaderNavigationProp = any;
+const SECCIONES = [
+  ['Inicio', 'Inicio'], ['Eventos', 'Eventos'], ['Matching', 'Matching'],
+  ['Mapa', 'Mapa'], ['Mascotas', 'Mascotas'], ['Matches', 'Chats'], ['Perfil', 'Perfil'],
+] as const;
 
 interface HeaderProps {
   /** Título a mostrar en el header (opcional, por defecto "SportPetMatch") */
@@ -17,6 +21,8 @@ interface HeaderProps {
   mostrarUsuario?: boolean;
   /** Acción personalizada al presionar el logo (opcional) */
   onLogoPress?: () => void;
+  onVolver?: () => void;
+  seccionActiva?: string;
 }
 
 /**
@@ -25,7 +31,9 @@ interface HeaderProps {
 export default function Header({ 
   titulo = MARCA.nombre,
   mostrarUsuario = true,
-  onLogoPress 
+  onLogoPress,
+  onVolver,
+  seccionActiva,
 }: HeaderProps): JSX.Element {
   const navigation = useNavigation<HeaderNavigationProp>();
   const { usuario, cerrarSesion } = useAuth();
@@ -36,13 +44,16 @@ export default function Header({
       onLogoPress();
     } else {
       // Por defecto, navegar a Inicio
-      navigation.navigate('Principal');
+      navigation.navigate('Principal', { screen: 'Inicio' });
     }
   };
 
   return (
     <View style={estilos.header}>
       <View style={estilos.headerContent}>
+        {onVolver && (
+          <IconButton icon="arrow-left" iconColor={temaApp.colors.onPrimary} accessibilityLabel="Volver" onPress={onVolver} />
+        )}
         {/* Logo y Título */}
         <TouchableOpacity 
           style={estilos.logoContainer}
@@ -66,6 +77,8 @@ export default function Header({
             anchor={
               <TouchableOpacity 
                 onPress={() => setMostrarMenu(true)} 
+                accessibilityRole="button"
+                accessibilityLabel="Menú de cuenta"
                 style={estilos.avatarContainer}
                 activeOpacity={0.7}
               >
@@ -85,7 +98,7 @@ export default function Header({
             <Menu.Item 
               onPress={() => {
                 setMostrarMenu(false);
-                navigation.navigate('Perfil');
+                navigation.navigate('Principal', { screen: 'Perfil' });
               }} 
               title="Mi Perfil" 
               leadingIcon="account"
@@ -111,6 +124,19 @@ export default function Header({
           </Menu>
         )}
       </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={estilos.secciones}>
+        {SECCIONES.map(([ruta, etiqueta]) => (
+          <TouchableOpacity
+            key={ruta}
+            accessibilityRole="button"
+            accessibilityState={{ selected: ruta === seccionActiva }}
+            onPress={() => navigation.navigate('Principal', { screen: ruta })}
+            style={[estilos.seccion, ruta === seccionActiva && estilos.seccionActiva]}
+          >
+            <Text style={estilos.seccionTexto}>{etiqueta}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -164,6 +190,22 @@ const estilos = StyleSheet.create({
   },
   menuContent: {
     backgroundColor: temaApp.colors.surface,
+  },
+  secciones: {
+    gap: 6,
+    paddingTop: 8,
+  },
+  seccion: {
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  seccionActiva: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+  },
+  seccionTexto: {
+    color: temaApp.colors.onPrimary,
+    fontWeight: '600',
   },
 });
 

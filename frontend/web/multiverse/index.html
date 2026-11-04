@@ -8,7 +8,7 @@
 	<head>
 		<title>Indio — Personas con mascotas</title>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
 		<!-- Backend público separado para no depender del /api protegido del proyecto principal -->
 		<meta name="indio-api-base" content="/api" />
@@ -24,13 +24,14 @@
 
 				<!-- Header -->
 					<header id="header">
-						<h1><a href="/"><strong>Indio</strong> · mi mejor amigo</a></h1>
-						<nav>
+						<p class="indio-brand"><a href="#indio-portada"><img src="/icon-192x192.png" alt="" width="42" height="42" /><span><strong>INDIO</strong><small>Mi mejor amigo</small></span></a></p>
+						<button class="indio-menu-toggle" type="button" aria-expanded="false" aria-controls="indio-nav" aria-label="Abrir menú">☰</button>
+						<nav id="indio-nav" aria-label="Navegación principal">
 							<ul>
 								<li><a href="#indio-portada">Inicio</a></li>
 								<li><a href="#indio-como-funciona"><span class="icon solid fa-route"></span> Cómo funciona</a></li>
-								<li><a href="#indio-instalacion"><span class="icon solid fa-download"></span> Instalación</a></li>
-								<li><a href="#indio-contacto"><span class="icon solid fa-envelope"></span> Contacto</a></li>
+								<li><a href="#indio-comunidad">Comunidad</a></li>
+								<li><a href="#indio-eventos">Eventos</a></li>
 								<li><a href="#indio-login" class="open-app indio-nav-login">Ingresar</a></li>
 							</ul>
 						</nav>
@@ -39,23 +40,36 @@
 				<section class="indio-portada" id="indio-portada" aria-labelledby="indio-portada-titulo">
 					<div class="indio-portada-copy">
 						<p class="indio-portada-beta">Beta gratis en Santa Fe y Paraná</p>
-						<h2 id="indio-portada-titulo">Más aventuras juntos <span aria-hidden="true">🐾</span></h2>
-						<p>Conocé personas, descubrí encuentros y compartí momentos con tu mascota.</p>
+						<h1 id="indio-portada-titulo">Más aventuras<br />juntos <span aria-hidden="true">🐾</span></h1>
+						<p>Conocé personas, descubrí encuentros y compartí momentos inolvidables con tu mascota.</p>
 						<div class="indio-portada-actions">
-							<a href="#indio-registro">Crear cuenta gratis</a>
+							<a href="/app.html?app=1" class="indio-crear-cuenta">Crear cuenta gratis →</a>
 							<a href="#indio-como-funciona">Cómo funciona</a>
 						</div>
 						<p class="indio-portada-plan"><strong>Membresía Indio · Próximamente</strong><br />Primer mes gratis. Después, ARS $15.900 por mes con acceso completo.</p>
 						<a class="indio-portada-play" href="#indio-instalacion">Google Play · Beta cerrada de Android</a>
 					</div>
-					<img src="/multiverse/images/fulls/02.jpg" alt="Labrador" width="640" height="480" />
+					<img src="/multiverse/images/fulls/02.jpg" alt="Dos perros durante un paseo al aire libre" width="640" height="480" />
 				</section>
-				<div class="indio-portada-features" aria-label="Qué podés hacer en Indio">
-					<p><strong>📅 Eventos</strong>Sumate a paseos y encuentros.</p>
-					<p><strong>💜 Matching</strong>Conocé gente con intereses afines.</p>
-					<p><strong>💬 Chat</strong>Coordiná tu próxima salida.</p>
-					<p><strong>🐾 Perfil de mascota</strong>Presentá a tu compañero.</p>
+				<div class="indio-portada-features" id="indio-eventos" aria-label="Qué podés hacer en Indio">
+					<p><i class="fas fa-calendar-alt" aria-hidden="true"></i><strong>Eventos</strong>Participá en paseos, encuentros y actividades pet friendly.</p>
+					<p><i class="fas fa-users" aria-hidden="true"></i><strong>Matching</strong>Conocé personas con intereses similares y amor por los animales.</p>
+					<p><i class="fas fa-comment" aria-hidden="true"></i><strong>Chat</strong>Conectá, coordiná planes y compartí experiencias.</p>
+					<p><i class="fas fa-paw" aria-hidden="true"></i><strong>Perfil de mascota</strong>Contá su historia y compartí sus fotos con la comunidad.</p>
 				</div>
+
+				<section class="indio-presentacion" id="indio-comunidad">
+					<div>
+						<p class="indio-portada-beta">Comunidad pet friendly</p>
+						<h2>La app pet friendly para vivir más aventuras</h2>
+						<p>Una comunidad pensada para que vos y tu mascota disfruten más, conozcan amigos y vivan nuevas experiencias juntos.</p>
+						<ul><li>Fácil de usar</li><li>Conectá con otros amantes de los animales</li><li>Descubrí experiencias pet friendly</li></ul>
+					</div>
+					<div class="indio-capturas">
+						<img src="/multiverse/images/app-eventos.png" alt="Pantalla de eventos de Indio con datos de ejemplo" loading="lazy" width="390" height="780" />
+						<img src="/multiverse/images/app-detalle.png" alt="Detalle de un evento de ejemplo en Indio" loading="lazy" width="390" height="780" />
+					</div>
+				</section>
 
 				<!-- Main -->
 					<div class="indio-carrusel-header">
@@ -215,17 +229,17 @@
 								<h2 class="indio-section-title indio-display">Empezá en pocos pasos</h2>
 								<p class="indio-section-lead">Creá tu cuenta una sola vez y seguí el recorrido guiado dentro de la app.</p>
 								<div class="indio-steps indio-steps-wide">
-									<div class="indio-step"><div class="indio-step-num">1</div><h3>Creá tu cuenta</h3><p>Registrate con tu email y contraseña para empezar a usar Indio.</p></div>
-									<div class="indio-step"><div class="indio-step-num">2</div><h3>Completá tu perfil</h3><p>Seguís un flujo guiado para cargar tu información, intereses y preferencias.</p></div>
-									<div class="indio-step"><div class="indio-step-num">3</div><h3>Agregá tu mascota</h3><p>Sumá los datos de tu compañero para personalizar tu experiencia.</p></div>
-									<div class="indio-step"><div class="indio-step-num">4</div><h3>Explorá Indio</h3><p>Entrá a eventos, matching y chat desde la app con tu cuenta ya creada.</p></div>
+									<div class="indio-step"><div class="indio-step-num">1</div><h3>Creá tu perfil</h3><p>Registrate con tu email y completá tus preferencias.</p></div>
+									<div class="indio-step"><div class="indio-step-num">2</div><h3>Sumá tu mascota</h3><p>Completá su perfil y compartí sus fotos.</p></div>
+									<div class="indio-step"><div class="indio-step-num">3</div><h3>Conectá</h3><p>Descubrí personas, eventos y experiencias.</p></div>
 								</div>
 							</div>
 						</div>
 
 						<div class="indio-mid">
-							<h2 class="indio-display">Creá tu cuenta y seguí el flujo guiado dentro de la app</h2>
-							<button type="button" class="indio-btn-primary" id="indio-mid-cta" style="max-width:320px;margin:0 auto;display:block;">Crear cuenta gratis</button>
+							<img src="/multiverse/images/fulls/02.jpg" alt="" loading="lazy" width="160" height="160" />
+							<div><h2 class="indio-display">Sumate a Indio gratis</h2><p>Conectá, compartí y viví nuevas aventuras junto a tu mascota.</p></div>
+							<button type="button" class="indio-btn-primary" id="indio-mid-cta">Crear cuenta ahora →</button>
 						</div>
 
 						<div class="indio-section" id="indio-instalacion">
@@ -345,6 +359,16 @@
 				</section>
 
 				<!-- Footer -->
+					<nav class="indio-footer-nav" aria-label="Enlaces de Indio">
+						<a href="#indio-portada"><strong>INDIO</strong> · Mi mejor amigo</a>
+						<a href="#indio-como-funciona">Cómo funciona</a>
+						<a href="#indio-comunidad">Comunidad</a>
+						<a href="#indio-eventos">Eventos</a>
+						<a href="#indio-contacto">Contacto</a>
+						<a href="/politica-de-privacidad">Privacidad</a>
+						<a href="/terminos">Términos</a>
+						<a href="/eliminar-cuenta">Eliminar cuenta</a>
+					</nav>
 					<footer id="footer" class="panel">
 						<div class="inner split">
 							<div>
@@ -413,6 +437,25 @@
 			<script src="/multiverse/assets/js/util.js"></script>
 			<script src="/multiverse/assets/js/main.js"></script>
 		<script>
+			var menuToggle = document.querySelector('.indio-menu-toggle');
+			var menu = document.getElementById('indio-nav');
+			function setMenu(open) {
+				menu.classList.toggle('indio-menu-open', open);
+				menuToggle.setAttribute('aria-expanded', String(open));
+				menuToggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+			}
+			menuToggle.addEventListener('click', function () {
+				setMenu(menuToggle.getAttribute('aria-expanded') !== 'true');
+			});
+			menu.addEventListener('click', function (event) {
+				if (event.target.closest('a')) setMenu(false);
+			});
+			document.addEventListener('keydown', function (event) {
+				if (event.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+					setMenu(false);
+					menuToggle.focus();
+				}
+			});
 			document.querySelectorAll('[data-indio-slide]').forEach(function (button) {
 				button.addEventListener('click', function () {
 					var carousel = document.getElementById('main');
@@ -605,6 +648,12 @@
 					}
 					var sr = document.getElementById('indio-open-registro');
 					if (sr) sr.addEventListener('click', openAppRoot);
+					document.querySelectorAll('.indio-crear-cuenta').forEach(function (link) {
+						link.addEventListener('click', function (event) {
+							event.preventDefault();
+							openAppRoot();
+						});
+					});
 					var mc = document.getElementById('indio-mid-cta');
 					if (mc) mc.addEventListener('click', openAppRoot);
 					var ec = document.getElementById('indio-extra-cta');
