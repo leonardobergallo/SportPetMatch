@@ -14,6 +14,7 @@
 		<meta name="indio-api-base" content="/api" />
 		<link rel="stylesheet" href="/multiverse/assets/css/main.css" />
 		<link rel="stylesheet" href="/multiverse/assets/css/indio-override.css" />
+		<link rel="stylesheet" href="/multiverse/assets/css/indio-portada.css" />
 		<noscript><link rel="stylesheet" href="/multiverse/assets/css/noscript.css" /></noscript>
 	</head>
 	<body class="is-preload">
@@ -26,17 +27,45 @@
 						<h1><a href="/"><strong>Indio</strong> · mi mejor amigo</a></h1>
 						<nav>
 							<ul>
-								<li><a href="#indio-login" class="open-app"><span class="icon solid fa-mobile-alt"></span> Entrar / login</a></li>
+								<li><a href="#indio-portada">Inicio</a></li>
 								<li><a href="#indio-como-funciona"><span class="icon solid fa-route"></span> Cómo funciona</a></li>
 								<li><a href="#indio-instalacion"><span class="icon solid fa-download"></span> Instalación</a></li>
 								<li><a href="#indio-contacto"><span class="icon solid fa-envelope"></span> Contacto</a></li>
-								<li><a href="#footer" class="icon solid fa-info-circle">Info</a></li>
+								<li><a href="#indio-login" class="open-app indio-nav-login">Ingresar</a></li>
 							</ul>
 						</nav>
 					</header>
 
+				<section class="indio-portada" id="indio-portada" aria-labelledby="indio-portada-titulo">
+					<div class="indio-portada-copy">
+						<p class="indio-portada-beta">Beta gratis en Santa Fe y Paraná</p>
+						<h2 id="indio-portada-titulo">Más aventuras juntos <span aria-hidden="true">🐾</span></h2>
+						<p>Conocé personas, descubrí encuentros y compartí momentos con tu mascota.</p>
+						<div class="indio-portada-actions">
+							<a href="#indio-registro">Crear cuenta gratis</a>
+							<a href="#indio-como-funciona">Cómo funciona</a>
+						</div>
+						<p class="indio-portada-plan"><strong>Membresía Indio · Próximamente</strong><br />Primer mes gratis. Después, ARS $15.900 por mes con acceso completo.</p>
+						<a class="indio-portada-play" href="#indio-instalacion">Google Play · Beta cerrada de Android</a>
+					</div>
+					<img src="/multiverse/images/fulls/02.jpg" alt="Labrador" width="640" height="480" />
+				</section>
+				<div class="indio-portada-features" aria-label="Qué podés hacer en Indio">
+					<p><strong>📅 Eventos</strong>Sumate a paseos y encuentros.</p>
+					<p><strong>💜 Matching</strong>Conocé gente con intereses afines.</p>
+					<p><strong>💬 Chat</strong>Coordiná tu próxima salida.</p>
+					<p><strong>🐾 Perfil de mascota</strong>Presentá a tu compañero.</p>
+				</div>
+
 				<!-- Main -->
-					<div id="main">
+					<div class="indio-carrusel-header">
+						<h2 id="indio-carrusel-titulo">Momentos con tu compañero</h2>
+						<div class="indio-carrusel-controles">
+							<button type="button" data-indio-slide="-1" aria-controls="main" aria-label="Fotos anteriores">←</button>
+							<button type="button" data-indio-slide="1" aria-controls="main" aria-label="Fotos siguientes">→</button>
+						</div>
+					</div>
+					<div id="main" class="indio-carrusel" role="region" aria-labelledby="indio-carrusel-titulo" tabindex="0">
 						<article class="thumb">
 							<a href="/multiverse/images/fulls/01.jpg" class="image"><img src="/multiverse/images/thumbs/01.jpg" alt="Perro jugando" /></a>
 							<h2>Eventos</h2>
@@ -218,18 +247,18 @@
 									<div class="indio-install-card">
 										<span class="indio-install-emoji" aria-hidden="true">🤖</span>
 										<h3>Android</h3>
-										<p>Abrí Chrome e instalá Indio desde la web.</p>
+										<p>Descargá Indio desde Google Play y mantenela actualizada automáticamente.</p>
 										<div class="indio-apk-box">
-											<p class="indio-apk-title">Instalación en Android</p>
-											<p>Indio se instala como PWA desde Chrome. No necesitás Play Store ni descargar archivos externos.</p>
+											<p class="indio-apk-title">Disponible en Google Play</p>
+											<p>Indio está disponible para las personas que participan de nuestra beta cerrada en Google Play.</p>
 											<ol class="indio-apk-steps">
-												<li>Abrí este link con <strong>Chrome</strong>: <a href="http://indio.com.ar/" target="_blank" rel="noopener noreferrer">indio.com.ar</a></li>
-												<li>Tocá <strong>Abrir app</strong>.</li>
-												<li>En el menú de Chrome, elegí <strong>Instalar app</strong> o <strong>Agregar a pantalla de inicio</strong>.</li>
+												<li>Abrí el enlace de la beta con la misma cuenta de Google con la que te registraste.</li>
+												<li>Tocá <strong>Descargar en Google Play</strong>.</li>
+												<li>Instalá o actualizá Indio desde Google Play.</li>
 											</ol>
 										</div>
-										<p class="indio-install-apk-wrap"><a class="indio-install-apk" href="/?app=1">Abrir app</a></p>
-										<p class="indio-install-note">Cuando haya APK oficial, lo publicaremos desde este mismo sitio.</p>
+										<p class="indio-install-apk-wrap"><a class="indio-install-apk" href="https://play.google.com/apps/testing/com.it360.indio" target="_blank" rel="noopener noreferrer">Descargar en Google Play</a></p>
+										<p class="indio-install-note">La descarga es gratuita para participantes de la beta. Si todavía no formás parte, pedinos acceso.</p>
 									</div>
 								</div>
 								<p class="indio-install-micro">Si preferís, también podés usar Indio desde la web sin instalar nada.</p>
@@ -383,6 +412,15 @@
 			<script src="/multiverse/assets/js/breakpoints.min.js"></script>
 			<script src="/multiverse/assets/js/util.js"></script>
 			<script src="/multiverse/assets/js/main.js"></script>
+		<script>
+			document.querySelectorAll('[data-indio-slide]').forEach(function (button) {
+				button.addEventListener('click', function () {
+					var carousel = document.getElementById('main');
+					var photo = carousel.querySelector('.thumb');
+					carousel.scrollBy({ left: Number(button.dataset.indioSlide) * photo.getBoundingClientRect().width });
+				});
+			});
+		</script>
 			<script>
 				(function () {
 					function scrollToLogin(e) {

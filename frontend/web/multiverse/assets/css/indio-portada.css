@@ -1,0 +1,170 @@
+/* Presentación pública de Indio. */
+#header {
+	background: #fff8f1;
+	color: #142732;
+}
+
+#header h1 a,
+#header h1 strong,
+#header nav > ul > li a {
+	color: #142732;
+}
+
+#header nav > ul > li .indio-nav-login {
+	background: #173f41;
+	border-radius: 2rem;
+	color: #fff;
+}
+
+.indio-portada {
+	display: grid;
+	grid-template-columns: 1.1fr 1fr;
+	min-height: 29rem;
+	background: #faf1e5;
+	color: #142732;
+	scroll-margin-top: 6rem;
+}
+
+.indio-portada-copy {
+	align-self: center;
+	padding: clamp(1.5rem, 5vw, 5rem);
+}
+
+.indio-portada h2 {
+	margin: .35em 0 .25em;
+	color: inherit;
+	font-size: clamp(2.6rem, 5vw, 5rem);
+	font-weight: 800;
+	letter-spacing: -.055em;
+	line-height: .99;
+	text-transform: none;
+}
+
+.indio-portada h2 span {
+	font-size: .5em;
+}
+
+.indio-portada-copy > p {
+	margin-bottom: 1rem;
+}
+
+.indio-portada-beta {
+	display: inline-block;
+	padding: .35rem .8rem;
+	border-radius: 2rem;
+	background: #e0e9cd;
+	font-weight: 700;
+}
+
+.indio-portada > img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	object-fit: cover;
+}
+
+.indio-portada-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .7rem;
+	margin-bottom: 1rem;
+}
+
+.indio-portada-actions a {
+	padding: .65rem 1.2rem;
+	border: 1px solid #173f41;
+	border-radius: 2rem;
+	color: #173f41;
+	font-weight: 700;
+}
+
+.indio-portada-actions a:first-child {
+	background: #ac3d23;
+	border-color: #ac3d23;
+	color: #fff;
+}
+
+.indio-portada-plan strong,
+.indio-portada-play {
+	color: #173f41;
+}
+
+.indio-portada-features {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1rem;
+	padding: 1.5rem clamp(1rem, 5vw, 5rem);
+	background: #fff8f1;
+	color: #142732;
+}
+
+.indio-portada-features p {
+	margin: 0;
+	padding: 1rem;
+	border-radius: 1rem;
+	background: #f7e4d6;
+}
+
+.indio-portada-features p:nth-child(2) { background: #e1ebde; }
+.indio-portada-features p:nth-child(3) { background: #e2ebf4; }
+.indio-portada-features p:nth-child(4) { background: #ede3f3; }
+
+.indio-portada-features strong {
+	display: block;
+	color: inherit;
+}
+
+#indio-registro,
+#indio-instalacion,
+#indio-como-funciona {
+	scroll-margin-top: 7rem;
+}
+
+.indio-carrusel-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem clamp(1rem, 5vw, 5rem);
+	background: #fff8f1;
+}
+
+.indio-carrusel-header h2 {
+	margin: 0;
+	color: #142732;
+	text-transform: none;
+}
+
+.indio-carrusel-controles {
+	display: flex;
+	gap: .5rem;
+}
+
+.indio-carrusel-controles button {
+	padding: 0;
+	width: 2.75rem;
+	height: 2.75rem;
+	line-height: 1;
+	border-radius: 50%;
+	background: #173f41;
+	color: #fff;
+}
+
+#main.indio-carrusel {
+	display: flex;
+	flex-wrap: nowrap;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+}
+
+#main.indio-carrusel .thumb {
+	flex: 0 0 clamp(15rem, 33%, 26rem);
+	scroll-snap-align: start;
+}
+
+@media (max-width: 720px) {
+	.indio-portada { grid-template-columns: 1fr; }
+	.indio-portada > img { height: 15rem; }
+	.indio-portada-features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
