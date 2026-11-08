@@ -1,6 +1,6 @@
 // Semilla de lugares pet friendly para Indio
 // Uso: node --env-file=.env scripts/sembrar-lugares.mjs
-// Es idempotente: actualiza por slug sin borrar datos existentes.
+// Inserta los lugares faltantes sin sobrescribir los existentes.
 
 import { PrismaClient } from '@prisma/client';
 
@@ -184,11 +184,10 @@ const lugares = [
 ];
 
 async function main() {
-  let creados = 0;
-  let actualizados = 0;
-
-  for (const lugar of lugares) {
-    const datos = {
+  const { count } = await prisma.lugarPetFriendly.createMany({
+    skipDuplicates: true,
+    data: lugares.map((lugar) => ({
+      slug: lugar.slug,
       nombre: lugar.nombre,
       descripcion: lugar.descripcion,
       categoria: lugar.categoria,
@@ -207,23 +206,11 @@ async function main() {
       destacado: Boolean(lugar.destacado),
       fuente: lugar.fuente || 'manual',
       isActive: true,
-    };
-
-    const existente = await prisma.lugarPetFriendly.findUnique({ where: { slug: lugar.slug } });
-
-    if (existente) {
-      await prisma.lugarPetFriendly.update({ where: { slug: lugar.slug }, data: datos });
-      actualizados += 1;
-    } else {
-      await prisma.lugarPetFriendly.create({
-        data: { slug: lugar.slug, recomendaciones: 0, ...datos },
-      });
-      creados += 1;
-    }
-  }
+    })),
+  });
 
   const total = await prisma.lugarPetFriendly.count({ where: { isActive: true } });
-  console.log(`Lugares pet friendly: ${creados} creados, ${actualizados} actualizados, ${total} activos en total.`);
+  console.log(`Lugares pet friendly: ${count} creados, ${total} activos en total.`);
 }
 
 main()

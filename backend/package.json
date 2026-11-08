@@ -16,6 +16,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
+    "db:lugares:migrate": "prisma db execute --schema prisma/schema.prisma --file prisma/crear-lugares-pet-friendly.sql",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
     "db:listar-usuarios": "node scripts/listar-usuarios.js",
