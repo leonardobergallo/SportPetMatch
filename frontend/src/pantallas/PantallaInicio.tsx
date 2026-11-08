@@ -169,6 +169,10 @@ export default function PantallaInicio(): JSX.Element {
     navigation.navigate('CrearEvento');
   };
 
+  const manejarVerLugares = () => {
+    navigation.navigate('Mapa', { vista: 'lugares' });
+  };
+
   const formatearFecha = (fechaISO: string) => {
     const fecha = new Date(fechaISO);
     const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -220,6 +224,15 @@ export default function PantallaInicio(): JSX.Element {
               )}
             </View>
           </View>
+          <Button
+            variant="outline"
+            size="lg"
+            onPress={manejarVerLugares}
+            icon="place"
+            style={estilos.botonLugares}
+          >
+            Lugares pet friendly
+          </Button>
         </View>
 
         {/* Upcoming Events */}
@@ -384,6 +397,10 @@ const estilos = StyleSheet.create({
   botonAccion: {
     flex: 1,
     minHeight: 56,
+  },
+  botonLugares: {
+    marginTop: 12,
+    minHeight: 48,
   },
   buscador: {
     flex: 1,

@@ -62,7 +62,7 @@ export type TabParamList = {
   Dashboard: undefined;
   Inicio: undefined;
   Matching: undefined;
-  Mapa: undefined;
+  Mapa: { vista?: 'mapa' | 'lugares' } | undefined;
   Eventos: undefined;
   Mascotas: undefined;
   Matches: { openMatchId?: string } | undefined;

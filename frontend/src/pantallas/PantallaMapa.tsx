@@ -17,8 +17,9 @@ import {
   ActivityIndicator,
   Divider
 } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
+import ListaLugaresPetFriendly from '../componentes/ListaLugaresPetFriendly';
 import { useUbicacion } from '../contextos/ContextoUbicacion';
 import { temaApp, espaciado } from '../constantes/tema';
 import { obtenerEventos } from '../servicios/servicioEventos';
@@ -352,10 +353,28 @@ const ListaUsuariosYEventos = ({ usuarios, eventos, coordenadas, onItemPress }: 
 
 export default function PantallaMapa() {
   const navigation = useNavigation<any>();
-  const { coordenadas: coordenadasContexto } = useUbicacion();
+  const route = useRoute<any>();
+  const {
+    coordenadas: coordenadasContexto,
+    ubicacionActual,
+    solicitarPermisos,
+  } = useUbicacion();
   
   // Usar coordenadas del contexto o Santa Fe Capital por defecto
   const coordenadas = coordenadasContexto || SANTA_FE_CAPITAL;
+  
+  // Vista actual: mapa (usuarios/eventos) o lugares pet friendly (lista)
+  const [vista, setVista] = useState<'mapa' | 'lugares'>(
+    route.params?.vista === 'lugares' ? 'lugares' : 'mapa'
+  );
+
+  useEffect(() => {
+    if (route.params?.vista === 'lugares') {
+      setVista('lugares');
+    } else if (route.params?.vista === 'mapa') {
+      setVista('mapa');
+    }
+  }, [route.params?.vista]);
   
   // Estados para datos del mapa
   const [usuarios, setUsuarios] = useState<UsuarioMapa[]>([]);
@@ -505,15 +524,61 @@ export default function PantallaMapa() {
     <Surface style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Mapa de Indio" />
-        <Appbar.Action 
-          icon="refresh" 
-          onPress={cargarDatosCercanos}
-          disabled={cargando}
-        />
+        <Appbar.Content title={vista === 'mapa' ? 'Mapa de Indio' : 'Lugares pet friendly'} />
+        {vista === 'mapa' && (
+          <Appbar.Action 
+            icon="refresh" 
+            onPress={cargarDatosCercanos}
+            disabled={cargando}
+          />
+        )}
       </Appbar.Header>
 
-      {cargando ? (
+      <View style={styles.selectorVista}>
+        <TouchableOpacity
+          style={[styles.selectorVistaBoton, vista === 'mapa' && styles.selectorVistaBotonActivo]}
+          onPress={() => {
+            setVista('mapa');
+            navigation.setParams({ vista: 'mapa' });
+          }}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons
+            name="map"
+            size={18}
+            color={vista === 'mapa' ? '#FFFFFF' : temaApp.colors.onSurfaceVariant}
+          />
+          <Text style={[styles.selectorVistaTexto, vista === 'mapa' && styles.selectorVistaTextoActivo]}>
+            Mapa
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.selectorVistaBoton, vista === 'lugares' && styles.selectorVistaBotonActivo]}
+          onPress={() => {
+            setVista('lugares');
+            navigation.setParams({ vista: 'lugares' });
+          }}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons
+            name="pets"
+            size={18}
+            color={vista === 'lugares' ? '#FFFFFF' : temaApp.colors.onSurfaceVariant}
+          />
+          <Text style={[styles.selectorVistaTexto, vista === 'lugares' && styles.selectorVistaTextoActivo]}>
+            Lugares pet friendly
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {vista === 'lugares' ? (
+        <ListaLugaresPetFriendly
+          coordenadas={coordenadas}
+          ciudadActual={ubicacionActual?.ciudad}
+          provinciaActual={ubicacionActual?.provincia}
+          onSolicitarUbicacion={solicitarPermisos}
+        />
+      ) : cargando ? (
         <View style={styles.centeredContainer}>
           <ActivityIndicator animating={true} size="large" />
           <Text style={{ marginTop: 16 }}>Cargando mapa...</Text>
@@ -611,12 +676,14 @@ export default function PantallaMapa() {
         </Dialog>
       </Portal>
 
-      {/* FAB para crear nuevo evento */}
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        onPress={() => navigation.navigate('CrearEvento')}
-      />
+      {/* FAB para crear nuevo evento (solo en la vista de mapa) */}
+      {vista === 'mapa' && (
+        <FAB
+          icon="plus"
+          style={styles.fab}
+          onPress={() => navigation.navigate('CrearEvento')}
+        />
+      )}
     </Surface>
   );
 }
@@ -878,6 +945,36 @@ const styles = StyleSheet.create({
   },
   chip: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  },
+  selectorVista: {
+    flexDirection: 'row',
+    gap: espaciado.sm,
+    paddingHorizontal: espaciado.md,
+    paddingVertical: espaciado.sm,
+    backgroundColor: temaApp.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: temaApp.colors.border,
+  },
+  selectorVistaBoton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderRadius: 12,
+    paddingVertical: 8,
+    backgroundColor: temaApp.colors.surfaceVariant,
+  },
+  selectorVistaBotonActivo: {
+    backgroundColor: temaApp.colors.primary,
+  },
+  selectorVistaTexto: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: temaApp.colors.onSurfaceVariant,
+  },
+  selectorVistaTextoActivo: {
+    color: '#FFFFFF',
   },
   dialogCard: {
     marginBottom: espaciado.md,

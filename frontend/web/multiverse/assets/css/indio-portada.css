@@ -92,7 +92,7 @@
 
 .indio-portada-features {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 	gap: 1rem;
 	padding: 1.5rem clamp(1rem, 5vw, 5rem);
 	background: #fff8f1;
@@ -109,6 +109,7 @@
 .indio-portada-features p:nth-child(2) { background: #e1ebde; }
 .indio-portada-features p:nth-child(3) { background: #e2ebf4; }
 .indio-portada-features p:nth-child(4) { background: #ede3f3; }
+.indio-portada-features p:nth-child(5) { background: #e8f1e0; }
 
 .indio-portada-features strong {
 	display: block;

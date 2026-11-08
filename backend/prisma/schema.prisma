@@ -302,6 +302,44 @@ model UbicacionEvento {
   @@map("ubicaciones_eventos") // Mapea a la tabla 'ubicaciones_eventos'
 }
 
+// Modelo de Lugares pet friendly - Espacios y comercios recomendados
+model LugarPetFriendly {
+  id               String   @id @default(cuid()) // ID unico del lugar
+  slug             String   @unique // Identificador legible para seeds y URLs
+  nombre           String // Nombre del lugar
+  descripcion      String? // Descripcion breve para recomendar
+  categoria        String // parque, plaza, cafeteria, restaurante, bar, veterinaria, pet_shop, alojamiento, paseo, otro
+  direccion        String? // Direccion completa
+  ciudad           String // Ciudad
+  provincia        String // Provincia
+  pais             String   @default("Argentina") // Pais
+  latitud          Float // Latitud
+  longitud         Float // Longitud
+  telefono         String? // Telefono de contacto
+  web              String? // Sitio web
+  instagram        String? // Instagram
+  horarios         Json? // Horarios de atencion
+  fotos            String[] // Fotos del lugar
+  permitePerros    Boolean  @default(true) // Si permite mascotas
+  zonaPetFriendly  String   @default("exterior") // interior, exterior, ambos
+  requiereCorrea   Boolean  @default(true) // Si requiere correa
+  aguaParaMascotas Boolean  @default(false) // Si ofrece agua para mascotas
+  verificado       Boolean  @default(false) // Si Indio verifico el dato
+  destacado        Boolean  @default(false) // Si se muestra destacado
+  fuente           String   @default("manual") // manual, comunidad, osm
+  osmId            String? // ID de OpenStreetMap si vino de OSM
+  recomendaciones  Int      @default(0) // Cantidad de recomendaciones de la comunidad
+  isActive         Boolean  @default(true) // Lugar activo/inactivo
+  createdAt        DateTime @default(now()) // Fecha de creacion
+  updatedAt        DateTime @updatedAt // Fecha de ultima actualizacion
+
+  @@unique([fuente, osmId]) // Evita duplicados de OSM
+  @@index([provincia, ciudad]) // Busquedas por zona
+  @@index([latitud, longitud]) // Busquedas por cercania
+  @@index([categoria]) // Filtros por categoria
+  @@map("lugares_pet_friendly") // Tabla en la base de datos
+}
+
 // Modelo de Compras - Compras in-app y suscripciones
 model Compra {
   id              String    @id @default(cuid()) // ID único de la compra

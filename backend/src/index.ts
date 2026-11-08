@@ -16,6 +16,7 @@ import rutasMascotas from './rutas/mascotas';
 import rutasEventos from './rutas/eventos';
 import rutasMatches from './rutas/matches';
 import rutasMensajes from './rutas/mensajes';
+import rutasLugares from './rutas/lugares';
 import rutasAdmin from './rutas/admin';
 
 // Importar middleware personalizado
@@ -162,7 +163,8 @@ app.get('/api', (req: Request, res: Response) => {
       mascotas: '/api/mascotas',
       eventos: '/api/eventos',
       matches: '/api/matches',
-      mensajes: '/api/mensajes'
+      mensajes: '/api/mensajes',
+      lugares: '/api/lugares'
     }
   });
 });
@@ -174,6 +176,7 @@ app.use('/api/mascotas', rutasMascotas);
 app.use('/api/eventos', rutasEventos);
 app.use('/api/matches', rutasMatches);
 app.use('/api/mensajes', rutasMensajes);
+app.use('/api/lugares', rutasLugares);
 app.use('/api/admin', rutasAdmin);
 
 // Middleware para rutas de API no encontradas (404).
