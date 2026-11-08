@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="es-AR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Indio · Laboratorio de paseos</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff9f3; color: #102333; font: 16px system-ui, sans-serif; }
+  .shell { display: grid; grid-template-columns: 230px minmax(0,1fr); min-height: 100vh; }
+  aside { background: #173e3c; color: white; padding: 1.5rem; }
+  aside > div { position: sticky; top: 1.5rem; }
+  .marca { font-size: 1.6rem; font-weight: 800; letter-spacing: .04em; margin: 0; }
+  .marca img { width: 36px; height: 36px; vertical-align: middle; border-radius: 9px; }
+  .marca-sub { color: #c1d9d4; margin: 0 0 1.75rem; }
+  nav { display: grid; gap: .45rem; margin-block: 1.25rem; }
+  nav a { color: #eaf8f4; text-decoration: none; border-radius: 10px; padding: .65rem .75rem; }
+  nav a:hover, nav a:focus-visible { background: #2e5c58; }
+  main { width: 100%; min-width: 0; max-width: 1320px; margin: auto; padding: clamp(1rem, 3vw, 2.5rem); align-self: start; }
+  section, article { background: white; border: 1px solid #dde8df; border-radius: 18px; padding: 1.2rem; margin-block: 1rem; }
+  section { box-shadow: 0 8px 30px #204f4c09; scroll-margin-top: 1rem; }
+  article { background: #f7fbf9; }
+  h1 { font-size: clamp(1.7rem, 4vw, 2.65rem); margin: .3rem 0; letter-spacing: -.04em; }
+  .hero { background: #deede4; border-radius: 22px; padding: clamp(1rem,3vw,2rem); }
+  .eyebrow { display: inline-block; border-radius: 999px; padding: .25rem .65rem; background: #fff2e5; color: #7b3e2a; font-size: .82rem; font-weight: 700; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%, 145px),1fr)); gap: .75rem; margin-top: 1rem; }
+  .stat { background: #f2f7f4; border-radius: 12px; padding: .8rem; }
+  .stat strong { display: block; font-size: 1.5rem; color: #204f4c; }
+  .admin-accesos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr)); gap: .8rem; }
+  .admin-accesos a { display: grid; align-content: start; gap: .35rem; padding: 1rem; border: 1px solid #dce9e3; border-radius: 14px; background: #f5faf7; color: #173e3c; text-decoration: none; }
+  .admin-accesos a:hover, .admin-accesos a:focus-visible { border-color: #204f4c; background: #e6f2ea; }
+  .admin-accesos strong { font-size: 1.06rem; }
+  .admin-accesos small { color: #405e58; }
+  .admin-accesos .numero { color: #204f4c; font-size: 1.85rem; font-weight: 800; }
+  .admin-accesos a[data-pendiente="true"] { background: #fff4ea; border-color: #f1d4be; }
+  .tabla { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th, td { padding: .65rem; border-bottom: 1px solid #dde8df; vertical-align: top; }
+  th { color: #204f4c; background: #f2f7f4; }
+  .reporte { display: grid; grid-template-columns: 1fr 1fr 2rem; align-items: center; gap: .5rem; margin: .4rem 0; }
+  meter { width: 100%; accent-color: #204f4c; }
+  .estado { display: inline-block; background: #deede4; color: #204f4c; border-radius: 999px; padding: .2rem .55rem; }
+  .mapa { min-height: 290px; height: min(48vh, 380px); background: #e7efe6; border-radius: 14px; margin-top: .7rem; }
+  .mapa[data-fuente="collar"] { border: 2px solid #a94c36; }
+  .mapa[data-fuente="paseo"] { border: 2px solid #204f4c; }
+  .alerta { color: #8b301d; font-weight: 700; background: #fff1e8; padding: .65rem; border-radius: 9px; }
+  h1, h2, h3 { color: #204f4c; }
+  form, .acciones { display: flex; flex-wrap: wrap; align-items: end; gap: .65rem; }
+  label { display: grid; gap: .25rem; max-width: 100%; }
+  input, select, button { font: inherit; padding: .55rem; border-radius: 8px; border: 1px solid #73867a; max-width: 100%; }
+  button { background: #204f4c; color: white; cursor: pointer; }
+  svg.plano { display: block; width: min(100%, 480px); background: #e7efe6; border-radius: 12px; margin-block: .5rem; }
+  article img { width: 72px; height: 72px; object-fit: cover; border-radius: 50%; }
+  #mensaje { min-height: 1.5rem; }
+  @media (max-width: 720px) {
+    .shell { grid-template-columns: minmax(0, 1fr); }
+    aside { padding: .85rem 1rem; }
+    .marca-sub { margin-bottom: .65rem; }
+    nav { display: flex; flex-wrap: wrap; gap: .15rem; margin-block: .5rem 0; }
+    nav a { padding: .4rem .5rem; font-size: .88rem; }
+  }
+</style>
+<div class="shell">
+<aside><div>
+  <p class="marca"><img src="/demo-assets/marca" alt=""> INDIO</p>
+  <p class="marca-sub">Mi mejor amigo</p>
+  <label>Ciudad de prueba
+    <select id="ciudad"><option value="santa-fe">Santa Fe</option></select>
+  </label>
+  <label>Cuenta de prueba
+    <select id="rol"><option value="dueno">Dueño</option><option value="paseador">Paseador</option><option value="admin">Administrador</option><option value="visitante">Visitante</option></select>
+  </label>
+  <nav aria-label="Navegación del panel" id="navegacion"></nav>
+</div></aside>
+<main id="inicio">
+  <header class="hero"><span class="eyebrow">Demostración · datos ficticios</span>
+    <h1 id="titulo">Mi comunidad Indio</h1>
+    <p id="subtitulo">Organizá los paseos de tus mascotas y revisá su seguridad.</p>
+    <p id="cobertura">Indio sumará Rosario junto a Santa Fe y Paraná.</p>
+  </header>
+  <p id="mensaje" role="status"></p>
+  <section id="admin-pendientes" hidden><h2>Para revisar ahora</h2><p>Entradas directas a lo que puede requerir atención.</p>
+    <div id="admin-pendientes-datos" class="admin-accesos"></div>
+  </section>
+  <section id="resumen"><h2>Resumen</h2><div id="estadisticas" class="stats"></div></section>
+  <section id="admin-accesos" hidden>
+    <h2>Gestión de Indio</h2>
+    <h3>Moderación y comunidad</h3>
+    <div class="admin-accesos">
+      <a href="#admin-verificaciones"><strong>Paseadores y verificaciones</strong><small>Revisá perfiles, tarifas y estados de verificación.</small></a>
+      <a href="#admin-eventos"><strong>Eventos</strong><small>Consultá y moderá los eventos ficticios de la comunidad.</small></a>
+    </div>
+    <h3>Suscripciones y actividad</h3>
+    <div class="admin-accesos">
+      <a href="#mensualidades"><strong>Inscripciones y mensualidades</strong><small>Revisá el mes gratis, los vencimientos y los pagos registrados.</small></a>
+      <a href="#reporte-diario"><strong>Reporte de últimas 24 horas</strong><small>Altas recientes, pagos y solicitudes de paseo.</small></a>
+      <a href="#mapa-operativo"><strong>Mapa operativo</strong><small>Actividad agregada de Santa Fe, Paraná y Rosario.</small></a>
+    </div>
+    <h3>Gestión de datos</h3>
+    <div class="admin-accesos">
+      <a href="#admin-directorio"><strong>Usuarios y mascotas</strong><small>Buscá cuentas, revisá sus roles y consultá sus mascotas.</small></a>
+      <a href="#admin-auditoria"><strong>Registro de cambios</strong><small>Consultá las últimas acciones administrativas de la demo.</small></a>
+    </div>
+  </section>
+  <section id="mis-mascotas" hidden>
+    <h2>Mis mascotas</h2>
+    <div id="mascotas-demo" class="stats"></div>
+  </section>
+  <section id="servicio"></section>
+  <section id="mis-paseos">
+    <h2>Solicitudes e historial</h2>
+    <div id="reservas"></div>
+    <button id="actualizar" type="button">Actualizar reservas</button>
+    <div id="recorrido"></div>
+    <details id="diagnostico" hidden><summary>Diagnóstico de Safari</summary>
+      <p>Registro local sin coordenadas. Conservá esta pestaña para comparar pausas y recuperaciones.</p>
+      <pre id="diagnostico-lineas" style="white-space:pre-wrap"></pre>
+    </details>
+  </section>
+  <section id="seguridad">
+    <h2>Collar GPS virtual</h2>
+    <p>Demostración independiente. Los puntos pertenecen al dispositivo simulado y se quedan en esta pestaña.</p>
+    <div class="acciones">
+      <label>Mascota <select id="mascota"><option>Mora</option><option>Simón</option></select></label>
+      <label>Radio de zona segura (m) <input id="radio" type="number" min="25" max="2000" value="100"></label>
+      <button id="vincular" type="button">Vincular y definir zona</button>
+      <button id="mover" type="button">Simular movimiento</button>
+    </div>
+    <div id="collar"></div>
+  </section>
+  <section id="operaciones" hidden>
+    <h2>Operaciones</h2><button id="actualizar-operaciones" type="button">Actualizar indicadores</button>
+    <h3>Usuarios y mascotas</h3>
+    <form id="admin-filtros">
+      <label>Buscar por nombre o correo <input id="admin-buscar" type="search"></label>
+      <label>Estado de cuenta <select id="admin-estado"><option value="">Todos</option><option value="true">Activos</option><option value="false">Suspendidos</option></select></label>
+      <label>Especie <select id="admin-especie"><option value="">Todas</option><option>Perro</option></select></label>
+      <button>Filtrar</button>
+    </form>
+    <div id="admin-directorio"></div>
+    <div class="acciones"><button type="button" id="admin-anterior">Anterior</button><span id="admin-pagina"></span><button type="button" id="admin-siguiente">Siguiente</button></div>
+    <div id="operaciones-datos"></div><div id="mapa-operativo"></div>
+    <h3>Reportes del entorno ficticio</h3>
+    <form id="reportes-fechas"><label>Desde <input id="reporte-desde" type="date"></label><label>Hasta <input id="reporte-hasta" type="date"></label><button>Consultar período</button></form>
+    <div id="reportes-resultados"></div>
+  </section>
+  <section id="mensualidades" hidden>
+    <h2>Inscripciones y mensualidades</h2>
+    <p>Control administrativo de la demo. Los pagos se registran manualmente con datos ficticios.</p>
+    <div id="mensualidades-resumen" class="stats"></div>
+    <form id="mensualidades-filtro">
+      <label>Período <input id="mensualidades-periodo" type="month" required></label>
+      <button>Ver período</button>
+    </form>
+    <form id="mensualidades-alta">
+      <label>Cuenta activa <select id="mensualidades-cuenta" required></select></label>
+      <label>Vencimiento <input id="mensualidades-vence" type="date" required></label>
+      <button>Registrar mensualidad</button>
+    </form>
+    <div id="mensualidades-tabla"></div>
+    <p id="mensualidades-mensaje" role="status"></p>
+  </section>
+  <section id="reporte-diario" hidden>
+    <h2>Reporte Indio · Últimas 24 horas</h2>
+    <p id="reporte-diario-fecha"></p>
+    <div id="reporte-diario-datos"></div>
+    <div class="acciones"><button id="reporte-diario-actualizar" type="button">Actualizar reporte</button>
+      <a href="#operaciones">Ver operaciones</a><a href="#mensualidades">Ver mensualidades</a></div>
+  </section>
+</main>
+</div>
+<script type="module">
+  const el = id => document.getElementById(id);
+  const etiquetas = { nombre: 'Nombre', zona: 'Zona', descripcion: 'Descripción', precio: 'Precio (ARS)',
+    duracion: 'Duración (min)', disponibilidad: 'Disponibilidad', experiencia: 'Experiencia',
+    referencias: 'Referencias', foto: 'URL HTTPS de la foto (opcional)' };
+  let ciudad = 'santa-fe', ciudades = {};
+  const collares = new Map();
+  let token, rol, seguimiento, collar, gpsReal;
+  const diagnostico = [];
+  let cambioSesion = 0;
+  let datosAdmin, paginaAdmin = 0, filtroMascota = '';
+  const mensaje = texto => { el('mensaje').textContent = texto; };
+  const escapar = texto => String(texto ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
+  async function api(ruta, method = 'GET', datos) {
+    const r = await fetch('/api/' + ruta, { method, headers: {
+      ...(token ? (location.protocol === 'https:' ? { 'X-Indio-Demo-Token': token } : { Authorization: 'Bearer ' + token }) : {}),
+      ...(datos ? { 'Content-Type': 'application/json' } : {})
+    }, body: datos ? JSON.stringify(datos) : undefined });
+    if (!r.ok) {
+      const error = r.headers.get('content-type')?.includes('application/json') ? await r.json() : null;
+      throw Object.assign(new Error(error?.mensaje ?? 'La operación no se pudo completar (' + r.status + ').'), { estado: r.status });
+    }
+    return r.status === 204 ? null : r.json();
+  }
+  function accion(id, ejecutar, evento = 'click') {
+    el(id).addEventListener(evento, async e => {
+      e.preventDefault();
+      try { await ejecutar(e); } catch (error) { mensaje(error.message); }
+    });
+  }
+  function detener() {
+    if (seguimiento?.watch !== undefined) navigator.geolocation.clearWatch(seguimiento.watch);
+    if (seguimiento) registrar('GPS detenido.');
+    seguimiento = undefined;
+  }
+  function registrar(texto) {
+    diagnostico.push(new Date().toLocaleTimeString() + ' · ' + texto);
+    if (diagnostico.length > 100) diagnostico.shift();
+    el('diagnostico-lineas').textContent = diagnostico.join('\n');
+  }
+  async function sesion() {
+    const turno = ++cambioSesion;
+    detener();
+    token = undefined;
+    rol = el('rol').value;
+    ciudad = el('ciudad').value;
+    collar = collares.get(ciudad);
+    el('servicio').replaceChildren();
+    el('reservas').replaceChildren();
+    el('recorrido').replaceChildren();
+    el('estadisticas').replaceChildren();
+    el('operaciones').hidden = true;
+    el('admin-pendientes').hidden = true;
+    el('admin-accesos').hidden = true;
+    el('admin-pendientes-datos').replaceChildren();
+    el('mensualidades').hidden = true;
+    el('reporte-diario').hidden = true;
+    el('mensualidades-mensaje').textContent = '';
+    datosAdmin = undefined;
+    paginaAdmin = 0;
+    filtroMascota = '';
+    mensaje('');
+    const datos = await api('sesion', 'POST', { rol, ciudad });
+    if (turno !== cambioSesion) return;
+    token = datos.token;
+    ciudades = datos.ciudades;
+    el('ciudad').replaceChildren(...Object.entries(ciudades).map(([id, c]) => new Option(c.nombre, id, false, id === ciudad)));
+    el('cobertura').textContent = 'Demo en ' + ciudades[ciudad].nombre + ' · Santa Fe, Paraná y Rosario';
+    gpsReal = datos.gpsReal && window.isSecureContext;
+    el('diagnostico').hidden = !gpsReal || rol !== 'paseador';
+    configurarPanel();
+    if (rol === 'admin') {
+      await Promise.all([operaciones(), mostrarMensualidades(), mostrarReporteDiario()]);
+      return;
+    }
+    await mostrarServicio();
+    if (collar) mostrarCollar();
+    await reservas();
+  }
+  const paneles = {
+    dueno: ['Mi comunidad Indio', 'Organizá tus paseos y revisá la seguridad de tus mascotas.'],
+    paseador: ['Panel del paseador', 'Gestioná solicitudes y agenda. Podés pasear sin comprar un collar.'],
+    admin: ['Panel de Administración · Indio', 'Comunidad, paseadores, suscripciones y actividad en un solo lugar.'],
+    visitante: ['Explorá Indio', 'Consultá los perfiles de paseadores disponibles.']
+  };
+  function tarjetas(datos) {
+    return datos.map(([etiqueta, valor]) => '<div class="stat"><strong>' + escapar(valor) +
+      '</strong>' + escapar(etiqueta) + '</div>').join('');
+  }
+  function configurarPanel() {
+    [el('titulo').textContent, el('subtitulo').textContent] = paneles[rol];
+    const admin = rol === 'admin';
+    el('operaciones').hidden = !admin;
+    el('admin-pendientes').hidden = !admin;
+    el('admin-accesos').hidden = !admin;
+    el('mensualidades').hidden = !admin;
+    el('reporte-diario').hidden = !admin;
+    el('mis-mascotas').hidden = rol !== 'dueno';
+    for (const id of ['servicio', 'mis-paseos', 'seguridad']) el(id).hidden = admin;
+    const enlaces = [['inicio', '⌂ Inicio'], ...(admin
+      ? [['operaciones', '▦ Operaciones'], ['mensualidades', '＄ Mensualidades'], ['reporte-diario', '▤ Reporte de 24 h']]
+      : [...(rol === 'dueno' ? [['mis-mascotas', '🐾 Mis mascotas']] : []),
+        ['servicio', rol === 'paseador' ? '◎ Mi perfil' : '⌕ Paseadores'],
+        ['mis-paseos', rol === 'paseador' ? '▣ Agenda y servicios' : '▣ Mis paseos'],
+        ['seguridad', '◉ GPS y seguridad']])];
+    el('navegacion').innerHTML = enlaces.map(([id, texto]) => '<a href="#' + id + '">' + texto + '</a>').join('');
+    mascotas();
+  }
+  function mascotas() {
+    el('mascotas-demo').innerHTML = ['Mora', 'Simón'].map(nombre => {
+      const vinculado = collar?.mascota === nombre;
+      return '<article><img src="/demo-assets/' + (nombre === 'Mora' ? 'mora' : 'simon') +
+        '" alt="Imagen ilustrativa de ' + nombre + '" loading="lazy"><h3>' + nombre + '</h3><p>Mascota ficticia · perro</p><p>' +
+        (vinculado ? 'Collar virtual vinculado' : 'Sin collar vinculado') +
+        '</p><div class="acciones"><a href="#mis-paseos" data-mascota="' + nombre + '">Ver sus paseos</a><a href="#seguridad">Ver GPS y zonas seguras</a></div></article>';
+    }).join('');
+  }
+  async function operaciones() {
+    const turno = cambioSesion;
+    const fechas = new URLSearchParams();
+    if (el('reporte-desde').value) fechas.set('desde', el('reporte-desde').value);
+    if (el('reporte-hasta').value) fechas.set('hasta', el('reporte-hasta').value);
+    const datos = await api('operaciones?' + fechas);
+    if (turno !== cambioSesion) return;
+    datosAdmin = datos;
+    const { conteo, paseadores, usuarios, mascotas, eventos, reportes, auditoria } = datos;
+    const publicados = eventos.filter(e => e.publicado).length;
+    const verificaciones = paseadores.filter(p => p.verificacion === 'pendiente').length;
+    el('admin-pendientes-datos').innerHTML = [
+      ['admin-verificaciones', 'Paseadores para verificar', verificaciones, 'Perfiles pendientes de revisión'],
+      ['mensualidades', 'Pagos pendientes', datos.cuotasPorRevisar, datos.cuotasVencidas + ' mensualidades vencidas'],
+      ['mapa-operativo', 'Paseos activos', conteo.activo, conteo.solicitado + ' solicitudes pendientes'],
+    ].map(([destino, etiqueta, cantidad, detalle]) => '<a href="#' + destino + '" data-pendiente="' + (cantidad > 0) +
+      '"><strong>' + escapar(etiqueta) + '</strong><span class="numero">' + escapar(cantidad) + '</span><small>' +
+      escapar(detalle) + '</small></a>').join('');
+    el('estadisticas').innerHTML = tarjetas([['Usuarios ficticios', usuarios.length], ['Usuarios activos', datos.usuariosActivos],
+      ['Registros de los últimos 7 días', datos.altas7dias], ['Mascotas de ejemplo', mascotas.length], ['Paseadores', paseadores.length], ['Verificación pendiente', verificaciones],
+      ['Solicitudes pendientes', conteo.solicitado], ['Paseos activos', conteo.activo], ['Paseos finalizados', conteo.finalizado],
+      ['Eventos publicados', publicados], ['Dispositivos físicos', datos.dispositivos], ['Alertas técnicas', datos.alertas]]);
+    mostrarDirectorio();
+    el('operaciones-datos').innerHTML = '<h3 id="admin-verificaciones">Paseadores y verificaciones</h3>' +
+      tabla(['Nombre', 'Zona', 'Tarifa', 'Disponibilidad', 'Solicitudes', 'Finalizados', 'Verificación'],
+        paseadores.map(p => [p.nombre, p.zona, 'ARS $' + p.precio, p.disponibilidad, p.solicitudes, p.completados, p.verificacion]),
+        paseadores.map(p => '<label>Cambiar estado<select data-verificar="' + escapar(p.id) + '">' +
+          ['pendiente', 'aprobado', 'rechazado'].map(v => '<option' + (v === p.verificacion ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></label>')) +
+      '<h3 id="admin-eventos">Eventos ficticios</h3>' + tabla(['Evento', 'Organizador', 'Fecha', 'Zona', 'Participantes', 'Estado'],
+        eventos.map(e => [e.nombre, e.organizador, fechaLocal(e.fecha), e.zona, e.participantes, e.publicado ? 'Publicado' : 'Oculto']),
+        eventos.map(e => botonAdmin('eventos', e.id, !e.publicado, e.publicado ? 'Ocultar evento' : 'Publicar en demo'))) +
+      '<h3 id="admin-auditoria">Registro de cambios</h3>' + tabla(['Fecha', 'Actor', 'Entidad', 'Anterior', 'Nuevo'],
+        auditoria.map(a => [fechaLocal(a.hora), a.actor, a.tipo + ' · ' + a.id, a.anterior, a.valor])) +
+      '<h3>Mapa operativo · ' + escapar(ciudades[ciudad].nombre) + '</h3>' + tabla(['Zona', 'Paseos', 'Activos', 'Eventos publicados'],
+        datos.zonas.map(z => [z.nombre, z.paseos, z.activos, z.eventos]));
+    const series = [['Altas', reportes.altas], ['Mascotas', reportes.mascotas], ['Solicitudes', reportes.solicitudes],
+      ['Servicios completados', reportes.completados], ['Eventos', reportes.eventos], ['Seguimientos', reportes.seguimientos]];
+    const maximo = Math.max(1, ...series.map(([, valor]) => valor));
+    el('reportes-resultados').innerHTML = series.some(([, valor]) => valor)
+      ? series.map(([nombre, valor]) => '<div class="reporte"><span>' + nombre + '</span><meter aria-label="' + nombre +
+        '" min="0" max="' + maximo + '" value="' + valor + '"></meter><strong>' + valor + '</strong></div>').join('')
+      : '<p>No hay actividad en el período seleccionado.</p>';
+    const centro = ciudades[ciudad];
+    const zona = datos.zonas.find(z => z.nombre === centro.nombre);
+    dibujar('mapa-operativo', [{ ...centro, simulado: true }], 'operaciones', 0, false,
+      centro.nombre + ' · ' + (zona?.activos ?? 0) + ' paseos activos · ' + (zona?.eventos ?? 0) + ' eventos');
+  }
+  const fechaLocal = valor => new Date(valor).toLocaleString('es-AR');
+  const pesos = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+  const fechaReporte = new Intl.DateTimeFormat('es-AR', {
+    dateStyle: 'short', timeStyle: 'medium', timeZone: 'America/Argentina/Buenos_Aires',
+  });
+  async function mostrarReporteDiario() {
+    const turno = cambioSesion;
+    const { generado, altas, pagos, solicitudes, totales } = await api('reporte-diario');
+    if (turno !== cambioSesion) return;
+    const importe = pagos.reduce((total, p) => total + p.monto, 0);
+    el('reporte-diario-fecha').textContent = 'Generado el ' + fechaReporte.format(generado) + ' · hora argentina · datos ficticios';
+    el('reporte-diario-datos').innerHTML = '<h3>Actividad del período</h3><div class="stats">' + tarjetas([
+      ['Usuarios nuevos · Total: ' + totales.usuarios, altas.length],
+      ['Pagos registrados · Total: ' + totales.pagos, pagos.length],
+      ['Importe registrado · Total: ' + pesos.format(totales.importe), pesos.format(importe)],
+      ['Paseos solicitados · Total: ' + totales.solicitudes, solicitudes.length],
+    ]) + '</div><h3>Últimas inscripciones</h3>' +
+      tabla(['Nombre', 'Correo', 'Rol', 'Fecha'], altas.map(u => [u.nombre, u.email, u.rol, fechaReporte.format(new Date(u.alta))])) +
+      '<h3>Últimos pagos</h3>' + tabla(['Cuenta', 'Importe', 'Vencimiento', 'Fecha de pago'],
+        pagos.map(p => [p.nombre, pesos.format(p.monto), p.vence, fechaReporte.format(new Date(p.pagada))])) +
+      '<h3>Últimas solicitudes</h3>' + tabla(['Mascota', 'Zona', 'Estado', 'Fecha'],
+        solicitudes.map(r => [r.mascota, r.zona, r.estado, fechaReporte.format(r.solicitada)]));
+  }
+  async function mostrarMensualidades() {
+    const turno = cambioSesion;
+    const periodo = el('mensualidades-periodo').value;
+    const datos = await api('mensualidades' + (periodo ? '?periodo=' + encodeURIComponent(periodo) : ''));
+    if (turno !== cambioSesion) return;
+    el('mensualidades-periodo').value = datos.periodo;
+    const { filas, tarifa, totalPagado } = datos;
+    el('mensualidades-resumen').innerHTML = tarjetas([
+      ['Inscripciones registradas', filas.length],
+      ['En mes de prueba', filas.filter(f => f.estado === 'prueba').length],
+      ['Mensualidades pendientes', filas.filter(f => f.estado === 'pendiente').length],
+      ['Mensualidades vencidas', filas.filter(f => f.estado === 'vencida').length],
+      ['Pagos registrados en el período', pesos.format(totalPagado)],
+      ['Tarifa mensual de prueba', pesos.format(tarifa)],
+    ]);
+    const seleccion = el('mensualidades-cuenta').value;
+    el('mensualidades-cuenta').replaceChildren(...filas.filter(f => f.activo)
+      .map(f => new Option(f.nombre, f.id, false, f.id === seleccion)));
+    el('mensualidades-tabla').innerHTML = tabla(['Cuenta', 'Rol', 'Inscripción', 'Fin de prueba', 'Estado del período', 'Vencimiento', 'Importe', 'Fecha de pago'],
+      filas.map(f => [f.nombre, f.rol, fechaLocal(f.alta), f.pruebaHasta, f.estado,
+        f.cuota?.vence ?? '—', f.cuota ? pesos.format(f.cuota.monto) : '—',
+        f.cuota?.pagada ? fechaLocal(f.cuota.pagada) : '—']),
+      filas.map(f => f.cuota && !f.cuota.pagada
+        ? '<button type="button" data-pago-demo="' + escapar(f.cuota.id) + '">Marcar pagada</button>' : '—'));
+  }
+  async function accionMensualidad(ejecutar, mensajeExito = '') {
+    const turno = cambioSesion;
+    const salida = el('mensualidades-mensaje');
+    salida.textContent = '';
+    try {
+      await ejecutar();
+      if (turno === cambioSesion) salida.textContent = mensajeExito;
+    } catch (error) { if (turno === cambioSesion) salida.textContent = error.message; }
+  }
+  function tabla(titulos, filas, acciones = []) {
+    if (!filas.length) return '<p>No hay registros para mostrar.</p>';
+    return '<div class="tabla"><table><thead><tr>' + titulos.map(t => '<th scope="col">' + escapar(t) + '</th>').join('') +
+      (acciones.length ? '<th scope="col">Acción</th>' : '') + '</tr></thead><tbody>' +
+      filas.map((fila, i) => '<tr>' + fila.map(v => '<td>' + escapar(v) + '</td>').join('') +
+        (acciones.length ? '<td>' + acciones[i] + '</td>' : '') + '</tr>').join('') + '</tbody></table></div>';
+  }
+  function botonAdmin(tipo, id, valor, etiqueta) {
+    return '<button type="button" data-admin-tipo="' + tipo + '" data-admin-id="' + escapar(id) +
+      '" data-admin-valor="' + valor + '">' + etiqueta + '</button>';
+  }
+  function mostrarDirectorio() {
+    if (!datosAdmin) return;
+    const q = el('admin-buscar').value.toLowerCase().trim();
+    const estado = el('admin-estado').value;
+    const especie = el('admin-especie').value;
+    const usuarios = datosAdmin.usuarios.filter(u => (u.nombre + ' ' + u.email).toLowerCase().includes(q) &&
+      (!estado || String(u.activo) === estado));
+    const mascotas = datosAdmin.mascotas.filter(m => (m.nombre + ' ' + m.dueno).toLowerCase().includes(q) &&
+      (!especie || m.especie === especie));
+    const paginas = Math.max(1, Math.ceil(usuarios.length / 2));
+    paginaAdmin = Math.min(paginas - 1, Math.max(0, paginaAdmin));
+    const pagina = usuarios.slice(paginaAdmin * 2, paginaAdmin * 2 + 2);
+    el('admin-directorio').innerHTML = '<h4>Usuarios</h4>' + tabla(['Nombre', 'Correo', 'Alta', 'Estado', 'Rol', 'Mascotas'],
+      pagina.map(u => [u.nombre, u.email, fechaLocal(u.alta), u.activo ? 'Activo' : 'Suspendido', u.rol, u.mascotas]),
+      pagina.map(u => botonAdmin('usuarios', u.id, !u.activo, u.activo ? 'Suspender' : 'Reactivar'))) +
+      '<h4>Mascotas</h4>' + tabla(['Mascota', 'Dueño', 'Especie', 'Perfil', 'Collar físico'],
+        mascotas.map(m => [m.nombre, m.dueno, m.especie, m.estado, 'Sin vincular']));
+    el('admin-pagina').textContent = 'Página ' + (paginaAdmin + 1) + ' de ' + paginas;
+    el('admin-anterior').disabled = paginaAdmin === 0;
+    el('admin-siguiente').disabled = paginaAdmin >= paginas - 1;
+  }
+  async function mostrarServicio() {
+    const turno = cambioSesion;
+    if (rol === 'paseador') {
+      const perfil = await api('perfil');
+      if (turno !== cambioSesion) return;
+      el('servicio').innerHTML = '<h2>Perfil del paseador</h2><p class="estado">Verificación: ' + escapar(perfil.verificacion) + '</p><form id="perfil">' +
+        Object.entries(etiquetas).map(([k, nombre]) => '<label>' + nombre + '<input name="' + k +
+          '" value="' + escapar(perfil[k]) + '"' + (k === 'foto' ? ' type="url"' : ' required') + '></label>').join('') +
+        '<button>Guardar perfil</button></form>';
+      accion('perfil', async e => {
+        const p = Object.fromEntries(new FormData(e.currentTarget));
+        await api('perfil', 'PUT', { ...p, precio: Number(p.precio), duracion: Number(p.duracion) });
+        mensaje('Perfil guardado.');
+      }, 'submit');
+      return;
+    }
+    el('servicio').innerHTML = '<h2>Buscar paseadores</h2><form id="buscar"><label>Zona<input name="zona" placeholder="' + escapar(ciudades[ciudad].nombre) + '"></label>' +
+      '<label>Disponibilidad<input name="disponibilidad" placeholder="Lunes"></label><label>Precio máximo (ARS)<input name="precio" type="number" min="1"></label>' +
+      '<label>Tipo de paseo<input name="tipo" placeholder="Individual"></label><label>Verificación<select name="verificacion">' +
+      '<option value="">Todas</option><option value="pendiente">Pendiente</option><option value="aprobado">Aprobado</option>' +
+      '</select></label><button>Buscar</button></form><div id="resultados"></div>';
+    accion('buscar', buscar, 'submit');
+    await buscar();
+  }
+  async function buscar() {
+    const turno = cambioSesion;
+    const perfiles = await api('paseadores?' + new URLSearchParams(new FormData(el('buscar'))));
+    if (turno !== cambioSesion) return;
+    el('resultados').innerHTML = perfiles.map(p => '<article>' +
+      (p.foto ? '<img src="' + escapar(p.foto) + '" alt="" referrerpolicy="no-referrer">' : '') +
+      '<h3>' + escapar(p.nombre) + '</h3><p>' + escapar(p.zona) + ' · Verificación: ' + escapar(p.verificacion) + '</p>' +
+      '<p>' + escapar(p.descripcion) + ' · ARS $' + p.precio + ' · ' + p.duracion + ' min</p>' +
+      '<p>Disponibilidad: ' + escapar(p.disponibilidad) + '</p><p>Experiencia: ' + escapar(p.experiencia) +
+      ' · Referencias: ' + escapar(p.referencias) + '</p>' +
+      (rol === 'dueno' ? '<form id="solicitar-' + p.id + '"><label>Mascota<select name="mascota"><option>Mora</option><option>Simón</option></select></label><label>Fecha y horario<input name="fecha" type="datetime-local" required></label><button>Solicitar paseo</button></form>' : '') +
+      '</article>').join('') || '<p>No hay perfiles en esa zona.</p>';
+    if (rol === 'dueno') for (const p of perfiles) accion('solicitar-' + p.id, async e => {
+      const datos = Object.fromEntries(new FormData(e.currentTarget));
+      await api('reservas', 'POST', { ...datos, fecha: new Date(datos.fecha).toISOString(), paseador: p.id });
+      mensaje('Solicitud enviada.');
+      await reservas();
+    }, 'submit');
+  }
+  const nombres = { aceptar: 'Aceptar', rechazar: 'Rechazar', cancelar: 'Cancelar',
+    iniciar: 'Activar seguimiento', finalizar: 'Finalizar paseo', ver: 'Ver recorrido',
+    simular: 'Simular punto', gps: 'Usar GPS del celular', detener: 'Pausar GPS del celular' };
+  function opciones(r) {
+    if (r.estado === 'solicitado') return rol === 'paseador' ? ['aceptar', 'rechazar'] : ['cancelar'];
+    if (r.estado === 'aceptado') return rol === 'paseador' ? ['iniciar', 'cancelar'] : ['cancelar'];
+    if (r.estado === 'activo') {
+      if (rol !== 'paseador') return ['ver'];
+      return gpsReal
+        ? ['ver', 'simular', 'gps', 'detener', 'finalizar']
+        : ['ver', 'simular', 'finalizar'];
+    }
+    return [];
+  }
+  async function reservas() {
+    const turno = cambioSesion;
+    const lista = await api('reservas');
+    if (turno !== cambioSesion) return;
+    const hoy = new Date().toDateString();
+    const proximo = lista.filter(r => r.estado === 'aceptado' && Date.parse(r.fecha) >= Date.now())
+      .sort((a, b) => Date.parse(a.fecha) - Date.parse(b.fecha))[0];
+    el('estadisticas').innerHTML = tarjetas([
+      [rol === 'dueno' ? 'Mis mascotas' : 'Solicitudes', rol === 'dueno' ? 2 : lista.filter(r => r.estado === 'solicitado').length],
+      ['Próximos paseos', lista.filter(r => r.estado === 'aceptado').length],
+      ['Paseos activos', lista.filter(r => r.estado === 'activo').length],
+      ['Alertas del collar virtual', collar?.fuera ? 1 : 0],
+      ['Solicitudes pendientes', lista.filter(r => r.estado === 'solicitado').length],
+      ['Paseos de hoy', lista.filter(r => new Date(r.fecha).toDateString() === hoy && ['aceptado', 'activo', 'finalizado'].includes(r.estado)).length],
+      ['Servicios finalizados', lista.filter(r => r.estado === 'finalizado').length],
+    ]);
+    if (proximo) el('estadisticas').insertAdjacentHTML('beforeend', tarjetas([['Próximo turno · ' + proximo.mascota, fechaLocal(proximo.fecha)]]));
+    const visibles = filtroMascota ? lista.filter(r => r.mascota === filtroMascota) : lista;
+    const filtro = filtroMascota ? '<p>Mostrando paseos de ' + escapar(filtroMascota) +
+      ' <button type="button" id="limpiar-mascota">Ver todos</button></p>' : '';
+    el('reservas').innerHTML = filtro + (visibles.map(r => '<article><h3>' + escapar(r.mascota) + ' · ' + r.estado +
+      '</h3><p>' + new Date(r.fecha).toLocaleString() + ' · ARS $' + r.precio + ' · ' + r.duracion + ' min previstos</p>' +
+      (r.estado === 'finalizado' ? '<p>Resumen: ' + r.distanciaKm + ' km · ' + minutos(r.fin - r.inicio) + ' min</p>' : '') +
+      '<div class="acciones">' + opciones(r).map(a => '<button id="' + a + '-' + r.id + '">' + nombres[a] + '</button>').join('') +
+      '</div></article>').join('') || '<p>Todavía no hay reservas para esta selección.</p>');
+    if (filtroMascota) accion('limpiar-mascota', () => { filtroMascota = ''; return reservas(); });
+    for (const r of visibles) for (const a of opciones(r)) accion(a + '-' + r.id, () => operar(r.id, a));
+  }
+  const minutos = ms => Math.floor(ms / 60000);
+  function mapa(puntos, zona = 0) {
+    const centro = puntos[0];
+    const proyectar = p => [150 + (p.lon - centro.lon) * 65000, 95 - (p.lat - centro.lat) * 75000];
+    const puntosSvg = puntos.map(proyectar);
+    const [x, y] = puntosSvg.at(-1);
+    const radio = zona * .675;
+    const margen = Math.max(18, radio);
+    const xs = puntosSvg.map(p => p[0]);
+    const ys = puntosSvg.map(p => p[1]);
+    const izquierda = Math.min(...xs) - margen, arriba = Math.min(...ys) - margen;
+    const ancho = Math.max(300, Math.max(...xs) - izquierda + margen);
+    const alto = Math.max(190, Math.max(...ys) - arriba + margen);
+    return '<svg class="plano" viewBox="' + [izquierda, arriba, ancho, alto].join(' ') + '" role="img" aria-label="Plano del recorrido, sin mapa de calles">' +
+      (zona ? '<circle cx="150" cy="95" r="' + radio + '" fill="#accfae"/>' : '') +
+      '<polyline fill="none" stroke="#204f4c" stroke-width="4" points="' + puntosSvg.map(p => p.join(',')).join(' ') +
+      '"/><circle r="6" fill="#c34c35" cx="' + x + '" cy="' + y + '"/></svg>';
+  }
+  const mapas = new Map();
+  function liberarMapa(id) {
+    mapas.get(id)?.map.remove();
+    mapas.delete(id);
+  }
+  function dibujar(id, puntos, fuente, radio = 0, alerta = false, leyenda = '', callesAutorizadas = false) {
+    const destino = el(id);
+    const color = fuente === 'collar' ? '#a94c36' : '#204f4c';
+    if (!window.L || (!puntos.every(p => p.simulado) && !callesAutorizadas)) {
+      liberarMapa(id);
+      destino.innerHTML = '<p>' + (puntos.every(p => p.simulado)
+        ? 'Mapa de calles no disponible. Mostrando el plano de la demo.'
+        : 'Plano privado del GPS del celular.') + '</p>' + mapa(puntos, radio);
+      return;
+    }
+    const coords = puntos.map(p => [p.lat, p.lon]);
+    let actual = mapas.get(id);
+    if (!actual || actual.nodo.parentElement !== destino || actual.fuente !== fuente) {
+      liberarMapa(id);
+      destino.replaceChildren();
+      const nodo = document.createElement('div');
+      nodo.className = 'mapa';
+      nodo.dataset.fuente = fuente;
+      destino.append(nodo);
+      const map = L.map(nodo).setView(coords[0], fuente === 'operaciones' ? 13 : 16);
+      const aviso = document.createElement('p');
+      aviso.hidden = true;
+      aviso.textContent = 'No se pudieron cargar las calles. La ruta y sus marcadores siguen disponibles.';
+      destino.append(aviso);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).on('tileerror', () => { aviso.hidden = false; }).addTo(map);
+      actual = { nodo, map, fuente, capas: L.layerGroup().addTo(map) };
+      mapas.set(id, actual);
+    }
+    actual.capas.clearLayers();
+    if (radio) L.circle(coords[0], { radius: radio, color: '#2d7153', fillOpacity: .18 }).addTo(actual.capas);
+    if (coords.length > 1) L.polyline(coords, { color, weight: 4 }).addTo(actual.capas);
+    L.circleMarker(coords.at(-1), { radius: 8, color: alerta ? '#a3231a' : color, fillOpacity: .9 })
+      .bindTooltip(leyenda).addTo(actual.capas);
+    if (actual.cantidad !== coords.length && coords.length > 1) {
+      actual.map.panInside(coords.at(-1), { padding: [35, 35], animate: false });
+    }
+    actual.cantidad = coords.length;
+  }
+  let recorridoVisible;
+  async function ver(id) {
+    const t = cambioSesion;
+    const { puntos, distanciaKm, inicio } = await api('reservas/' + id + '/ubicacion');
+    if (t !== cambioSesion || recorridoVisible !== id) return;
+    const ultimo = puntos.at(-1);
+    if (!el('mapa-paseo')) {
+      el('recorrido').innerHTML = '<div id="paseo-estado"></div><label id="permiso-calles" hidden><span><input type="checkbox" id="calles-gps"> Mostrar calles (OpenStreetMap recibe las solicitudes de mapa de la zona)</span></label><div id="mapa-paseo"></div>';
+      accion('calles-gps', () => ver(recorridoVisible), 'change');
+    }
+    const real = ultimo && !ultimo.simulado;
+    el('permiso-calles').hidden = !real || rol !== 'dueno';
+    const segundos = ultimo ? Math.max(0, Math.floor((Date.now() - (ultimo.capturada ?? ultimo.hora)) / 1000)) : 0;
+    const estado = !ultimo ? 'Esperando el primer punto'
+      : segundos > 20 ? 'Ubicación desactualizada' : 'Ubicación reciente';
+    el('paseo-estado').innerHTML = '<h3>GPS del paseador · ' + estado + '</h3><p>' + distanciaKm + ' km · ' + minutos(Date.now() - inicio) + ' min</p>' +
+      (ultimo ? '<p>Última ubicación: ' + ultimo.lat.toFixed(5) + ', ' + ultimo.lon.toFixed(5) + ' · ' +
+        new Date(ultimo.capturada ?? ultimo.hora).toLocaleTimeString() + ' · hace ' + segundos + ' s</p>' : '');
+    if (ultimo) dibujar('mapa-paseo', puntos, 'paseo', 0, false, 'GPS del paseador',
+      real && rol === 'dueno' && el('calles-gps').checked);
+  }
+  async function operar(id, a) {
+    const ruta = 'reservas/' + id;
+    if (a === 'ver') {
+      if (recorridoVisible !== id && el('calles-gps')) el('calles-gps').checked = false;
+      recorridoVisible = id;
+      await ver(id);
+    } else if (a === 'simular') {
+      detener();
+      await api(ruta + '/ubicacion', 'POST', { simular: true });
+      recorridoVisible = id;
+      await ver(id);
+    } else if (a === 'gps') {
+      if (!gpsReal) throw new Error('El GPS real está deshabilitado en esta instancia.');
+      detener();
+      if (!navigator.geolocation) throw new Error('La geolocalización no está disponible.');
+      const sesionGps = { id, intento: 0, ultimaConfirmada: 0, enviando: false };
+      seguimiento = sesionGps;
+      registrar('Activación explícita. Esperando permiso y posición.');
+      sesionGps.watch = navigator.geolocation.watchPosition(async ({ coords, timestamp }) => {
+        const ahora = Date.now();
+        if (seguimiento !== sesionGps || document.hidden || !navigator.onLine ||
+            sesionGps.enviando || ahora - sesionGps.intento < 5000) return;
+        sesionGps.intento = ahora;
+        sesionGps.enviando = true;
+        try {
+          await api(ruta + '/ubicacion', 'POST', { lat: coords.latitude, lon: coords.longitude, capturada: timestamp });
+          if (seguimiento !== sesionGps) return;
+          const intervalo = sesionGps.ultimaConfirmada ? Math.round((ahora - sesionGps.ultimaConfirmada) / 1000) : 0;
+          registrar(intervalo ? 'Punto confirmado. Intervalo: ' + intervalo + ' s.' : 'Primer punto confirmado.');
+          sesionGps.ultimaConfirmada = ahora;
+          mensaje('GPS activo en Safari. Último envío confirmado.');
+        } catch (error) {
+          if (seguimiento !== sesionGps) return;
+          registrar('Envío fallido' + (error.estado ? ' (HTTP ' + error.estado + ')' : '') + '.');
+          if ([401, 403, 404].includes(error.estado)) detener();
+          mensaje('No se pudo enviar esta posición. ' + error.message);
+        } finally { sesionGps.enviando = false; }
+      }, error => {
+        if (seguimiento !== sesionGps) return;
+        registrar('Safari devolvió error de ubicación ' + error.code + '.');
+        if (error.code === 1) detener();
+        mensaje(error.code === 1 ? 'Permiso de ubicación denegado. Revisá los permisos de Safari.' : 'Safari no obtuvo una posición nueva.');
+      }, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 });
+      mensaje('Esperando el primer punto del GPS de Safari.');
+      recorridoVisible = id;
+      await ver(id);
+    } else if (a === 'detener') {
+      detener();
+      mensaje('GPS del celular pausado. Podés reanudarlo o finalizar el paseo.');
+    } else {
+      await api(ruta + '/estado', 'POST', { accion: a });
+      if (a === 'finalizar') {
+        if (seguimiento?.id === id) detener();
+        recorridoVisible = undefined;
+        liberarMapa('mapa-paseo');
+        el('recorrido').replaceChildren();
+      }
+      await reservas();
+      if (a === 'iniciar') { recorridoVisible = id; await ver(id); }
+    }
+  }
+  function mostrarCollar() {
+    const ultimo = collar.puntos.at(-1);
+    if (!el('mapa-collar')) el('collar').innerHTML = '<div id="collar-estado"></div><div id="mapa-collar"></div>';
+    el('collar-estado').innerHTML = '<h3>' + escapar(collar.mascota) + ' · Collar virtual activo</h3><p>Última señal: ' +
+      ultimo.lat.toFixed(5) + ', ' + ultimo.lon.toFixed(5) + ' · ' + new Date(ultimo.hora).toLocaleTimeString() +
+      '</p><p role="status"' + (collar.fuera ? ' class="alerta"' : '') + '>' +
+      (collar.fuera ? '⚠️ Alerta: salió de la zona segura.' : 'Dentro de la zona segura.') + '</p>';
+    dibujar('mapa-collar', collar.puntos, 'collar', collar.radio, collar.fuera, 'Collar virtual');
+    mascotas();
+    reservas().catch(error => mensaje(error.message));
+  }
+  accion('vincular', () => {
+    const radio = el('radio').valueAsNumber;
+    if (!Number.isFinite(radio) || radio < 25 || radio > 2000) throw new Error('Ingresá un radio entre 25 y 2000 m.');
+    const { lat, lon } = ciudades[ciudad];
+    collar = { mascota: el('mascota').value, radio, puntos: [{ lat, lon, hora: Date.now(), simulado: true }], fuera: false };
+    collares.set(ciudad, collar);
+    mostrarCollar();
+  });
+  accion('mover', () => {
+    if (!collar) throw new Error('Vinculá primero un collar virtual.');
+    const centro = collar.puntos[0];
+    const lat = centro.lat + collar.puntos.length * .00065;
+    collar.puntos.push({ lat, lon: centro.lon, hora: Date.now(), simulado: true });
+    collar.fuera = (lat - centro.lat) * 111195 > collar.radio;
+    mostrarCollar();
+  });
+  accion('rol', async () => {
+    recorridoVisible = undefined;
+    liberarMapa('mapa-paseo');
+    liberarMapa('mapa-operativo');
+    await sesion();
+    mapas.get('mapa-collar')?.map.invalidateSize();
+  }, 'change');
+  accion('ciudad', async () => {
+    recorridoVisible = undefined;
+    liberarMapa('mapa-paseo');
+    liberarMapa('mapa-operativo');
+    liberarMapa('mapa-collar');
+    el('collar').replaceChildren();
+    await sesion();
+  }, 'change');
+  accion('actualizar', reservas);
+  accion('actualizar-operaciones', operaciones);
+  accion('mensualidades-filtro', () => accionMensualidad(mostrarMensualidades), 'submit');
+  accion('reporte-diario-actualizar', mostrarReporteDiario);
+  accion('mensualidades-alta', () => accionMensualidad(async () => {
+    const turno = cambioSesion;
+    const { periodo } = await api('mensualidades', 'POST', {
+      usuario: el('mensualidades-cuenta').value, vence: el('mensualidades-vence').value,
+    });
+    if (turno !== cambioSesion) return;
+    el('mensualidades-periodo').value = periodo;
+    await Promise.all([mostrarMensualidades(), operaciones()]);
+  }, 'Mensualidad registrada.'), 'submit');
+  el('mensualidades-tabla').addEventListener('click', event => {
+    const boton = event.target.closest('[data-pago-demo]');
+    if (!boton) return;
+    const turno = cambioSesion;
+    void accionMensualidad(async () => {
+      await api('mensualidades/' + encodeURIComponent(boton.dataset.pagoDemo) + '/pago', 'PUT');
+      if (turno === cambioSesion) await Promise.all([mostrarMensualidades(), mostrarReporteDiario(), operaciones()]);
+    }, 'Pago de prueba registrado.');
+  });
+  accion('reportes-fechas', operaciones, 'submit');
+  accion('admin-filtros', () => { paginaAdmin = 0; mostrarDirectorio(); }, 'submit');
+  accion('admin-anterior', () => { paginaAdmin--; mostrarDirectorio(); });
+  accion('admin-siguiente', () => { paginaAdmin++; mostrarDirectorio(); });
+  el('mascotas-demo').addEventListener('click', event => {
+    const enlace = event.target.closest('[data-mascota]');
+    if (!enlace) return;
+    filtroMascota = enlace.dataset.mascota;
+    reservas().catch(error => mensaje(error.message));
+  });
+  async function actualizarAdmin(tipo, id, valor) {
+    const turno = cambioSesion;
+    try {
+      await api('operaciones/' + tipo + '/' + encodeURIComponent(id), 'PATCH', { valor });
+      if (turno === cambioSesion) await operaciones();
+    } catch (error) { if (turno === cambioSesion) mensaje(error.message); }
+  }
+  el('operaciones').addEventListener('click', event => {
+    const boton = event.target.closest('[data-admin-tipo]');
+    if (boton) void actualizarAdmin(boton.dataset.adminTipo, boton.dataset.adminId, boton.dataset.adminValor === 'true');
+  });
+  el('operaciones').addEventListener('change', event => {
+    const control = event.target;
+    if (control.dataset.verificar) void actualizarAdmin('paseadores', control.dataset.verificar, control.value);
+  });
+  setInterval(async () => {
+    const id = recorridoVisible;
+    if (!id || !token) return;
+    try { await ver(id); }
+    catch (error) {
+      if (recorridoVisible !== id) return;
+      if (![401, 403, 404, 409].includes(error.estado)) {
+        const estado = el('paseo-estado');
+        if (estado) estado.textContent = 'Conexión interrumpida. El mapa muestra la última posición conocida.';
+        return;
+      }
+      recorridoVisible = undefined;
+      liberarMapa('mapa-paseo');
+      if (seguimiento?.id === id) detener();
+      el('recorrido').textContent = 'Seguimiento en vivo cerrado.';
+      reservas().catch(error => mensaje(error.message));
+    }
+  }, 4000);
+  document.addEventListener('visibilitychange', () => {
+    if (seguimiento) registrar(document.hidden ? 'Safari quedó oculto. Envío pausado.' : 'Safari volvió a primer plano. Esperando posición nueva.');
+  });
+  window.addEventListener('offline', () => { if (seguimiento) registrar('Sin conexión. Se descartan muestras mientras dure la pausa.'); });
+  window.addEventListener('online', () => { if (seguimiento) registrar('Conexión recuperada. Esperando posición nueva.'); });
+  window.addEventListener('pagehide', detener);
+  sesion().catch(error => mensaje(error.message));
+</script>
+</html>
