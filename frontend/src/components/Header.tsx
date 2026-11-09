@@ -2,10 +2,11 @@
 // Header con logo, título y menú de usuario
 
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform, ScrollView, Linking } from 'react-native';
 import { Text, Avatar, Menu, Divider, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contextos/ContextoAuth';
+import { mostrarAlerta } from '../utilidades/alerta';
 import { temaApp, espaciado, MARCA } from '../constantes/tema';
 
 type HeaderNavigationProp = any;
@@ -46,6 +47,28 @@ export default function Header({
       // Por defecto, navegar a Inicio
       navigation.navigate('Principal', { screen: 'Inicio' });
     }
+  };
+
+  const irASuscripcion = () => {
+    setMostrarMenu(false);
+    navigation.navigate('Suscripcion');
+  };
+
+  const irAFuncionalidades = () => {
+    setMostrarMenu(false);
+    navigation.navigate('Funcionalidades');
+  };
+
+  const irALugares = () => {
+    setMostrarMenu(false);
+    navigation.navigate('Principal', { screen: 'Mapa', params: { vista: 'lugares' } });
+  };
+
+  const abrirSoporte = () => {
+    setMostrarMenu(false);
+    Linking.openURL('https://wa.me/5493425089906?text=Hola%2C%20escribo%20por%20Indio.').catch(
+      () => mostrarAlerta('Soporte', 'No se pudo abrir WhatsApp. Escribinos a it360tecnologia@gmail.com.')
+    );
   };
 
   return (
@@ -104,12 +127,33 @@ export default function Header({
               leadingIcon="account"
             />
             <Menu.Item 
+              onPress={irASuscripcion}
+              title="Mi suscripción" 
+              leadingIcon="crown"
+            />
+            <Menu.Item 
+              onPress={irAFuncionalidades}
+              title="Funcionalidades" 
+              leadingIcon="apps"
+            />
+            <Menu.Item 
+              onPress={irALugares}
+              title="Lugares pet friendly" 
+              leadingIcon="map-marker"
+            />
+            <Divider />
+            <Menu.Item 
               onPress={() => {
                 setMostrarMenu(false);
                 navigation.navigate('Configuracion');
               }} 
               title="Configuración" 
               leadingIcon="cog"
+            />
+            <Menu.Item 
+              onPress={abrirSoporte}
+              title="Ayuda y soporte" 
+              leadingIcon="whatsapp"
             />
             <Divider />
             <Menu.Item 

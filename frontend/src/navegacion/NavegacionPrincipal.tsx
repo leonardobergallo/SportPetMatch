@@ -28,6 +28,8 @@ import PantallaEditarPerfil from '../pantallas/PantallaEditarPerfil';
 import PantallaAgregarMascota from '../pantallas/PantallaAgregarMascota';
 import PantallaEditarMascota from '../pantallas/PantallaEditarMascota';
 import PantallaConfiguracion from '../pantallas/PantallaConfiguracion';
+import PantallaFuncionalidades from '../pantallas/PantallaFuncionalidades';
+import PantallaSuscripcion from '../pantallas/PantallaSuscripcion';
 
 // Importar tema y contexto de autenticación
 import { temaApp } from '../constantes/tema';
@@ -52,6 +54,8 @@ export type RootStackParamList = {
   
   // Pantallas de configuración
   Configuracion: undefined;
+  Funcionalidades: undefined;
+  Suscripcion: undefined;
   EditarPerfil: undefined;
   AgregarMascota: undefined;
   EditarMascota: { mascotaId: string };
@@ -322,6 +326,18 @@ function NavegadorPrincipal(): JSX.Element {
             options={{ title: 'Configuración' }}
           />
           
+          <Stack.Screen
+            name="Funcionalidades"
+            component={PantallaFuncionalidades}
+            options={{ title: 'Funcionalidades' }}
+          />
+
+          <Stack.Screen
+            name="Suscripcion"
+            component={PantallaSuscripcion}
+            options={{ title: 'Mi suscripción' }}
+          />
+
           <Stack.Screen 
             name="EditarPerfil" 
             component={PantallaEditarPerfil}

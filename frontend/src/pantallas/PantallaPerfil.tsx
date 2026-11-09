@@ -2,7 +2,7 @@
 // Perfil del usuario y configuración
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Image, LinearGradient, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
 import { Text, Card, Avatar, Switch, Divider, List } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -99,7 +99,7 @@ export default function PantallaPerfil(): JSX.Element {
           </Button>
           <TouchableOpacity 
             style={estilos.botonVerMascota}
-            onPress={() => navigation.navigate('Mascotas')}
+            onPress={() => (navigation as any).navigate('Principal', { screen: 'Mascotas' })}
           >
             <Text style={estilos.botonTextoVerMascota}>Ver Mis Mascotas</Text>
           </TouchableOpacity>
@@ -121,6 +121,24 @@ export default function PantallaPerfil(): JSX.Element {
           <MaterialIcons name="chevron-right" size={22} color="#fff" />
         </TouchableOpacity>
       )}
+
+      {/* Acceso a funcionalidades */}
+      <TouchableOpacity
+        style={estilos.cardFuncionalidades}
+        onPress={() => navigation.navigate('Funcionalidades')}
+        activeOpacity={0.85}
+      >
+        <View style={estilos.funcionalidadesIcono}>
+          <MaterialIcons name="apps" size={26} color="#FFFFFF" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={estilos.funcionalidadesTitle}>Descubrí las funcionalidades</Text>
+          <Text style={estilos.funcionalidadesDesc}>
+            Eventos, matching, lugares pet friendly, membresía y paseos con GPS.
+          </Text>
+        </View>
+        <MaterialIcons name="chevron-right" size={24} color={temaApp.colors.onSurfaceVariant} />
+      </TouchableOpacity>
 
       {/* Configuración */}
       <Card style={estilos.cardConfig}>
@@ -301,6 +319,38 @@ const estilos = StyleSheet.create({
   cardConfig: {
     margin: espaciado.lg,
     ...sombras.media,
+  },
+  cardFuncionalidades: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaciado.md,
+    backgroundColor: temaApp.colors.surface,
+    marginHorizontal: espaciado.lg,
+    marginTop: espaciado.lg,
+    borderRadius: 14,
+    padding: espaciado.md,
+    borderWidth: 1,
+    borderColor: temaApp.colors.border,
+    ...sombras.pequena,
+  },
+  funcionalidadesIcono: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: temaApp.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  funcionalidadesTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: temaApp.colors.onSurface,
+  },
+  funcionalidadesDesc: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: temaApp.colors.onSurfaceVariant,
+    marginTop: 2,
   },
   cardStats: {
     margin: espaciado.lg,
