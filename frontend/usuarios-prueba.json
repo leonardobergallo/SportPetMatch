@@ -1,35 +1,53 @@
 {
-  "descripcion": "Usuarios de prueba para SportPetMatch. Contraseña de todos: 123456",
+  "descripcion": "Usuarios demo de Indio. Contraseña de todos: IndioComunidad2026!",
   "usuarios": [
     {
-      "email": "maria.gonzalez@sportpetmatch.com",
-      "password": "123456",
-      "nombre": "María González",
-      "perfil": "Corredora con perro Max (Golden Retriever)"
+      "email": "camila.sosa.sf@gmail.com",
+      "password": "IndioComunidad2026!",
+      "nombre": "Camila Sosa",
+      "perfil": "Corre por la Costanera con Kira (Border Collie)"
     },
     {
-      "email": "carlos.rodriguez@sportpetmatch.com",
-      "password": "123456",
-      "nombre": "Carlos Rodríguez",
-      "perfil": "Ciclista, sin mascota"
+      "email": "julian.aguirre.sf@gmail.com",
+      "password": "IndioComunidad2026!",
+      "nombre": "Julián Aguirre",
+      "perfil": "Cuidador y ciclista, sin mascota"
     },
     {
-      "email": "ana.martinez@sportpetmatch.com",
-      "password": "123456",
-      "nombre": "Ana Martínez",
-      "perfil": "Veterinaria con Luna, Rocky y Mimi"
+      "email": "florencia.benitez.sf@gmail.com",
+      "password": "IndioComunidad2026!",
+      "nombre": "Florencia Benítez",
+      "perfil": "Yoga y paseos con Nala (Siamesa)"
     },
     {
-      "email": "diego.fernandez@sportpetmatch.com",
-      "password": "123456",
-      "nombre": "Diego Fernández",
-      "perfil": "Entrenador premium"
+      "email": "nicolas.ramirez.st@gmail.com",
+      "password": "IndioComunidad2026!",
+      "nombre": "Nicolás Ramírez",
+      "perfil": "Running en Santo Tomé con Toto (Mestizo)"
     },
     {
-      "email": "laura.sanchez@sportpetmatch.com",
-      "password": "123456",
-      "nombre": "Laura Sánchez",
-      "perfil": "Principiante con gato Luna"
+      "email": "agustina.lemos.pna@gmail.com",
+      "password": "IndioComunidad2026!",
+      "nombre": "Agustina Lemos",
+      "perfil": "Senderismo en Paraná con Uma (Weimaraner)"
+    },
+    {
+      "email": "martin.cabrera.sf@gmail.com",
+      "password": "IndioComunidad2026!",
+      "nombre": "Martín Cabrera",
+      "perfil": "Entrenamiento funcional en Santa Fe"
+    },
+    {
+      "email": "valentina.ruiz.pna@gmail.com",
+      "password": "IndioComunidad2026!",
+      "nombre": "Valentina Ruiz",
+      "perfil": "Paseos y cafés pet friendly con Simón (Caniche)"
+    },
+    {
+      "email": "facundo.delgado.sf@gmail.com",
+      "password": "IndioComunidad2026!",
+      "nombre": "Facundo Delgado",
+      "perfil": "Running nocturno con Lola (Labrador)"
     }
   ]
 }

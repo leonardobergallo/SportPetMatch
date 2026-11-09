@@ -8,12 +8,13 @@
 	<head>
 		<title>Indio — Personas con mascotas</title>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content="Indio: app gratis para salir con tu mascota, eventos y encuentros." />
 		<!-- Backend público separado para no depender del /api protegido del proyecto principal -->
 		<meta name="indio-api-base" content="/api" />
 		<link rel="stylesheet" href="/multiverse/assets/css/main.css" />
 		<link rel="stylesheet" href="/multiverse/assets/css/indio-override.css" />
+		<link rel="stylesheet" href="/multiverse/assets/css/indio-portada.css" />
 		<noscript><link rel="stylesheet" href="/multiverse/assets/css/noscript.css" /></noscript>
 	</head>
 	<body class="is-preload">
@@ -23,20 +24,69 @@
 
 				<!-- Header -->
 					<header id="header">
-						<h1><a href="/"><strong>Indio</strong> · mi mejor amigo</a></h1>
-						<nav>
+						<p class="indio-brand"><a href="#indio-portada"><img src="/multiverse/images/indio-logo.png" alt="" width="42" height="42" /><span><strong>INDIO</strong><small>Mi mejor amigo</small></span></a></p>
+						<nav id="indio-nav" aria-label="Navegación principal">
 							<ul>
-								<li><a href="#indio-login" class="open-app"><span class="icon solid fa-mobile-alt"></span> Entrar / login</a></li>
-								<li><a href="#indio-como-funciona"><span class="icon solid fa-route"></span> Cómo funciona</a></li>
-								<li><a href="#indio-instalacion"><span class="icon solid fa-download"></span> Instalación</a></li>
-								<li><a href="#indio-contacto"><span class="icon solid fa-envelope"></span> Contacto</a></li>
-								<li><a href="#footer" class="icon solid fa-info-circle">Info</a></li>
+								<li><a href="#indio-portada">Inicio</a></li>
+								<li><a href="#indio-como-funciona">Cómo funciona</a></li>
+								<li><a href="#indio-comunidad">Comunidad</a></li>
+								<li><a href="#indio-eventos">Eventos</a></li>
+								<li><a href="#indio-precios">Planes</a></li>
 							</ul>
 						</nav>
+						<div class="indio-header-actions">
+							<a href="#indio-login" class="open-app indio-nav-login">Ingresar</a>
+							<button class="indio-menu-toggle" type="button" aria-expanded="false" aria-controls="indio-nav" aria-label="Abrir menú">
+								<span class="indio-menu-icon" aria-hidden="true"></span>
+							</button>
+						</div>
 					</header>
 
+				<section class="indio-portada" id="indio-portada" aria-labelledby="indio-portada-titulo">
+					<div class="indio-portada-copy">
+						<p class="indio-portada-beta">Santa Fe · Paraná · Rosario</p>
+						<h1 id="indio-portada-titulo">Más aventuras<br />juntos <span aria-hidden="true">🐾</span></h1>
+						<p>Conocé personas, descubrí encuentros y compartí momentos inolvidables con tu mascota.</p>
+						<div class="indio-portada-actions">
+							<a href="/app.html?app=1" class="indio-crear-cuenta">Crear cuenta gratis →</a>
+							<a href="#indio-como-funciona">Cómo funciona</a>
+						</div>
+						<p class="indio-portada-plan"><a href="#indio-precios">Conocé la próxima membresía de Indio →</a></p>
+						<a class="indio-portada-play" href="#indio-instalacion">Google Play · Android</a>
+					</div>
+					<img src="/multiverse/images/fulls/02.jpg" alt="Dos perros durante un paseo al aire libre" width="640" height="480" />
+				</section>
+				<div class="indio-portada-features" id="indio-eventos" aria-label="Qué podés hacer en Indio">
+					<p><i class="fas fa-calendar-alt" aria-hidden="true"></i><strong>Eventos</strong>Participá en paseos, encuentros y actividades pet friendly.</p>
+					<p><i class="fas fa-users" aria-hidden="true"></i><strong>Matching</strong>Conocé personas con intereses similares y amor por los animales.</p>
+					<p><i class="fas fa-comment" aria-hidden="true"></i><strong>Chat</strong>Conectá, coordiná planes y compartí experiencias.</p>
+					<p><i class="fas fa-paw" aria-hidden="true"></i><strong>Perfil de mascota</strong>Contá su historia y compartí sus fotos con la comunidad.</p>
+					<p><i class="fas fa-map-marker-alt" aria-hidden="true"></i><strong>Lugares pet friendly</strong>Descubrí cafés, parques y comercios donde tu mascota es bienvenida.</p>
+					<p><i class="fas fa-route" aria-hidden="true"></i><strong>Paseos con GPS · Próximamente</strong>Estamos preparando una forma de coordinar paseos y seguir el recorrido desde la app.</p>
+				</div>
+
+				<section class="indio-presentacion" id="indio-comunidad">
+					<div>
+						<p class="indio-portada-beta">Comunidad pet friendly</p>
+						<h2>La app pet friendly para vivir más aventuras</h2>
+						<p>Una comunidad pensada para que vos y tu mascota disfruten más, conozcan amigos y vivan nuevas experiencias juntos.</p>
+						<ul><li>Fácil de usar</li><li>Conectá con otros amantes de los animales</li><li>Descubrí experiencias pet friendly</li></ul>
+					</div>
+					<div class="indio-capturas">
+						<img src="/multiverse/images/app-eventos.png" alt="Pantalla de eventos de Indio con datos de ejemplo" loading="lazy" width="390" height="780" />
+						<img src="/multiverse/images/app-detalle.png" alt="Detalle de un evento de ejemplo en Indio" loading="lazy" width="390" height="780" />
+					</div>
+				</section>
+
 				<!-- Main -->
-					<div id="main">
+					<div class="indio-carrusel-header">
+						<h2 id="indio-carrusel-titulo">Momentos con tu compañero</h2>
+						<div class="indio-carrusel-controles">
+							<button type="button" data-indio-slide="-1" aria-controls="main" aria-label="Fotos anteriores">←</button>
+							<button type="button" data-indio-slide="1" aria-controls="main" aria-label="Fotos siguientes">→</button>
+						</div>
+					</div>
+					<div id="main" class="indio-carrusel" role="region" aria-labelledby="indio-carrusel-titulo" tabindex="0">
 						<article class="thumb">
 							<a href="/multiverse/images/fulls/01.jpg" class="image"><img src="/multiverse/images/thumbs/01.jpg" alt="Perro jugando" /></a>
 							<h2>Eventos</h2>
@@ -68,7 +118,7 @@
 							<p>Usuario y mascota en un solo lugar.</p>
 						</article>
 						<article class="thumb">
-							<a href="/multiverse/images/fulls/08.jpg" class="image"><img src="/multiverse/images/thumbs/08.jpg" alt="Gratis beta" /></a>
+							<a href="/multiverse/images/fulls/08.jpg" class="image"><img src="/multiverse/images/thumbs/08.jpg" alt="Gratis" /></a>
 							<h2>Gratis</h2>
 							<p>Sin costo para usar la app.</p>
 						</article>
@@ -84,7 +134,7 @@
 						</article>
 						<article class="thumb">
 							<a href="/multiverse/images/fulls/11.jpg" class="image"><img src="/multiverse/images/thumbs/11.jpg" alt="Evento grupal" /></a>
-							<h2>Próxima beta</h2>
+							<h2>Novedades</h2>
 							<p>Seguimos sumando funciones.</p>
 						</article>
 						<article class="thumb">
@@ -102,7 +152,7 @@
 								<div class="indio-paw" aria-hidden="true">🐾</div>
 								<h2 class="indio-title indio-display">Indio</h2>
 								<p class="indio-slogan">Mi mejor amigo</p>
-								<p class="indio-desc"><strong>Eventos, matching y chat para personas y mascotas.</strong> Indio es gratis durante esta beta de prueba. Por ahora la experiencia esta enfocada en la provincia de Santa Fe y zonas cercanas como Parana; mas adelante se puede extender a nuevas ciudades.</p>
+								<p class="indio-desc"><strong>Eventos, matching y chat para personas y mascotas.</strong> Indio es gratis. La experiencia está enfocada en Santa Fe, Paraná y Rosario; más adelante se puede extender a nuevas ciudades.</p>
 								<form id="indio-form-login" class="indio-form-box" novalidate>
 									<label for="indio-email">Email</label>
 									<input id="indio-email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" required />
@@ -124,14 +174,14 @@
 									<div class="indio-feature-icon" aria-hidden="true">📅</div>
 									<div>
 										<h3>Eventos</h3>
-										<p>Descubri personas con mascotas, sumate a encuentros y encontra eventos pet-friendly en Santa Fe y zonas cercanas como Parana.</p>
+										<p>Descubrí personas con mascotas, sumate a encuentros y encontrá eventos pet-friendly en Santa Fe, Paraná y Rosario.</p>
 									</div>
 								</div>
 								<div class="indio-feature">
 									<div class="indio-feature-icon" aria-hidden="true">💜</div>
 									<div>
 										<h3>Matching</h3>
-										<p>Encontra personas y mascotas compatibles segun intereses, nivel y ubicacion dentro de la beta regional.</p>
+										<p>Encontrá personas y mascotas compatibles según intereses, nivel y ubicación.</p>
 									</div>
 								</div>
 								<div class="indio-feature">
@@ -152,14 +202,14 @@
 									<div class="indio-feature-icon" aria-hidden="true">🐾</div>
 									<div>
 										<h3>Comunidad</h3>
-										<p>Sumate a una comunidad pensada para personas con mascotas de Santa Fe, Parana y alrededores.</p>
+										<p>Sumate a una comunidad pensada para personas con mascotas de Santa Fe, Paraná y Rosario.</p>
 									</div>
 								</div>
 								<div class="indio-feature">
 									<div class="indio-feature-icon" aria-hidden="true">🆓</div>
 									<div>
 										<h3>Gratis</h3>
-										<p>Acceso gratuito durante la versión beta de prueba.</p>
+										<p>Acceso gratuito para empezar.</p>
 									</div>
 								</div>
 							</div>
@@ -186,17 +236,17 @@
 								<h2 class="indio-section-title indio-display">Empezá en pocos pasos</h2>
 								<p class="indio-section-lead">Creá tu cuenta una sola vez y seguí el recorrido guiado dentro de la app.</p>
 								<div class="indio-steps indio-steps-wide">
-									<div class="indio-step"><div class="indio-step-num">1</div><h3>Creá tu cuenta</h3><p>Registrate con tu email y contraseña para empezar a usar Indio.</p></div>
-									<div class="indio-step"><div class="indio-step-num">2</div><h3>Completá tu perfil</h3><p>Seguís un flujo guiado para cargar tu información, intereses y preferencias.</p></div>
-									<div class="indio-step"><div class="indio-step-num">3</div><h3>Agregá tu mascota</h3><p>Sumá los datos de tu compañero para personalizar tu experiencia.</p></div>
-									<div class="indio-step"><div class="indio-step-num">4</div><h3>Explorá Indio</h3><p>Entrá a eventos, matching y chat desde la app con tu cuenta ya creada.</p></div>
+									<div class="indio-step"><div class="indio-step-num">1</div><h3>Creá tu perfil</h3><p>Registrate con tu email y completá tus preferencias.</p></div>
+									<div class="indio-step"><div class="indio-step-num">2</div><h3>Sumá tu mascota</h3><p>Completá su perfil y compartí sus fotos.</p></div>
+									<div class="indio-step"><div class="indio-step-num">3</div><h3>Conectá</h3><p>Descubrí personas, eventos y experiencias.</p></div>
 								</div>
 							</div>
 						</div>
 
 						<div class="indio-mid">
-							<h2 class="indio-display">Creá tu cuenta y seguí el flujo guiado dentro de la app</h2>
-							<button type="button" class="indio-btn-primary" id="indio-mid-cta" style="max-width:320px;margin:0 auto;display:block;">Crear cuenta gratis</button>
+							<img src="/multiverse/images/fulls/02.jpg" alt="" loading="lazy" width="160" height="160" />
+							<div><h2 class="indio-display">Sumate a Indio gratis</h2><p>Conectá, compartí y viví nuevas aventuras junto a tu mascota.</p></div>
+							<button type="button" class="indio-btn-primary" id="indio-mid-cta">Crear cuenta ahora →</button>
 						</div>
 
 						<div class="indio-section" id="indio-instalacion">
@@ -218,34 +268,34 @@
 									<div class="indio-install-card">
 										<span class="indio-install-emoji" aria-hidden="true">🤖</span>
 										<h3>Android</h3>
-										<p>Abrí Chrome e instalá Indio desde la web.</p>
+										<p>Descargá Indio desde Google Play y mantenela actualizada automáticamente.</p>
 										<div class="indio-apk-box">
-											<p class="indio-apk-title">Instalación en Android</p>
-											<p>Indio se instala como PWA desde Chrome. No necesitás Play Store ni descargar archivos externos.</p>
+											<p class="indio-apk-title">Disponible en Google Play</p>
+											<p>Indio ya está disponible en Google Play.</p>
 											<ol class="indio-apk-steps">
-												<li>Abrí este link con <strong>Chrome</strong>: <a href="http://indio.com.ar/" target="_blank" rel="noopener noreferrer">indio.com.ar</a></li>
-												<li>Tocá <strong>Abrir app</strong>.</li>
-												<li>En el menú de Chrome, elegí <strong>Instalar app</strong> o <strong>Agregar a pantalla de inicio</strong>.</li>
+												<li>Abrí el enlace con la misma cuenta de Google con la que te registraste.</li>
+												<li>Tocá <strong>Descargar en Google Play</strong>.</li>
+												<li>Instalá o actualizá Indio desde Google Play.</li>
 											</ol>
 										</div>
-										<p class="indio-install-apk-wrap"><a class="indio-install-apk" href="/?app=1">Abrir app</a></p>
-										<p class="indio-install-note">Cuando haya APK oficial, lo publicaremos desde este mismo sitio.</p>
+										<p class="indio-install-apk-wrap"><a class="indio-install-apk" href="https://play.google.com/apps/testing/com.it360.indio" target="_blank" rel="noopener noreferrer">Descargar en Google Play</a></p>
+										<p class="indio-install-note">La descarga es gratuita. Si tenés problemas para instalarla, escribinos.</p>
 									</div>
 								</div>
 								<p class="indio-install-micro">Si preferís, también podés usar Indio desde la web sin instalar nada.</p>
 							</div>
 						</div>
 
-						<!-- Planes y apoyo voluntario -->
+						<!-- Planes de Indio -->
 						<div class="indio-section indio-precios-section" id="indio-precios">
-							<p class="indio-tag">APOYO</p>
-							<h2 class="indio-display">Indio es gratis durante la beta</h2>
-							<p class="indio-precios-sub">Si te gusta la app y querés ayudar a mantenerla activa, podés hacer una contribución rápida para el mantenimiento. No es obligatoria para usar Indio.</p>
+							<p class="indio-tag">PLANES</p>
+							<h2 class="indio-display">Indio es gratis</h2>
+							<p class="indio-precios-sub">Explorá la comunidad y conocé lo que estamos preparando para la membresía.</p>
 							<div class="indio-precios-grid">
 								<div class="indio-plan">
 									<div class="indio-plan-badge indio-plan-badge-free">GRATIS</div>
 									<div class="indio-plan-price">ARS <span class="indio-plan-num">$0</span></div>
-									<p class="indio-plan-period">Acceso libre durante la beta</p>
+									<p class="indio-plan-period">Acceso libre</p>
 									<ul class="indio-plan-features">
 										<li>&#10003; Perfil de usuario y mascota</li>
 										<li>&#10003; Matching con otros due&#241;os</li>
@@ -256,16 +306,15 @@
 									<button type="button" class="indio-btn-plan indio-btn-plan-free" onclick="document.getElementById('indio-mid-cta').click()">Crear cuenta</button>
 								</div>
 								<div class="indio-plan indio-plan-premium">
-									<div class="indio-plan-badge indio-plan-badge-pro">MANTENIMIENTO</div>
-									<div class="indio-plan-price">ARS <span class="indio-plan-num">$15.000</span></div>
-									<p class="indio-plan-period">Contribución sugerida para que Indio siga funcionando y mejorando.</p>
+									<div class="indio-plan-badge indio-plan-badge-pro">PRÓXIMAMENTE</div>
+									<h3 class="indio-membership-title">Membresía Indio</h3>
+									<div class="indio-plan-price">ARS <span class="indio-plan-num">$15.900</span> / mes</div>
+									<p class="indio-plan-period">Primer mes gratis. Después, pagás cada mes por Mercado Pago. Vas a poder consultar el enlace, el estado y el vencimiento desde tu cuenta.</p>
 									<ul class="indio-plan-features">
-										<li>&#10003; Transferencia bancaria</li>
-										<li>&#10003; Alias: <strong>IT360.SOLUCIONES</strong></li>
-										<li>&#10003; Banco Santander</li>
-										<li>&#10003; Titular: ANIBAL LEONARDO BERGALLO</li>
+										<li><strong>Paseos con GPS</strong><br />Estamos preparando una forma de solicitar paseos, ver el recorrido mientras el paseador comparte su ubicación y consultar el resumen al finalizar.</li>
+										<li><strong>Lugares pet friendly</strong><br />Encontrá cafés, plazas y comercios que reciben mascotas.</li>
 									</ul>
-									<a class="indio-btn-plan indio-btn-plan-pro" href="https://wa.me/5493425089906?text=Hola%2C%20quiero%20hacer%20una%20contribuci%C3%B3n%20de%20ARS%2015.000%20para%20el%20mantenimiento%20de%20Indio." target="_blank" rel="noopener noreferrer">Avisar contribuci&oacute;n</a>
+									<a class="indio-btn-plan indio-btn-plan-free" href="/suscripcion.html">Mi suscripción</a>
 								</div>
 							</div>
 						</div>
@@ -273,10 +322,10 @@
 						<div class="indio-section indio-dark" id="indio-extra">
 							<div class="indio-extra-card" id="indio-registro">
 								<p class="indio-tag">ESTADO DEL PROYECTO</p>
-								<h2 class="indio-display">Estamos construyendo la próxima beta</h2>
-								<p class="indio-extra-lead">Indio esta enfocado en una experiencia simple para la beta regional: crear tu cuenta, completar el onboarding, agregar tu mascota y empezar a explorar eventos, matching y chat en Santa Fe, Parana y alrededores.</p>
+								<h2 class="indio-display">Estamos construyendo la próxima etapa</h2>
+								<p class="indio-extra-lead">Indio está enfocado en una experiencia simple: crear tu cuenta, completar el onboarding, agregar tu mascota y empezar a explorar eventos, matching y chat en Santa Fe, Paraná y Rosario.</p>
 								<div class="indio-steps">
-									<div class="indio-step"><div class="indio-step-num">✓</div><h3>Gratis durante la beta</h3><p>Podés registrarte y empezar a usar Indio sin costo mientras está en versión de prueba.</p></div>
+									<div class="indio-step"><div class="indio-step-num">✓</div><h3>Gratis para empezar</h3><p>Podés registrarte y empezar a usar Indio sin costo.</p></div>
 									<div class="indio-step"><div class="indio-step-num">⚙</div><h3>En desarrollo activo</h3><p>Estamos mejorando funciones y experiencia semana a semana.</p></div>
 									<div class="indio-step"><div class="indio-step-num">→</div><h3>Próximamente más funciones</h3><p>Seguimos trabajando en nuevas herramientas para la comunidad.</p></div>
 								</div>
@@ -288,20 +337,20 @@
 						<div class="indio-contacto" id="indio-contacto">
 							<p class="indio-contacto-tag">CONTACTO</p>
 							<h2 class="indio-contacto-title indio-display">Escribinos</h2>
-							<p class="indio-contacto-desc">Si querés soporte, dejarnos feedback o consultar por la beta, escribinos.</p>
+							<p class="indio-contacto-desc">Si querés soporte, dejarnos feedback o consultar por Indio, escribinos.</p>
 							<ul class="indio-contacto-list">
 								<li>
-									<span class="indio-contacto-label" aria-hidden="true">✉️</span>
+									<span class="indio-contacto-label" aria-hidden="true"><i class="fas fa-envelope"></i></span>
 									<div>
-										<strong>Email</strong>
-										<a class="indio-contacto-link" href="mailto:leonardobergallo@gmail.com?subject=Consulta%20Indio">leonardobergallo@gmail.com</a>
+										<strong>Email oficial</strong>
+										<a class="indio-contacto-link" href="mailto:it360tecnologia@gmail.com?subject=Consulta%20Indio">it360tecnologia@gmail.com</a>
 									</div>
 								</li>
 								<li>
-									<span class="indio-contacto-label" aria-hidden="true">💬</span>
+									<span class="indio-contacto-label" aria-hidden="true"><i class="fab fa-whatsapp"></i></span>
 									<div>
 										<strong>WhatsApp</strong>
-										<a class="indio-contacto-link indio-wa" href="https://wa.me/5493425089906?text=Hola%2C%20escribo%20por%20Indio%20%28SportPetMatch%29." target="_blank" rel="noopener noreferrer">+54 9 342 508-9906 — Chatear ahora</a>
+										<a class="indio-contacto-link indio-wa" href="https://wa.me/5493425089906?text=Hola%2C%20escribo%20por%20Indio." target="_blank" rel="noopener noreferrer">+54 9 342 508-9906 — Chatear ahora</a>
 									</div>
 								</li>
 							</ul>
@@ -310,18 +359,28 @@
 
 						<div class="indio-brand-footer">
 							<strong>Indio · mi mejor amigo</strong>
-							Eventos, matching y chat para personas y mascotas · Beta gratis en Santa Fe, Parana y alrededores · IT360
+							Eventos, matching y chat para personas y mascotas · Santa Fe, Paraná y Rosario · IT360
 						</div>
 					</div>
 				</section>
 
 				<!-- Footer -->
+					<nav class="indio-footer-nav" aria-label="Enlaces de Indio">
+						<a href="#indio-portada"><strong>INDIO</strong> · Mi mejor amigo</a>
+						<a href="#indio-como-funciona">Cómo funciona</a>
+						<a href="#indio-comunidad">Comunidad</a>
+						<a href="#indio-eventos">Eventos</a>
+						<a href="#indio-contacto">Contacto</a>
+						<a href="/politica-de-privacidad">Privacidad</a>
+						<a href="/terminos">Términos</a>
+						<a href="/eliminar-cuenta">Eliminar cuenta</a>
+					</nav>
 					<footer id="footer" class="panel">
 						<div class="inner split">
 							<div>
 								<section>
 									<h2>Indio</h2>
-									<p>App para <strong>personas y mascotas</strong>: eventos, matching y chat. Gratis durante la beta de prueba, enfocada por ahora en Santa Fe, Parana y alrededores.</p>
+									<p>App para <strong>personas y mascotas</strong>: eventos, matching y chat. Gratis, con foco en Santa Fe, Paraná y Rosario.</p>
 								</section>
 								<section>
 									<h2>IT360</h2>
@@ -345,7 +404,7 @@
 								</section>
 								<section>
 									<h2>Contacto</h2>
-									<p><a href="mailto:leonardobergallo@gmail.com?subject=Consulta%20Indio">leonardobergallo@gmail.com</a></p>
+									<p><a href="mailto:it360tecnologia@gmail.com?subject=Consulta%20Indio">it360tecnologia@gmail.com</a></p>
 									<p><a href="https://wa.me/5493425089906?text=Hola%2C%20escribo%20por%20Indio." target="_blank" rel="noopener noreferrer">WhatsApp +54 9 342 508-9906</a></p>
 									<p><a href="/politica-de-privacidad">Política de Privacidad</a> · <a href="/terminos">Términos</a> · <a href="/eliminar-cuenta">Eliminar cuenta</a></p>
 								</section>
@@ -360,7 +419,7 @@
 				<div class="indio-wa-panel" id="indio-wa-panel" hidden>
 					<button type="button" class="indio-wa-close" id="indio-wa-close" aria-label="Cerrar">&times;</button>
 					<div class="indio-wa-panel-head">
-						<img class="indio-wa-panel-avatar" src="/multiverse/images/thumbs/08.png" width="48" height="48" alt="" decoding="async" />
+						<img class="indio-wa-panel-avatar" src="/multiverse/images/indio-logo.png" width="48" height="48" alt="" decoding="async" />
 						<div>
 							<strong class="indio-wa-panel-name">Indio</strong>
 							<span class="indio-wa-panel-status">Soporte por WhatsApp</span>
@@ -371,7 +430,7 @@
 				</div>
 				<button type="button" class="indio-wa-fab" id="indio-wa-fab" aria-expanded="false" aria-controls="indio-wa-panel" aria-label="Abrir asistente de WhatsApp">
 					<span class="indio-wa-fab-ring" aria-hidden="true"></span>
-					<img class="indio-wa-fab-avatar" src="/multiverse/images/thumbs/08.png" width="56" height="56" alt="" decoding="async" />
+					<img class="indio-wa-fab-avatar" src="/multiverse/images/indio-logo.png" width="56" height="56" alt="" decoding="async" />
 					<span class="indio-wa-fab-badge" aria-hidden="true"></span>
 				</button>
 			</div>
@@ -383,6 +442,42 @@
 			<script src="/multiverse/assets/js/breakpoints.min.js"></script>
 			<script src="/multiverse/assets/js/util.js"></script>
 			<script src="/multiverse/assets/js/main.js"></script>
+		<script>
+			var menuToggle = document.querySelector('.indio-menu-toggle');
+			var menu = document.getElementById('indio-nav');
+			function setMenu(open) {
+				menu.classList.toggle('indio-menu-open', open);
+				menuToggle.setAttribute('aria-expanded', String(open));
+				menuToggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+			}
+			menuToggle.addEventListener('click', function () {
+				var open = menuToggle.getAttribute('aria-expanded') !== 'true';
+				setMenu(open);
+				if (open) menu.querySelector('a').focus({ preventScroll: true });
+			});
+			menu.addEventListener('click', function (event) {
+				if (event.target.closest('a') && menuToggle.getAttribute('aria-expanded') === 'true') {
+					setMenu(false);
+					menuToggle.focus({ preventScroll: true });
+				}
+			});
+			document.querySelector('.indio-nav-login').addEventListener('click', function () {
+				setMenu(false);
+			});
+			document.addEventListener('keydown', function (event) {
+				if (event.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+					setMenu(false);
+					menuToggle.focus();
+				}
+			});
+			document.querySelectorAll('[data-indio-slide]').forEach(function (button) {
+				button.addEventListener('click', function () {
+					var carousel = document.getElementById('main');
+					var photo = carousel.querySelector('.thumb');
+					carousel.scrollBy({ left: Number(button.dataset.indioSlide) * photo.getBoundingClientRect().width });
+				});
+			});
+		</script>
 			<script>
 				(function () {
 					function scrollToLogin(e) {
@@ -567,6 +662,12 @@
 					}
 					var sr = document.getElementById('indio-open-registro');
 					if (sr) sr.addEventListener('click', openAppRoot);
+					document.querySelectorAll('.indio-crear-cuenta').forEach(function (link) {
+						link.addEventListener('click', function (event) {
+							event.preventDefault();
+							openAppRoot();
+						});
+					});
 					var mc = document.getElementById('indio-mid-cta');
 					if (mc) mc.addEventListener('click', openAppRoot);
 					var ec = document.getElementById('indio-extra-cta');

@@ -1,25 +1,45 @@
 // Rutas de Admin / CRM - SportPetMatch
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { middlewareAutenticacion } from '../middleware/autenticacion';
+import prisma from '../utilidades/prisma';
+import rutasAdminMembresia from './adminMembresia';
 
 const router = express.Router();
-const prisma = new PrismaClient();
+const adminIds = new Set(
+  (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean)
+);
 
-// Middleware: verifica clave de admin en header o query
-function adminAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) {
-    return res.status(503).json({ error: 'Admin no configurado' });
-  }
-  const provided = req.headers['x-admin-key'] as string || req.query.key as string;
-  if (!provided || provided !== secret) {
-    return res.status(401).json({ error: 'No autorizado' });
-  }
+router.use((_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
   next();
-}
+});
+router.use(middlewareAutenticacion);
+router.use(async (req, res, next) => {
+  const id = req.usuario?.usuarioId;
+  if (!id || !adminIds.has(id)) {
+    res.status(403).json({ error: 'Esta cuenta no tiene acceso administrativo' });
+    return;
+  }
+
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id },
+      select: { isActive: true },
+    });
+    if (!usuario?.isActive) {
+      res.status(403).json({ error: 'Esta cuenta no tiene acceso administrativo' });
+      return;
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.use('/membresias', rutasAdminMembresia);
 
 // GET /api/admin/stats — resumen general del CRM
-router.get('/stats', adminAuth, async (_req, res) => {
+router.get('/stats', async (_req, res) => {
   try {
     const haceSieteDias = new Date();
     haceSieteDias.setDate(haceSieteDias.getDate() - 7);
@@ -103,7 +123,7 @@ router.get('/stats', adminAuth, async (_req, res) => {
 });
 
 // GET /api/admin/usuarios — listado buscable y paginado de registros.
-router.get('/usuarios', adminAuth, async (req, res) => {
+router.get('/usuarios', async (req, res) => {
   try {
     const pagina = Math.max(1, Number.parseInt(String(req.query.pagina || '1'), 10) || 1);
     const limite = Math.min(100, Math.max(1, Number.parseInt(String(req.query.limite || '25'), 10) || 25));

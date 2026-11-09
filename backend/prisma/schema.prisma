@@ -349,6 +349,11 @@ model Compra {
   estado          String    @default("pendiente") // Estado: pendiente, completada, cancelada
   metodoPago      String? // Método de pago usado
   transaccionId   String? // ID de la transacción externa
+  cicloIndioId    String?   @unique
+  enlacePagoIndio String?
+  operacionIndio  String?   @unique
+  confirmadaPorId String?
+  enlaceEnviadoEn DateTime?
   fechaCompra     DateTime  @default(now()) // Fecha de la compra
   createdAt       DateTime @default(now()) // Fecha de creación
   updatedAt       DateTime @updatedAt // Fecha de última actualización
@@ -369,6 +374,8 @@ model Suscripcion {
   fechaFin        DateTime // Fecha de fin
   precio          Float // Precio de la suscripción
   moneda          String    @default("ARS") // Moneda
+  pruebaIndioUsuarioId String? @unique
+  avisoPruebaEn   DateTime?
   createdAt       DateTime @default(now()) // Fecha de creación
   updatedAt       DateTime @updatedAt // Fecha de última actualización
 

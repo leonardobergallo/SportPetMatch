@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Mi suscripción | Indio</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f7f4ee; color: #102333; font: 1rem/1.5 system-ui, sans-serif; }
+    main { width: min(92%, 42rem); margin: 2.5rem auto; }
+    section { background: #fff; padding: clamp(1rem, 4vw, 2rem); border: 1px solid #e3ddd2; border-radius: 1rem; margin-top: 1rem; }
+    h1 { margin: .75rem 0; } h2 { margin: 0 0 .75rem; font-size: 1.2rem; }
+    input, button, .payment { font: inherit; border-radius: .65rem; padding: .65rem .9rem; }
+    input { display: block; width: 100%; border: 1px solid #9ba9a8; margin: .25rem 0 .75rem; }
+    button, .payment { display: inline-block; background: #173f41; color: white; border: 0; text-decoration: none; cursor: pointer; }
+    button:disabled { opacity: .65; cursor: wait; }
+    a { color: #173f41; }
+    li { margin-bottom: .85rem; } li:last-child { margin-bottom: 0; }
+    #mensaje { color: #89341d; } [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="/">← Volver a Indio</a>
+    <h1>Mi suscripción</h1>
+    <p id="mensaje" role="status">Cargando...</p>
+    <section id="login" hidden>
+      <h2>Ingresá con tu cuenta de Indio</h2>
+      <form id="formLogin" method="post">
+        <label for="email">Correo electrónico</label>
+        <input id="email" type="email" autocomplete="username" required>
+        <label for="password">Contraseña</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button>Ingresar</button>
+      </form>
+      <p><a href="/#indio-login">Crear una cuenta de Indio</a></p>
+    </section>
+    <div id="cuenta" hidden>
+      <section>
+        <h2>Membresía Indio</h2>
+        <p id="estado"></p>
+        <p id="precio"></p>
+        <button id="prueba" hidden>Activar mi mes gratis</button>
+        <button id="renovar" hidden>Solicitar enlace de pago</button>
+      </section>
+      <section>
+        <h2>Renovaciones</h2>
+        <ul id="renovaciones"></ul>
+      </section>
+    </div>
+  </main>
+  <script>
+    const el = id => document.getElementById(id);
+    const sessionKey = 'indio_membresia_token';
+    let token = sessionStorage.getItem(sessionKey) || localStorage.getItem('@SportPetMatch:token');
+    const fecha = value => new Intl.DateTimeFormat('es-AR', {dateStyle: 'long', timeZone: 'America/Argentina/Buenos_Aires'}).format(new Date(value));
+    const importe = value => 'ARS $' + new Intl.NumberFormat('es-AR').format(value);
+
+    async function api(path, options = {}) {
+      const headers = {'Content-Type': 'application/json'};
+      if (token) headers.Authorization = 'Bearer ' + token;
+      const response = await fetch(path, {...options, headers});
+      const data = await response.json();
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          token = null;
+          sessionStorage.removeItem(sessionKey);
+          el('cuenta').hidden = true;
+          el('login').hidden = false;
+        }
+        throw new Error(data.error || data.message || 'No se pudo completar la solicitud.');
+      }
+      return data;
+    }
+
+    async function cargar() {
+      if (!token) {
+        el('mensaje').textContent = '';
+        el('login').hidden = false;
+        return;
+      }
+      const {periodo, renovaciones, puedeActivarPrueba, precio} = await api('/api/membresia');
+      const ahora = new Date();
+      const vigente = periodo && new Date(periodo.fechaFin) > ahora;
+      el('estado').textContent = periodo
+        ? vigente
+          ? `Membresía vigente hasta el ${fecha(periodo.fechaFin)}.`
+          : `Tu último período venció el ${fecha(periodo.fechaFin)}.`
+        : 'Tu mes gratis está disponible.';
+      el('precio').textContent = `Primer mes gratis. Luego, ${importe(precio)} por mes.`;
+      const pendiente = renovaciones.some(item => item.estado === 'pendiente');
+      el('prueba').hidden = !puedeActivarPrueba;
+      el('renovar').hidden = !periodo || pendiente || new Date(periodo.fechaInicio) > ahora;
+      const lista = el('renovaciones');
+      lista.replaceChildren();
+      for (const item of renovaciones) {
+        const fila = document.createElement('li');
+        const confirmado = item.estado === 'completada';
+        const estado = confirmado ? 'Pago confirmado' : item.enlacePagoIndio ? 'Pendiente de pago' : 'Enlace solicitado';
+        const detalle = confirmado
+          ? ` · ${fecha(item.fechaCompra)}`
+          : periodo ? ` · Renovación del ${fecha(periodo.fechaFin)}` : '';
+        fila.textContent = `${importe(item.monto)} · ${estado}${detalle}`;
+        if (!confirmado && item.enlacePagoIndio) {
+          const pago = document.createElement('a');
+          pago.className = 'payment';
+          pago.href = item.enlacePagoIndio;
+          pago.textContent = 'Pagar con Mercado Pago';
+          fila.append(document.createElement('br'), pago);
+        }
+        lista.append(fila);
+      }
+      if (!renovaciones.length) {
+        const fila = document.createElement('li');
+        fila.textContent = 'Todavía no hay renovaciones.';
+        lista.append(fila);
+      }
+      el('login').hidden = true;
+      el('cuenta').hidden = false;
+      el('mensaje').textContent = '';
+    }
+
+    function informar(error) {
+      el('mensaje').textContent = error.message;
+    }
+
+    async function ejecutar(boton, accion) {
+      if (boton) boton.disabled = true;
+      try {
+        await accion();
+        await cargar();
+      } catch (error) {
+        informar(error);
+      } finally {
+        if (boton) boton.disabled = false;
+      }
+    }
+
+    el('formLogin').addEventListener('submit', event => {
+      event.preventDefault();
+      ejecutar(event.submitter || el('formLogin').querySelector('button'), async () => {
+        const password = el('password').value;
+        el('password').value = '';
+        const {data} = await api('/api/auth/login', {
+          method: 'POST', body: JSON.stringify({email: el('email').value, password}),
+        });
+        token = data.token;
+        sessionStorage.setItem(sessionKey, token);
+      });
+    });
+    el('prueba').onclick = () => ejecutar(el('prueba'), () => api('/api/membresia/prueba', {method: 'POST'}));
+    el('renovar').onclick = () => ejecutar(el('renovar'), () => api('/api/membresia/renovaciones', {method: 'POST'}));
+    cargar().catch(informar);
+  </script>
+</body>
+</html>

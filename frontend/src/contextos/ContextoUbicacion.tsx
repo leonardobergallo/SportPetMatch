@@ -96,7 +96,7 @@ export function ProveedorUbicacion({ children }: { children: ReactNode }) {
       if (status !== 'granted') {
         mostrarAlerta(
           'Permisos de Ubicación',
-          'SportPetMatch necesita acceso a tu ubicación para mostrarte eventos cercanos y conectar con personas de tu zona.',
+          'Indio necesita acceso a tu ubicación para mostrarte eventos cercanos y conectar con personas de tu zona.',
           [
             { 
               text: 'Configurar', 

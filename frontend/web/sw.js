@@ -1,5 +1,5 @@
-// Service Worker para PWA - SportPetMatch
-const CACHE_NAME = 'sportpetmatch-v1'
+// Service Worker para PWA - Indio
+const CACHE_NAME = 'indio-v1'
 const urlsToCache = [
   '/',
   '/app.html',

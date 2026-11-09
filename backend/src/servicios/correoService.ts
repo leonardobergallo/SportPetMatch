@@ -1,6 +1,38 @@
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 const EMAIL_ADMIN_POR_DEFECTO = 'it360tecnologia@gmail.com';
 
+export async function enviarCorreoMembresia(
+  tipo: 'prueba' | 'renovacion',
+  id: string,
+  destinatario: string,
+  asunto: string,
+  texto: string
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const from = process.env.EMAIL_FROM?.trim();
+  const to = tipo === 'prueba'
+    ? process.env.MEMBRESIA_ADMIN_EMAIL?.trim() ||
+      process.env.ADMIN_NOTIFICATION_EMAIL?.trim() || EMAIL_ADMIN_POR_DEFECTO
+    : destinatario;
+  if (!apiKey || !from) return false;
+
+  try {
+    const response = await fetch(RESEND_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': `indio-membresia/${tipo}/${id}`,
+      },
+      body: JSON.stringify({ from, to: [to], subject: asunto, text: texto }),
+      signal: AbortSignal.timeout(5000),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 interface NuevoRegistroEmail {
   id: string;
   nombre: string;

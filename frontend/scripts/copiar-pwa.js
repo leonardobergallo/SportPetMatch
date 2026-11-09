@@ -15,6 +15,8 @@ const filesToCopy = [
   'manifest.json',
   'sw.js',
   'landing.html',
+  'admin.html',
+  'suscripcion.html',
   'politica-de-privacidad.html',
   'seguridad-infantil.html',
   'privacidad.html',

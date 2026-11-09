@@ -1,7 +1,12 @@
-Usuario para probar si anda la app
-==================================
+Usuarios demo de Indio
+=======================
 
-Email:    maria.gonzalez@sportpetmatch.com
-Password: 123456
+Email:    camila.sosa.sf@gmail.com
+Password: IndioComunidad2026!
 
-(Después de correr el seed del backend: npm run db:seed en la carpeta backend)
+Otra opción:
+Email:    leonardobergallo@gmail.com
+Password: (la contraseña real de la cuenta)
+
+Estas son cuentas demo de la app, no personas reales.
+Para el piloto, cargá usuarios con sus correos reales.

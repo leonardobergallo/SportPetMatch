@@ -18,6 +18,7 @@ import rutasMatches from './rutas/matches';
 import rutasMensajes from './rutas/mensajes';
 import rutasLugares from './rutas/lugares';
 import rutasAdmin from './rutas/admin';
+import rutasMembresia from './rutas/membresia';
 
 // Importar middleware personalizado
 // import { middlewareAutenticacion } from './middleware/autenticacion';
@@ -89,7 +90,7 @@ const corsOptions: cors.CorsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Admin-Key']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
 app.use(cors(corsOptions));
@@ -142,7 +143,7 @@ import { Request, Response } from 'express';
 // Ruta de salud del servidor
 app.get('/api/salud', (req: Request, res: Response) => {
   res.json({
-    mensaje: '¡Servidor SportPetMatch funcionando correctamente! 🐕‍🦺',
+    mensaje: '¡Servidor Indio funcionando correctamente! 🐕‍🦺',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     entorno: process.env.NODE_ENV || 'development',
@@ -153,7 +154,7 @@ app.get('/api/salud', (req: Request, res: Response) => {
 // Ruta raíz de la API
 app.get('/api', (req: Request, res: Response) => {
   res.json({
-    mensaje: 'API SportPetMatch - Conecta personas con mascotas, matches y eventos pet-friendly',
+    mensaje: 'API Indio - Conecta personas con mascotas, matches y eventos pet-friendly',
     version: '1.0.0',
     documentacion: '/api/documentacion',
     salud: '/api/salud',
@@ -178,6 +179,7 @@ app.use('/api/matches', rutasMatches);
 app.use('/api/mensajes', rutasMensajes);
 app.use('/api/lugares', rutasLugares);
 app.use('/api/admin', rutasAdmin);
+app.use('/api/membresia', rutasMembresia);
 
 // Middleware para rutas de API no encontradas (404).
 // Mantenerlo limitado a /api permite que un servidor externo sirva la web estatica.
@@ -243,7 +245,7 @@ const iniciarServidor = async () => {
     // await conectarBaseDatos();
     
     app.listen(PUERTO, HOST, () => {
-      console.log('🚀 Servidor SportPetMatch iniciado exitosamente!');
+      console.log('🚀 Servidor Indio iniciado exitosamente!');
       console.log(`📍 Servidor corriendo en: http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PUERTO}`);
       console.log(`🌍 Entorno: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📊 API disponible en: http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PUERTO}/api`);
