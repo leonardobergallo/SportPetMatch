@@ -8,6 +8,7 @@
   <style>
     :root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#18211b;background:#f5f7f5;--green:#268536;--orange:#ff7900;--muted:#67726a;--line:#dfe6e0}
     *{box-sizing:border-box}body{margin:0}.top{background:#237b31;color:#fff;padding:18px 5vw;display:flex;align-items:center;justify-content:space-between}.brand{font-size:22px;font-weight:800}.brand small{display:block;font-size:12px;font-weight:500;opacity:.86}.wrap{width:min(1180px,92vw);margin:28px auto}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 18px #15351b0d}.card{padding:18px}.card b{display:block;font-size:28px;color:var(--green)}.card span{color:var(--muted);font-size:13px}.panel{padding:20px}.tools{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:16px}h1{font-size:24px;margin:0}input,button{font:inherit;border-radius:10px;padding:10px 13px}input{border:1px solid #bfc9c1;min-width:280px}button{border:0;background:var(--green);color:#fff;font-weight:700;cursor:pointer}.secondary{background:#edf5ee;color:#216c2e}.danger{background:#b3261e}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:900px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #edf0ed;font-size:14px}th{color:#536059;font-size:12px;text-transform:uppercase}.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#eaf5eb;color:#1d6f2a;font-size:12px}.badge.off{background:#f3f3f3;color:#747474}.pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:16px;color:var(--muted)}.empty,.error{padding:24px;text-align:center;color:var(--muted)}.error{color:#a11}.login{width:min(420px,92vw);margin:12vh auto;padding:26px}.login input{width:100%;margin:16px 0}.hidden{display:none!important}@media(max-width:650px){.wrap{width:94vw}.top{padding:15px 3vw}.panel{padding:14px}input{min-width:100%}}
+    #membresias{margin-top:24px}.membership-list{display:grid;gap:12px}.membership-entry{padding:14px;border:1px solid var(--line);border-radius:12px}.membership-entry p{margin:.35rem 0}.membership-entry form{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.membership-entry input:not([type=checkbox]){min-width:0;flex:1 1 14rem}.membership-entry input[type=checkbox]{min-width:0}.membership-entry label{flex-basis:100%}
   </style>
 </head>
 <body>
@@ -15,9 +16,15 @@
   <main>
     <section id="login" class="panel login">
       <h1>Acceso administrativo</h1>
-      <p>Ingresá la clave configurada para Indio. Se conserva sólo en esta pestaña.</p>
-      <form id="loginForm"><input id="key" type="password" autocomplete="current-password" placeholder="Clave administrativa" required /><button type="submit">Ingresar</button></form>
-      <div id="loginError" class="error hidden"></div>
+      <p>Ingresá con el correo y la contraseña de tu cuenta de Indio.</p>
+      <form id="loginForm" method="post">
+        <label for="email">Correo electrónico</label>
+        <input id="email" type="email" autocomplete="username" required />
+        <label for="password">Contraseña</label>
+        <input id="password" type="password" autocomplete="current-password" required />
+        <button id="loginButton" type="submit">Ingresar</button>
+      </form>
+      <div id="loginError" class="error hidden" role="alert"></div>
     </section>
     <section id="dashboard" class="wrap hidden">
       <div id="cards" class="cards"></div>
@@ -26,24 +33,208 @@
         <div id="content" class="table-wrap"></div>
         <div class="pager"><button id="prev" class="secondary">Anterior</button><span id="pageInfo"></span><button id="next" class="secondary">Siguiente</button></div>
       </div>
+      <section class="panel" id="membresias">
+        <div class="tools">
+          <h1>Membresías</h1>
+          <label>Renovaciones
+            <select id="estadoRenovacion">
+              <option value="pendiente">Pendientes</option>
+              <option value="completada">Confirmadas</option>
+            </select>
+          </label>
+          <button id="actualizarMembresias" class="secondary">Actualizar</button>
+        </div>
+        <p id="membresiaMensaje" role="status"></p>
+        <div id="listaRenovaciones" class="membership-list"></div>
+        <div class="pager">
+          <button id="membresiaAnterior" class="secondary" disabled>Anterior</button>
+          <span id="membresiaPagina"></span>
+          <button id="membresiaSiguiente" class="secondary" disabled>Siguiente</button>
+        </div>
+        <h2>Pruebas recientes</h2>
+        <ul id="listaPruebas"></ul>
+      </section>
     </section>
   </main>
   <script>
     (() => {
-      const state={key:sessionStorage.getItem('indio_admin_key')||'',page:1,pages:1,search:''};
+      const tokenKey = 'indio_admin_token';
+      const state = {token: sessionStorage.getItem(tokenKey), page: 1, pages: 1, search: ''};
       const $=id=>document.getElementById(id);
       const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
       const date=v=>v?new Intl.DateTimeFormat('es-AR',{dateStyle:'short',timeStyle:'short'}).format(new Date(v)):'—';
-      async function api(path){const r=await fetch('/api/admin'+path,{headers:{'X-Admin-Key':state.key}});if(r.status===401||r.status===503)throw new Error('Clave incorrecta o ADMIN_SECRET no configurado.');if(!r.ok)throw new Error('No se pudo cargar la información.');return r.json()}
+      async function api(path, token, options = {}) {
+        const response = await fetch('/api/admin' + path, {
+          ...options,
+          headers: {Authorization: 'Bearer ' + token, 'Content-Type': 'application/json'},
+        });
+        if (!response.ok) {
+          const messages = {
+            401: 'Tu sesión venció. Volvé a ingresar.',
+            403: 'Tu cuenta no tiene acceso administrativo.',
+          };
+          const body = await response.json().catch(() => ({}));
+          const error = new Error(messages[response.status] || body.error || 'No se pudo cargar la información.');
+          error.status = response.status;
+          throw error;
+        }
+        return response.json();
+      }
+      function showLoginError(message) {
+        $('loginError').textContent = message;
+        $('loginError').classList.remove('hidden');
+      }
+      function clearSession() {
+        sessionStorage.removeItem(tokenKey);
+        state.token = null;
+        $('cards').replaceChildren();
+        $('content').replaceChildren();
+        $('listaRenovaciones').replaceChildren();
+        $('listaPruebas').replaceChildren();
+        $('dashboard').classList.add('hidden');
+        $('logout').classList.add('hidden');
+        $('login').classList.remove('hidden');
+      }
       function showDashboard(){ $('login').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').classList.remove('hidden') }
+      let paginaMembresia = 1;
+      let cargaMembresia = 0;
+      async function cargarMembresias() {
+        const token = state.token;
+        const carga = ++cargaMembresia;
+        const estado = $('estadoRenovacion').value;
+        const datos = await api(`/membresias?estado=${estado}&pagina=${paginaMembresia}`, token);
+        if (token !== state.token || carga !== cargaMembresia) return;
+        $('listaRenovaciones').innerHTML = datos.renovaciones.map(pago => {
+          const detalle = `<p><strong>${esc(pago.usuario.nombre)}</strong> · ${esc(pago.usuario.email)}</p>
+            <p>${esc(pago.moneda)} $${esc(new Intl.NumberFormat('es-AR').format(pago.monto))}</p>`;
+          if (pago.estado === 'completada') {
+            return `<article class="membership-entry">${detalle}<p>Confirmada · Operación ${esc(pago.operacionIndio)}</p></article>`;
+          }
+          const enlace = pago.enlacePagoIndio;
+          const boton = pago.enlaceEnviadoEn ? 'Correo enviado' : enlace ? 'Reintentar envío' : 'Guardar y enviar enlace';
+          return `<article class="membership-entry">${detalle}
+            <form data-id="${esc(pago.id)}" data-accion="enlace">
+              <input name="enlace" aria-label="Enlace de Mercado Pago" type="url" placeholder="Enlace de Mercado Pago" value="${esc(enlace)}" ${enlace ? 'readonly' : ''} required>
+              <button ${pago.enlaceEnviadoEn ? 'disabled' : ''}>${boton}</button>
+            </form>
+            ${enlace ? `<form data-id="${esc(pago.id)}" data-accion="confirmar">
+              <label><input type="checkbox" required> Verifiqué en Mercado Pago que el importe es correcto y el pago está aprobado.</label>
+              <input name="operacion" aria-label="Número de operación" inputmode="numeric" placeholder="Número de operación" required>
+              <button>Confirmar pago</button>
+            </form>` : ''}
+          </article>`;
+        }).join('') || '<p>No hay renovaciones con este estado.</p>';
+        $('listaPruebas').innerHTML = datos.pruebas.map(prueba =>
+          `<li>${esc(prueba.usuario.email)} · Hasta ${esc(date(prueba.fechaFin))}${prueba.avisoPruebaEn ? '' : ' · Aviso por correo pendiente'}</li>`
+        ).join('');
+        $('membresiaPagina').textContent = `Página ${datos.pagina} de ${datos.paginas}`;
+        $('membresiaAnterior').disabled = datos.pagina <= 1;
+        $('membresiaSiguiente').disabled = datos.pagina >= datos.paginas;
+      }
+      function errorMembresia(error) {
+        $('membresiaMensaje').textContent = error.message;
+      }
+      $('actualizarMembresias').onclick = () => cargarMembresias().catch(errorMembresia);
+      $('estadoRenovacion').onchange = () => {
+        paginaMembresia = 1;
+        cargarMembresias().catch(errorMembresia);
+      };
+      $('membresiaAnterior').onclick = () => {
+        paginaMembresia--;
+        cargarMembresias().catch(errorMembresia);
+      };
+      $('membresiaSiguiente').onclick = () => {
+        paginaMembresia++;
+        cargarMembresias().catch(errorMembresia);
+      };
+      $('listaRenovaciones').addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = event.target;
+        const {id, accion} = form.dataset;
+        const boton = event.submitter || form.querySelector('button');
+        if (boton) boton.disabled = true;
+        try {
+          const datos = Object.fromEntries(new FormData(form));
+          const respuesta = await api(`/membresias/${encodeURIComponent(id)}/${accion}`, state.token, {
+            method: 'POST', body: JSON.stringify(datos),
+          });
+          $('membresiaMensaje').textContent = accion === 'confirmar'
+            ? 'Pago confirmado y membresía renovada.'
+            : respuesta.correoEnviado ? 'Enlace guardado y enviado.'
+              : 'Enlace guardado. El correo quedó pendiente y se puede reintentar.';
+          await cargarMembresias();
+        } catch (error) {
+          errorMembresia(error);
+        } finally {
+          if (boton) boton.disabled = false;
+        }
+      });
       function cards(r){const items=[['Usuarios',r.totalUsuarios],['Altas últimos 7 días',r.usuariosUltimosSieteDias],['Usuarios activos',r.usuariosActivos],['Mascotas',r.totalMascotas],['Eventos',r.totalEventos],['Matches',r.totalMatches],['Mensajes',r.totalMensajes]];$('cards').innerHTML=items.map(([l,v])=>`<div class="card"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}
       function table(users){if(!users.length){$('content').innerHTML='<div class="empty">No se encontraron registros.</div>';return}$('content').innerHTML=`<table><thead><tr><th>Alta</th><th>Persona</th><th>Contacto</th><th>Ubicación</th><th>Estado</th><th>Actividad</th></tr></thead><tbody>${users.map(u=>`<tr><td>${date(u.createdAt)}</td><td><strong>${esc(u.nombre)}</strong><br><small>${esc(u.tipoUsuario||'')}</small></td><td>${esc(u.email)}<br><small>${esc(u.telefono||'Sin teléfono')}</small></td><td>${esc([u.ubicacionCiudad,u.ubicacionPais].filter(Boolean).join(', ')||'—')}</td><td><span class="badge ${u.isActive?'':'off'}">${u.isActive?'Activo':'Inactivo'}</span><br><small>${u.emailVerificado?'Email verificado':'Email pendiente'}</small></td><td>${u._count.mascotas} mascotas · ${u._count.eventosCreados} eventos · ${u._count.matches} matches</td></tr>`).join('')}</tbody></table>`}
-      async function load(){try{showDashboard();$('content').innerHTML='<div class="empty">Cargando…</div>';const [s,u]=await Promise.all([api('/stats'),api(`/usuarios?pagina=${state.page}&limite=25&buscar=${encodeURIComponent(state.search)}`)]);cards(s.resumen);table(u.usuarios);state.pages=u.paginacion.paginas;$('pageInfo').textContent=`Página ${state.page} de ${state.pages} · ${u.paginacion.total} registros`;$('prev').disabled=state.page<=1;$('next').disabled=state.page>=state.pages}catch(e){sessionStorage.removeItem('indio_admin_key');state.key='';$('dashboard').classList.add('hidden');$('logout').classList.add('hidden');$('login').classList.remove('hidden');$('loginError').textContent=e.message;$('loginError').classList.remove('hidden')}}
-      $('loginForm').addEventListener('submit',e=>{e.preventDefault();state.key=$('key').value;sessionStorage.setItem('indio_admin_key',state.key);load()});
+      let latestLoad = 0;
+      async function load() {
+        const request = ++latestLoad;
+        const {token, page, search} = state;
+        $('content').innerHTML = '<div class="empty">Cargando…</div>';
+        try {
+          const [stats, users] = await Promise.all([
+            api('/stats', token),
+            api(`/usuarios?pagina=${page}&limite=25&buscar=${encodeURIComponent(search)}`, token),
+          ]);
+          if (request !== latestLoad || token !== state.token) return;
+          sessionStorage.setItem(tokenKey, token);
+          cards(stats.resumen);
+          table(users.usuarios);
+          state.pages = users.paginacion.paginas;
+          $('pageInfo').textContent = `Página ${page} de ${state.pages} · ${users.paginacion.total} registros`;
+          $('prev').disabled = page <= 1;
+          $('next').disabled = page >= state.pages;
+          showDashboard();
+          cargarMembresias().catch(errorMembresia);
+          if (location.hash === '#membresias') $('membresias').scrollIntoView();
+        } catch (error) {
+          if (request !== latestLoad || token !== state.token) return;
+          if (error.status === 401 || error.status === 403 || $('dashboard').classList.contains('hidden')) {
+            clearSession();
+            showLoginError(error.message);
+            return;
+          }
+          $('content').textContent = 'No se pudo cargar la información. Volvé a intentar.';
+        }
+      }
+      $('loginForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = $('loginButton');
+        if (button.disabled) return;
+        button.disabled = true;
+        $('loginError').classList.add('hidden');
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email: $('email').value, password: $('password').value}),
+          });
+          if (response.status === 401) throw new Error('Revisá el correo y la contraseña.');
+          if (response.status === 403) throw new Error('Tu cuenta está inactiva.');
+          if (response.status === 429) throw new Error('Demasiados intentos. Volvé a intentar más tarde.');
+          if (!response.ok) throw new Error('No se pudo iniciar sesión.');
+          const {data} = await response.json();
+          state.token = data.token;
+          await load();
+        } catch (error) {
+          showLoginError(error.message);
+        } finally {
+          $('password').value = '';
+          button.disabled = false;
+        }
+      });
       $('searchForm').addEventListener('submit',e=>{e.preventDefault();state.search=$('search').value.trim();state.page=1;load()});
       $('prev').onclick=()=>{if(state.page>1){state.page--;load()}};$('next').onclick=()=>{if(state.page<state.pages){state.page++;load()}};
-      $('logout').onclick=()=>{sessionStorage.removeItem('indio_admin_key');location.reload()};
-      if(state.key)load();
+      $('logout').onclick=()=>{
+        clearSession();
+        location.reload();
+      };
+      if (state.token) load();
     })();
   </script>
 </body>

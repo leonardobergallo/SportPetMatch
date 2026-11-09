@@ -6,7 +6,7 @@
   "display": "standalone",
   "prefer_related_applications": false,
   "background_color": "#ffffff",
-  "theme_color": "#6200ea",
+  "theme_color": "#0B4A63",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

@@ -1,19 +1,83 @@
 /* Presentación pública de Indio. */
 #header {
-	background: #fff8f1;
-	color: #142732;
+	min-height: 4.5rem;
+	padding: .6rem clamp(1rem, 4vw, 4rem);
+	flex-wrap: nowrap;
+	align-items: center;
+	background: #fff9f3;
+	border-bottom: 1px solid #e9dfd4;
+	box-shadow: 0 4px 18px #1023330a;
+	line-height: 1.2;
 }
 
-#header h1 a,
-#header h1 strong,
-#header nav > ul > li a {
-	color: #142732;
+body {
+	padding-top: 4.5rem;
 }
 
-#header nav > ul > li .indio-nav-login {
+#header #indio-nav {
+	width: auto;
+	margin-left: auto;
+}
+
+#header #indio-nav > ul {
+	gap: .2rem;
+	overflow: visible;
+	padding: 0;
+}
+
+#header #indio-nav a,
+#header .indio-nav-login,
+#header .indio-menu-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	padding: 0 .8rem;
+	border-radius: .7rem;
+	font-size: .95rem;
+	font-weight: 650;
+	letter-spacing: 0;
+	line-height: 1.2;
+	text-transform: none;
+	white-space: nowrap;
+}
+
+#header #indio-nav a {
+	color: #102333;
+}
+
+#header #indio-nav a[href="#indio-precios"] {
+	color: #275750;
+	background: #e8f1e7;
+}
+
+#header #indio-nav a:hover {
+	color: #173f41 !important;
+	background: #ece4da;
+}
+
+.indio-header-actions {
+	display: flex;
+	align-items: center;
+	gap: .45rem;
+}
+
+#header .indio-nav-login {
 	background: #173f41;
-	border-radius: 2rem;
+	border: 0;
 	color: #fff;
+	padding-inline: 1rem;
+}
+
+#header .indio-nav-login:hover {
+	background: #275750;
+	color: #fff !important;
+}
+
+#header a:focus-visible,
+#header button:focus-visible {
+	outline: 2px solid #ac3d23;
+	outline-offset: 2px;
 }
 
 .indio-portada {
@@ -85,14 +149,14 @@
 	color: #fff;
 }
 
-.indio-portada-plan strong,
+.indio-portada-plan a,
 .indio-portada-play {
 	color: #173f41;
 }
 
 .indio-portada-features {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 	gap: 1rem;
 	padding: 1.5rem clamp(1rem, 5vw, 5rem);
 	background: #fff8f1;
@@ -109,6 +173,7 @@
 .indio-portada-features p:nth-child(2) { background: #e1ebde; }
 .indio-portada-features p:nth-child(3) { background: #e2ebf4; }
 .indio-portada-features p:nth-child(4) { background: #ede3f3; }
+.indio-portada-features p:nth-child(5) { background: #e8f1e0; }
 
 .indio-portada-features strong {
 	display: block;
@@ -170,14 +235,12 @@
 }
 
 body { background: #fff9f3; font-family: Inter, system-ui, sans-serif; }
-#header { background: #fff9f3; padding-inline: clamp(1rem, 5vw, 5rem); line-height: 1.2; }
 body.is-preload #header { transform: none; }
-.indio-brand { margin: 0; line-height: 1; }
+.indio-brand { flex: none; margin: 0; line-height: 1; }
 .indio-brand a { display: flex; align-items: center; gap: .65rem; color: #102333; border: 0; }
 .indio-brand strong { display: block; color: inherit; font-size: 1.65rem; font-weight: 850; }
 .indio-brand small { color: inherit; }
 #header .indio-menu-toggle { display: none; }
-#header nav > ul > li a { text-transform: none; font-size: .9rem; letter-spacing: 0; }
 .indio-portada { background: #fff9f3; color: #102333; }
 .indio-portada > img { max-height: 36rem; }
 .indio-portada-actions a:first-child { background: #f2694b; border-color: #f2694b; color: #102333; }
@@ -185,7 +248,7 @@ body.is-preload #header { transform: none; }
 .indio-portada-features p:hover { transform: translateY(-4px); box-shadow: 0 12px 24px #10233314; }
 .indio-portada-features i { display: block; margin-bottom: .45rem; font-size: 1.6rem; color: #204f4c; }
 .indio-portada-features strong { font-size: 1.2rem; }
-#indio-eventos, #indio-comunidad { scroll-margin-top: 7rem; }
+#indio-eventos, #indio-comunidad, #indio-precios { scroll-margin-top: 5.25rem; }
 .indio-presentacion {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
@@ -206,13 +269,66 @@ body.is-preload #header { transform: none; }
 .indio-footer-nav { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; align-items: center; padding: 1.5rem clamp(1rem, 5vw, 5rem); background: #102333; }
 .indio-footer-nav a, .indio-footer-nav strong { color: #fff; }
 #acceso-panel.indio-native .indio-mid #indio-mid-cta { background: #f2694b; color: #102333; width: auto; }
-@media (max-width: 720px) {
-	body { padding-top: 4.6rem; }
-	#header { align-items: center; }
-	#header .indio-menu-toggle { display: block; padding: 0; width: 2.7rem; color: #102333; }
-	#header #indio-nav { display: none; flex-basis: 100%; }
+.indio-membership-title {
+	margin: 0 0 .45rem;
+	color: #fff;
+	font-size: 1.55rem;
+	font-weight: 750;
+	letter-spacing: normal;
+	text-transform: none;
+}
+
+#indio-precios .indio-plan-period { color: #b9c5d7; }
+
+@media (max-width: 860px) {
+	#header .indio-menu-toggle {
+		display: inline-flex;
+		width: 44px;
+		padding: 0;
+		background: #f1e9df;
+		box-shadow: none;
+		color: #173f41;
+	}
+
+	.indio-menu-icon,
+	.indio-menu-icon::before,
+	.indio-menu-icon::after {
+		display: block;
+		width: 18px;
+		height: 2px;
+		border-radius: 2px;
+		background: currentColor;
+	}
+
+	.indio-menu-icon { position: relative; }
+	.indio-menu-icon::before,
+	.indio-menu-icon::after { position: absolute; left: 0; content: ""; }
+	.indio-menu-icon::before { top: -6px; }
+	.indio-menu-icon::after { top: 6px; }
+	.indio-menu-toggle[aria-expanded="true"] .indio-menu-icon { background: transparent; }
+	.indio-menu-toggle[aria-expanded="true"] .indio-menu-icon::before { top: 0; transform: rotate(45deg); }
+	.indio-menu-toggle[aria-expanded="true"] .indio-menu-icon::after { top: 0; transform: rotate(-45deg); }
+
+	#header #indio-nav {
+		display: none;
+		position: absolute;
+		inset: calc(100% + .4rem) 1rem auto;
+		width: auto;
+		max-height: calc(100dvh - 6rem);
+		overflow-y: auto;
+		padding: .5rem;
+		border: 1px solid #e9dfd4;
+		border-radius: 1rem;
+		background: #fff9f3;
+		box-shadow: 0 12px 28px #10233326;
+	}
+
 	#header #indio-nav.indio-menu-open { display: block; }
 	#header #indio-nav > ul { display: grid; }
+	#header #indio-nav a { display: flex; justify-content: flex-start; }
+}
+
+@media (max-width: 720px) {
 	.indio-presentacion { grid-template-columns: 1fr; }
 	#acceso-panel.indio-native #indio-como-funciona .indio-steps { grid-template-columns: 1fr; }
 }

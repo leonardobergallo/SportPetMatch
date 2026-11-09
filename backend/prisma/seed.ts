@@ -1,4 +1,4 @@
-// Seeder PRODUCCION para SportPetMatch
+// Seeder PRODUCCION para Indio
 // Datos realistas para la beta regional: Santa Fe, Parana y alrededores
 
 import { PrismaClient } from '@prisma/client';
@@ -16,7 +16,7 @@ const sumarDias = (dias: number, horas = 0) => {
 };
 
 async function main() {
-  console.log('🌱 Iniciando seed PRODUCCION SportPetMatch...');
+  console.log('🌱 Iniciando seed PRODUCCION Indio...');
 
   // Limpiar datos existentes
   await prisma.mensaje.deleteMany();

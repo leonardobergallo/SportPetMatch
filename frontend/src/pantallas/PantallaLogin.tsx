@@ -182,7 +182,7 @@ export default function PantallaLogin(): JSX.Element {
         <ImageBackground source={IMGS.golden} style={st.hero} imageStyle={st.heroImg}>
           <View style={st.heroOverlay}>
             <View style={st.heroContent}>
-              <MaterialIcons name="pets" size={48} color="#fff" />
+              <Image source={require('../../assets/icono.png')} style={st.heroLogo} />
               <Text style={st.heroTitle}>{MARCA.nombre}</Text>
               <Text style={st.heroSlogan}>{MARCA.slogan}</Text>
               <Text style={st.heroDesc}>App gratis: eventos, matching y chat con tu mascota.</Text>
@@ -388,6 +388,7 @@ const st = StyleSheet.create({
   heroImg: { resizeMode: 'cover' },
   heroOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.84)', justifyContent: 'center', paddingVertical: 64 },
   heroContent: { alignItems: 'center', paddingHorizontal: 24, maxWidth: 560, alignSelf: 'center', width: '100%' },
+  heroLogo: { width: 76, height: 76, borderRadius: 18, marginBottom: 10 },
   heroTitle: {
     fontSize: 58,
     fontWeight: '900',
@@ -450,6 +451,15 @@ const st = StyleSheet.create({
     marginTop: 4,
   },
   heroLoginBtnTxt: { color: '#6200ea', fontWeight: '800', fontSize: 20, ...(fontSans ? { fontFamily: fontSans } : {}) },
+  heroCtaPrimary: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  heroCtaPrimaryTxt: { color: '#6200ea', fontWeight: '800', fontSize: 18, ...(fontSans ? { fontFamily: fontSans } : {}) },
   heroCtaSecondary: {
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.75)',

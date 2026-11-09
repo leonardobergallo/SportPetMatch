@@ -47,7 +47,7 @@ export default function NavegacionSimple(): JSX.Element {
           name="Inicio" 
           component={PantallaInicio}
           options={{
-            title: 'SportPetMatch Dashboard',
+            title: 'Indio',
             headerLeft: () => null, // No permitir volver al login
           }}
         />
