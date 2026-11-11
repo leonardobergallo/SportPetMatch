@@ -94,6 +94,14 @@ export async function iniciarSesion(datos: DatosLogin): Promise<RespuestaAuth> {
   return response.data;
 }
 
+/**
+ * Iniciar sesión con un ID token de Google.
+ */
+export async function iniciarSesionGoogle(idToken: string): Promise<RespuestaAuth> {
+  const response = await apiClient.post<RespuestaAuth>('/auth/google', { idToken });
+  return response.data;
+}
+
 export async function solicitarResetPassword(email: string): Promise<RespuestaResetPassword> {
   const response = await apiClient.post<RespuestaResetPassword>('/auth/recuperar-password', { email });
   return response.data;

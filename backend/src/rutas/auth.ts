@@ -4,6 +4,7 @@
 import express from 'express';
 import {
   login,
+  loginConGoogle,
   registro,
   obtenerDashboard,
   solicitarResetPassword,
@@ -16,6 +17,7 @@ const router = express.Router();
 
 router.post('/registro', registro);
 router.post('/login', login);
+router.post('/google', loginConGoogle);
 router.post('/recuperar-password', solicitarResetPassword);
 router.post('/reset-password', resetPassword);
 

@@ -76,6 +76,8 @@
     ],
     "extra": {
       "slogan": "Indio, mi mejor amigo",
+      "googleWebClientId": "",
+      "googleAndroidClientId": "",
       "eas": {
         "projectId": "14fd1aef-1de1-4762-9e4c-f01c08982de6"
       }

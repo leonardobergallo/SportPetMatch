@@ -25,9 +25,11 @@ import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { useAuth, normalizarUsuario } from '../contextos/ContextoAuth';
 import {
   iniciarSesion as servicioIniciarSesion,
+  iniciarSesionGoogle,
   resetPassword,
   solicitarResetPassword,
 } from '../servicios/servicioAuth';
+import BotonGoogle from '../componentes/BotonGoogle';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -124,11 +126,33 @@ export default function PantallaLogin(): JSX.Element {
     } finally { setLoading(false); }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogleToken = async (idToken: string) => {
     setLoading(true);
-    try { await new Promise(r => setTimeout(r, 2000)); mostrarAlerta('Bienvenido!', 'Sesión con Google'); }
-    catch { mostrarAlerta('Error', 'No se pudo iniciar con Google.'); }
-    finally { setLoading(false); }
+    try {
+      const r = await iniciarSesionGoogle(idToken);
+      if (r.success && r.data) {
+        const u = r.data.usuario;
+        const usuario = normalizarUsuario({
+          id: u.id,
+          nombre: u.nombre,
+          email: u.email,
+          fechaNacimiento: '',
+          genero: 'otro',
+          intereses: u.intereses || [],
+          avatar: u.avatar || null,
+          esPremium: u.esPremium,
+          esAdmin: u.esAdmin || false,
+          tipoUsuario: u.tipoUsuario || null,
+          onboardingCompletado: u.onboardingCompletado || false,
+        });
+        await iniciarSesion(usuario, r.data.token);
+        mostrarAlerta('Bienvenido!', `Hola ${usuario.nombre}!`, [{ text: 'Continuar' }]);
+      }
+    } catch (e: any) {
+      mostrarAlerta('Error', e.message || 'No se pudo iniciar con Google.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSolicitarReset = async () => {
@@ -358,9 +382,12 @@ export default function PantallaLogin(): JSX.Element {
             <Text style={st.extraTitle}>Más opciones de acceso</Text>
             <Text style={st.extraSub}>Si prefieres, también puedes continuar con Google o crear una cuenta nueva.</Text>
 
-            <Pressable style={st.extraGoogleBtn} onPress={handleGoogle} disabled={loading}>
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={st.extraGoogleTxt}>Continuar con Google</Text>}
-            </Pressable>
+            <BotonGoogle
+              onToken={handleGoogleToken}
+              onError={(message) => mostrarAlerta('Google', message)}
+              disabled={loading}
+              loading={loading}
+            />
 
             <Pressable style={st.extraRegisterBtn} onPress={goRegistro} disabled={loading}>
               <Text style={st.extraRegisterTxt}>Crear cuenta gratis</Text>

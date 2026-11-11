@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import { OAuth2Client } from 'google-auth-library';
 import prisma from '../utilidades/prisma';
 import { generarTokens } from '../servicios/jwtService';
 import { notificarNuevoRegistro } from '../servicios/correoService';
@@ -12,6 +13,14 @@ import { esAdministrador } from '../utilidades/admin';
 
 function normalizarEmail(email: unknown): string {
   return String(email || '').trim().toLowerCase();
+}
+
+function obtenerGoogleClientIds(): string[] {
+  return [process.env.GOOGLE_WEB_CLIENT_ID, process.env.GOOGLE_ANDROID_CLIENT_ID, process.env.GOOGLE_CLIENT_ID]
+    .filter(Boolean)
+    .flatMap((valor) => String(valor).split(','))
+    .map((valor) => valor.trim())
+    .filter((valor) => valor && !valor.startsWith('tu_'));
 }
 
 function normalizarTelefono(telefono: unknown): string {
@@ -279,6 +288,131 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       success: false,
       message: 'Error al iniciar sesión',
       error: process.env.NODE_ENV === 'development' ? error : undefined,
+    });
+  }
+};
+
+/**
+ * Login / registro con Google.
+ * Recibe el ID token de Google Identity Services y lo valida contra los
+ * Client ID configurados. Si el email ya existe, vincula la cuenta.
+ */
+export const loginConGoogle = async (req: Request, res: Response): Promise<void> => {
+  const idToken = typeof req.body?.idToken === 'string' ? req.body.idToken.trim() : '';
+  if (!idToken) {
+    res.status(400).json({
+      success: false,
+      message: 'Falta el token de Google',
+      code: 'GOOGLE_TOKEN_REQUIRED',
+    });
+    return;
+  }
+
+  const audiencias = obtenerGoogleClientIds();
+  if (audiencias.length === 0) {
+    res.status(503).json({
+      success: false,
+      message: 'El inicio de sesión con Google todavía no está configurado',
+      code: 'GOOGLE_NOT_CONFIGURED',
+    });
+    return;
+  }
+
+  try {
+    const cliente = new OAuth2Client();
+    const ticket = await cliente.verifyIdToken({ idToken, audience: audiencias });
+    const payload = ticket.getPayload();
+    const email = normalizarEmail(payload?.email);
+    if (!payload?.sub || !email || !payload.email_verified) {
+      res.status(401).json({
+        success: false,
+        message: 'No pudimos validar el email de Google',
+        code: 'INVALID_GOOGLE_EMAIL',
+      });
+      return;
+    }
+
+    const seleccionUsuario = {
+      id: true,
+      email: true,
+      nombre: true,
+      avatar: true,
+      esPremium: true,
+      isActive: true,
+      onboardingCompletado: true,
+      tipoUsuario: true,
+      intereses: true,
+    } as const;
+
+    let usuario = await prisma.usuario.findFirst({
+      where: { OR: [{ googleId: payload.sub }, { email }] },
+      select: { ...seleccionUsuario, googleId: true, emailVerificado: true },
+    });
+
+    if (usuario && usuario.googleId && usuario.googleId !== payload.sub) {
+      res.status(409).json({
+        success: false,
+        message: 'Ese email ya está vinculado a otra cuenta de Google',
+        code: 'GOOGLE_ACCOUNT_CONFLICT',
+      });
+      return;
+    }
+    if (usuario && !usuario.isActive) {
+      res.status(403).json({
+        success: false,
+        message: 'Usuario inactivo. Contactá al administrador',
+        code: 'INACTIVE_USER',
+      });
+      return;
+    }
+
+    if (!usuario) {
+      usuario = await prisma.usuario.create({
+        data: {
+          email,
+          nombre: String(payload.name || email.split('@')[0]).trim().slice(0, 120),
+          googleId: payload.sub,
+          avatar: payload.picture || null,
+          emailVerificado: true,
+          intereses: [],
+          tipoUsuario: 'solo',
+        },
+        select: { ...seleccionUsuario, googleId: true, emailVerificado: true },
+      });
+    } else {
+      const cambios: { googleId?: string; emailVerificado?: boolean; avatar?: string } = {};
+      if (!usuario.googleId) cambios.googleId = payload.sub;
+      if (!usuario.emailVerificado) cambios.emailVerificado = true;
+      if (!usuario.avatar && payload.picture) cambios.avatar = payload.picture;
+      if (Object.keys(cambios).length > 0) {
+        usuario = await prisma.usuario.update({
+          where: { id: usuario.id },
+          data: cambios,
+          select: { ...seleccionUsuario, googleId: true, emailVerificado: true },
+        });
+      }
+    }
+
+    const tokens = generarTokens({ usuarioId: usuario.id, email: usuario.email });
+    const { googleId: _, emailVerificado: __, ...usuarioPublico } = usuario;
+
+    res.json({
+      success: true,
+      message: 'Login con Google exitoso',
+      data: {
+        usuario: {
+          ...usuarioPublico,
+          esAdmin: esAdministrador({ id: usuario.id, email: usuario.email }),
+        },
+        ...tokens,
+      },
+    });
+  } catch (error) {
+    console.error('Error en login con Google:', error);
+    res.status(401).json({
+      success: false,
+      message: 'No pudimos validar la cuenta de Google',
+      code: 'INVALID_GOOGLE_TOKEN',
     });
   }
 };
