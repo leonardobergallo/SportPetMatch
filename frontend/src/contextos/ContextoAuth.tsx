@@ -32,6 +32,7 @@ export interface Usuario {
   tipoUsuario?: string | null;
   onboardingCompletado?: boolean;
   esPremium?: boolean;
+  esAdmin?: boolean;
   createdAt?: string;
   updatedAt?: string;
   // Alias legacy para no romper pantallas que todavía no se migraron del todo
@@ -67,6 +68,7 @@ export function normalizarUsuario(datos: Partial<Usuario>): Usuario {
     tipoUsuario: datos.tipoUsuario ?? null,
     onboardingCompletado: datos.onboardingCompletado ?? false,
     esPremium: datos.esPremium ?? false,
+    esAdmin: datos.esAdmin ?? false,
     createdAt: datos.createdAt,
     updatedAt: datos.updatedAt,
     apellido: datos.apellido || '',

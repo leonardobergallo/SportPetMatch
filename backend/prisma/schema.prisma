@@ -48,6 +48,7 @@ model Usuario {
   desafiosUsuarios  DesafioUsuario[]
   compras           Compra[]
   suscripciones     Suscripcion[]
+  paseador          Paseador?
   reportesEnviados  Reporte[] @relation("ReporteEnviado")
   reportesRecibidos Reporte[] @relation("ReporteRecibido")
 
@@ -384,6 +385,28 @@ model Suscripcion {
   usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
   @@map("suscripciones") // Mapea a la tabla 'suscripciones'
+}
+
+// Modelo de Paseadores - Solicitudes y perfiles de paseadores de mascotas
+model Paseador {
+  id              String    @id @default(cuid())
+  usuarioId       String    @unique
+  telefono        String
+  ciudad          String
+  zona            String?
+  experiencia     String?
+  precioHora      Int?
+  disponibilidad  String?
+  mensaje         String?
+  estado          String    @default("pendiente") // pendiente, aprobado, rechazado
+  motivoRechazo   String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([estado, createdAt])
+  @@map("paseadores")
 }
 
 // Modelo de Reportes - Reportes de usuarios o contenido

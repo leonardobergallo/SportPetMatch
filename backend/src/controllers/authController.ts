@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer';
 import prisma from '../utilidades/prisma';
 import { generarTokens } from '../servicios/jwtService';
 import { notificarNuevoRegistro } from '../servicios/correoService';
+import { esAdministrador } from '../utilidades/admin';
 
 function normalizarEmail(email: unknown): string {
   return String(email || '').trim().toLowerCase();
@@ -265,7 +266,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: 'Login exitoso',
       data: {
-        usuario: usuarioSinPassword,
+        usuario: {
+          ...usuarioSinPassword,
+          esAdmin: esAdministrador({ id: usuario.id, email: usuario.email }),
+        },
         ...tokens,
       },
     });

@@ -88,6 +88,13 @@ export default function PantallaFuncionalidades(): JSX.Element {
       accion: () => navigation.navigate('Suscripcion'),
     },
     {
+      icono: 'pets',
+      titulo: 'Paseadores',
+      descripcion: 'Postulate para pasear mascotas o conocé a los paseadores de la comunidad.',
+      estado: 'disponible',
+      accion: () => navigation.navigate('Paseadores'),
+    },
+    {
       icono: 'navigation',
       titulo: 'Paseos con GPS',
       descripcion: 'Solicitá un paseo, seguí el recorrido y recibí el resumen al finalizar.',

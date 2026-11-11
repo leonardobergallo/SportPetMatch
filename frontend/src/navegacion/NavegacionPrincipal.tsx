@@ -30,6 +30,7 @@ import PantallaEditarMascota from '../pantallas/PantallaEditarMascota';
 import PantallaConfiguracion from '../pantallas/PantallaConfiguracion';
 import PantallaFuncionalidades from '../pantallas/PantallaFuncionalidades';
 import PantallaSuscripcion from '../pantallas/PantallaSuscripcion';
+import PantallaPaseadores from '../pantallas/PantallaPaseadores';
 
 // Importar tema y contexto de autenticación
 import { temaApp } from '../constantes/tema';
@@ -56,6 +57,7 @@ export type RootStackParamList = {
   Configuracion: undefined;
   Funcionalidades: undefined;
   Suscripcion: undefined;
+  Paseadores: undefined;
   EditarPerfil: undefined;
   AgregarMascota: undefined;
   EditarMascota: { mascotaId: string };
@@ -336,6 +338,12 @@ function NavegadorPrincipal(): JSX.Element {
             name="Suscripcion"
             component={PantallaSuscripcion}
             options={{ title: 'Mi suscripción' }}
+          />
+
+          <Stack.Screen
+            name="Paseadores"
+            component={PantallaPaseadores}
+            options={{ title: 'Quiero ser paseador' }}
           />
 
           <Stack.Screen 

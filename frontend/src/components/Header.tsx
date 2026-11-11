@@ -64,6 +64,23 @@ export default function Header({
     navigation.navigate('Principal', { screen: 'Mapa', params: { vista: 'lugares' } });
   };
 
+  const irAPaseadores = () => {
+    setMostrarMenu(false);
+    navigation.navigate('Paseadores');
+  };
+
+  const abrirAdmin = () => {
+    setMostrarMenu(false);
+    const url = 'https://indio.com.ar/admin.html';
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    Linking.openURL(url).catch(() =>
+      mostrarAlerta('Panel de administración', 'No se pudo abrir el panel en el navegador.')
+    );
+  };
+
   const abrirSoporte = () => {
     setMostrarMenu(false);
     Linking.openURL('https://wa.me/5493425089906?text=Hola%2C%20escribo%20por%20Indio.').catch(
@@ -141,6 +158,18 @@ export default function Header({
               title="Lugares pet friendly" 
               leadingIcon="map-marker"
             />
+            <Menu.Item 
+              onPress={irAPaseadores}
+              title="Quiero ser paseador" 
+              leadingIcon="paw"
+            />
+            {usuario.esAdmin && (
+              <Menu.Item 
+                onPress={abrirAdmin}
+                title="Panel de administración" 
+                leadingIcon="shield-account"
+              />
+            )}
             <Divider />
             <Menu.Item 
               onPress={() => {

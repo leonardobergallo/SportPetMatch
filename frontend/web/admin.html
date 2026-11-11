@@ -9,6 +9,7 @@
     :root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#18211b;background:#f5f7f5;--green:#268536;--orange:#ff7900;--muted:#67726a;--line:#dfe6e0}
     *{box-sizing:border-box}body{margin:0}.top{background:#237b31;color:#fff;padding:18px 5vw;display:flex;align-items:center;justify-content:space-between}.brand{font-size:22px;font-weight:800}.brand small{display:block;font-size:12px;font-weight:500;opacity:.86}.wrap{width:min(1180px,92vw);margin:28px auto}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 18px #15351b0d}.card{padding:18px}.card b{display:block;font-size:28px;color:var(--green)}.card span{color:var(--muted);font-size:13px}.panel{padding:20px}.tools{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:16px}h1{font-size:24px;margin:0}input,button{font:inherit;border-radius:10px;padding:10px 13px}input{border:1px solid #bfc9c1;min-width:280px}button{border:0;background:var(--green);color:#fff;font-weight:700;cursor:pointer}.secondary{background:#edf5ee;color:#216c2e}.danger{background:#b3261e}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:900px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #edf0ed;font-size:14px}th{color:#536059;font-size:12px;text-transform:uppercase}.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#eaf5eb;color:#1d6f2a;font-size:12px}.badge.off{background:#f3f3f3;color:#747474}.pager{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:16px;color:var(--muted)}.empty,.error{padding:24px;text-align:center;color:var(--muted)}.error{color:#a11}.login{width:min(420px,92vw);margin:12vh auto;padding:26px}.login input{width:100%;margin:16px 0}.hidden{display:none!important}@media(max-width:650px){.wrap{width:94vw}.top{padding:15px 3vw}.panel{padding:14px}input{min-width:100%}}
     #membresias{margin-top:24px}.membership-list{display:grid;gap:12px}.membership-entry{padding:14px;border:1px solid var(--line);border-radius:12px}.membership-entry p{margin:.35rem 0}.membership-entry form{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.membership-entry input:not([type=checkbox]){min-width:0;flex:1 1 14rem}.membership-entry input[type=checkbox]{min-width:0}.membership-entry label{flex-basis:100%}
+    .admin-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}.admin-nav a{background:#edf5ee;color:#216c2e;text-decoration:none;font-weight:700;font-size:14px;padding:9px 14px;border-radius:999px}.admin-nav a:hover{background:#dcefdf}.panel+.panel{margin-top:24px}.panel h2{font-size:20px;margin:24px 0 12px}.panel select{font:inherit;border:1px solid #bfc9c1;border-radius:10px;padding:10px 13px;background:#fff}.badge.pending{background:#fff3df;color:#8a5300}.badge.rejected{background:#fde9e7;color:#9b241b}.badge.approved{background:#eaf5eb;color:#1d6f2a}.actions{display:flex;gap:6px;flex-wrap:wrap}.actions button{padding:7px 10px;font-size:13px}.muted{color:var(--muted);font-size:13px}.stat-inline{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:10px}
   </style>
 </head>
 <body>
@@ -28,11 +29,73 @@
     </section>
     <section id="dashboard" class="wrap hidden">
       <div id="cards" class="cards"></div>
-      <div class="panel">
-        <div class="tools"><h1>Personas registradas</h1><form id="searchForm"><input id="search" type="search" placeholder="Buscar nombre, email, teléfono o ciudad" /><button>Buscar</button></form></div>
+      <nav class="admin-nav" aria-label="Secciones del panel">
+        <a href="#usuarios">Usuarios</a>
+        <a href="#eventos">Eventos</a>
+        <a href="#lugares">Lugares</a>
+        <a href="#paseadores">Paseadores</a>
+        <a href="#membresias">Membresías</a>
+      </nav>
+      <div class="panel" id="usuarios">
+        <div class="tools"><h1>Personas registradas</h1><form id="searchForm"><input id="search" type="search" placeholder="Buscar nombre, email, teléfono o ciudad" /><select id="userEstado"><option value="todos">Todos</option><option value="activos">Activos</option><option value="inactivos">Inactivos</option></select><button>Buscar</button></form></div>
+        <p id="usuariosMensaje" role="status"></p>
         <div id="content" class="table-wrap"></div>
         <div class="pager"><button id="prev" class="secondary">Anterior</button><span id="pageInfo"></span><button id="next" class="secondary">Siguiente</button></div>
       </div>
+
+      <section class="panel" id="eventos">
+        <div class="tools">
+          <h1>Eventos</h1>
+          <form id="eventoFiltros">
+            <input id="eventoBuscar" type="search" placeholder="Buscar título u organizador" />
+            <select id="eventoEstado">
+              <option value="todos">Todos</option>
+              <option value="activos">Activos</option>
+              <option value="inactivos">Inactivos</option>
+            </select>
+            <button class="secondary">Filtrar</button>
+          </form>
+        </div>
+        <div id="listaEventos" class="table-wrap"></div>
+        <div class="pager"><button id="eventoAnterior" class="secondary" disabled>Anterior</button><span id="eventoPagina"></span><button id="eventoSiguiente" class="secondary" disabled>Siguiente</button></div>
+      </section>
+
+      <section class="panel" id="lugares">
+        <div class="tools">
+          <h1>Lugares pet friendly</h1>
+          <form id="lugarFiltros">
+            <input id="lugarBuscar" type="search" placeholder="Buscar nombre, ciudad o dirección" />
+            <select id="lugarEstado">
+              <option value="todos">Todos</option>
+              <option value="activos">Activos</option>
+              <option value="inactivos">Inactivos</option>
+            </select>
+            <button class="secondary">Filtrar</button>
+          </form>
+        </div>
+        <div id="resumenLugares" class="stat-inline"></div>
+        <div id="listaLugares" class="table-wrap"></div>
+        <div class="pager"><button id="lugarAnterior" class="secondary" disabled>Anterior</button><span id="lugarPagina"></span><button id="lugarSiguiente" class="secondary" disabled>Siguiente</button></div>
+      </section>
+
+      <section class="panel" id="paseadores">
+        <div class="tools">
+          <h1>Paseadores</h1>
+          <form id="paseadorFiltros">
+            <input id="paseadorBuscar" type="search" placeholder="Buscar nombre, email, ciudad o zona" />
+            <select id="paseadorEstado">
+              <option value="pendiente">Pendientes</option>
+              <option value="aprobado">Aprobados</option>
+              <option value="rechazado">Rechazados</option>
+            </select>
+            <button class="secondary">Filtrar</button>
+          </form>
+        </div>
+        <div id="resumenPaseadores" class="stat-inline"></div>
+        <p id="paseadorMensaje" role="status"></p>
+        <div id="listaPaseadores" class="membership-list"></div>
+        <div class="pager"><button id="paseadorAnterior" class="secondary" disabled>Anterior</button><span id="paseadorPagina"></span><button id="paseadorSiguiente" class="secondary" disabled>Siguiente</button></div>
+      </section>
       <section class="panel" id="membresias">
         <div class="tools">
           <h1>Membresías</h1>
@@ -59,7 +122,7 @@
   <script>
     (() => {
       const tokenKey = 'indio_admin_token';
-      const state = {token: sessionStorage.getItem(tokenKey), page: 1, pages: 1, search: ''};
+      const state = {token: sessionStorage.getItem(tokenKey), page: 1, pages: 1, search: '', estado: 'todos'};
       const $=id=>document.getElementById(id);
       const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
       const date=v=>v?new Intl.DateTimeFormat('es-AR',{dateStyle:'short',timeStyle:'short'}).format(new Date(v)):'—';
@@ -89,6 +152,13 @@
         state.token = null;
         $('cards').replaceChildren();
         $('content').replaceChildren();
+        $('usuariosMensaje').textContent = '';
+        $('paseadorMensaje').textContent = '';
+        $('listaEventos').replaceChildren();
+        $('listaLugares').replaceChildren();
+        $('listaPaseadores').replaceChildren();
+        $('resumenLugares').replaceChildren();
+        $('resumenPaseadores').replaceChildren();
         $('listaRenovaciones').replaceChildren();
         $('listaPruebas').replaceChildren();
         $('dashboard').classList.add('hidden');
@@ -169,17 +239,113 @@
           if (boton) boton.disabled = false;
         }
       });
-      function cards(r){const items=[['Usuarios',r.totalUsuarios],['Altas últimos 7 días',r.usuariosUltimosSieteDias],['Usuarios activos',r.usuariosActivos],['Mascotas',r.totalMascotas],['Eventos',r.totalEventos],['Matches',r.totalMatches],['Mensajes',r.totalMensajes]];$('cards').innerHTML=items.map(([l,v])=>`<div class="card"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}
-      function table(users){if(!users.length){$('content').innerHTML='<div class="empty">No se encontraron registros.</div>';return}$('content').innerHTML=`<table><thead><tr><th>Alta</th><th>Persona</th><th>Contacto</th><th>Ubicación</th><th>Estado</th><th>Actividad</th></tr></thead><tbody>${users.map(u=>`<tr><td>${date(u.createdAt)}</td><td><strong>${esc(u.nombre)}</strong><br><small>${esc(u.tipoUsuario||'')}</small></td><td>${esc(u.email)}<br><small>${esc(u.telefono||'Sin teléfono')}</small></td><td>${esc([u.ubicacionCiudad,u.ubicacionPais].filter(Boolean).join(', ')||'—')}</td><td><span class="badge ${u.isActive?'':'off'}">${u.isActive?'Activo':'Inactivo'}</span><br><small>${u.emailVerificado?'Email verificado':'Email pendiente'}</small></td><td>${u._count.mascotas} mascotas · ${u._count.eventosCreados} eventos · ${u._count.matches} matches</td></tr>`).join('')}</tbody></table>`}
+      function cards(r){const items=[['Usuarios',r.totalUsuarios],['Altas últimos 7 días',r.usuariosUltimosSieteDias],['Usuarios activos',r.usuariosActivos],['Mascotas',r.totalMascotas],['Eventos',r.totalEventos],['Lugares',r.totalLugares],['Paseadores pendientes',r.paseadoresPendientes],['Matches',r.totalMatches],['Mensajes',r.totalMensajes]];$('cards').innerHTML=items.map(([l,v])=>`<div class="card"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}
+
+      let paginaEvento = 1, paginasEvento = 1;
+      async function cargarEventos() {
+        const q = new URLSearchParams({
+          pagina: paginaEvento,
+          estado: $('eventoEstado').value,
+          buscar: $('eventoBuscar').value.trim(),
+        });
+        const datos = await api('/eventos?' + q, state.token);
+        $('listaEventos').innerHTML = datos.eventos.length
+          ? `<table><thead><tr><th>Fecha</th><th>Evento</th><th>Organizador</th><th>Participantes</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${datos.eventos.map(e => `<tr>
+              <td>${date(e.fechaInicio)}</td>
+              <td><strong>${esc(e.titulo)}</strong><br><small>${esc(e.tipo || '')}${e.esPetFriendly ? ' · Pet friendly' : ''}</small></td>
+              <td>${esc(e.organizador?.nombre || '—')}<br><small>${esc(e.organizador?.email || '')}</small></td>
+              <td>${esc(e._count?.participantes ?? 0)}</td>
+              <td><span class="badge ${e.isActive ? '' : 'off'}">${e.isActive ? 'Activo' : 'Inactivo'}</span></td>
+              <td><div class="actions"><button class="${e.isActive ? 'danger' : 'secondary'}" data-evento-id="${esc(e.id)}" data-activo="${e.isActive ? '1' : '0'}">${e.isActive ? 'Desactivar' : 'Activar'}</button></div></td>
+            </tr>`).join('')}</tbody></table>`
+          : '<div class="empty">No hay eventos con ese filtro.</div>';
+        $('eventoPagina').textContent = `Página ${datos.pagina} de ${datos.paginas} · ${datos.total} eventos`;
+        $('eventoAnterior').disabled = datos.pagina <= 1;
+        $('eventoSiguiente').disabled = datos.pagina >= datos.paginas;
+        paginasEvento = datos.paginas;
+      }
+
+      let paginaLugar = 1, paginasLugar = 1;
+      async function cargarLugares() {
+        const q = new URLSearchParams({
+          pagina: paginaLugar,
+          estado: $('lugarEstado').value,
+          buscar: $('lugarBuscar').value.trim(),
+        });
+        const datos = await api('/lugares?' + q, state.token);
+        $('resumenLugares').textContent = `${datos.resumen.verificados} verificados · ${datos.resumen.pendientes} pendientes de verificar`;
+        $('listaLugares').innerHTML = datos.lugares.length
+          ? `<table><thead><tr><th>Lugar</th><th>Categoría</th><th>Ciudad</th><th>Verificado</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${datos.lugares.map(l => `<tr>
+              <td><strong>${esc(l.nombre)}</strong><br><small>${esc(l.direccion || '')}</small></td>
+              <td>${esc(l.categoria)}</td>
+              <td>${esc(l.ciudad)}<br><small>${esc(l.provincia)}</small></td>
+              <td><span class="badge ${l.verificado ? '' : 'pending'}">${l.verificado ? 'Verificado' : 'Pendiente'}</span></td>
+              <td><span class="badge ${l.isActive ? '' : 'off'}">${l.isActive ? 'Activo' : 'Inactivo'}</span></td>
+              <td><div class="actions">
+                <button class="secondary" data-lugar-id="${esc(l.id)}" data-campo="verificado" data-valor="${l.verificado ? '0' : '1'}">${l.verificado ? 'Quitar verificación' : 'Verificar'}</button>
+                <button class="${l.isActive ? 'danger' : 'secondary'}" data-lugar-id="${esc(l.id)}" data-campo="isActive" data-valor="${l.isActive ? '0' : '1'}">${l.isActive ? 'Desactivar' : 'Activar'}</button>
+              </div></td>
+            </tr>`).join('')}</tbody></table>`
+          : '<div class="empty">No hay lugares con ese filtro.</div>';
+        $('lugarPagina').textContent = `Página ${datos.pagina} de ${datos.paginas} · ${datos.total} lugares`;
+        $('lugarAnterior').disabled = datos.pagina <= 1;
+        $('lugarSiguiente').disabled = datos.pagina >= datos.paginas;
+        paginasLugar = datos.paginas;
+      }
+
+      let paginaPaseador = 1, paginasPaseador = 1;
+      async function cargarPaseadores() {
+        const q = new URLSearchParams({
+          pagina: paginaPaseador,
+          estado: $('paseadorEstado').value,
+          buscar: $('paseadorBuscar').value.trim(),
+        });
+        const datos = await api('/paseadores?' + q, state.token);
+        $('resumenPaseadores').textContent = `${datos.resumen.pendientes} pendientes · ${datos.resumen.aprobados} aprobados · ${datos.resumen.rechazados} rechazados`;
+        $('listaPaseadores').innerHTML = datos.solicitudes.length
+          ? datos.solicitudes.map(p => `<article class="membership-entry">
+              <p><strong>${esc(p.usuario.nombre)}</strong> · ${esc(p.usuario.email)}</p>
+              <p>${esc(p.ciudad)}${p.zona ? ' · ' + esc(p.zona) : ''} · ${esc(p.telefono)}</p>
+              <p>${p.precioHora ? '$' + esc(new Intl.NumberFormat('es-AR').format(p.precioHora)) + ' / hora · ' : ''}${esc(p.disponibilidad || 'Disponibilidad a convenir')}</p>
+              <p><span class="badge ${p.estado === 'aprobado' ? 'approved' : p.estado === 'rechazado' ? 'rejected' : 'pending'}">${esc(p.estado)}</span> · ${date(p.createdAt)}</p>
+              ${p.experiencia ? `<p><small>${esc(p.experiencia)}</small></p>` : ''}
+              ${p.motivoRechazo ? `<p><small>Motivo: ${esc(p.motivoRechazo)}</small></p>` : ''}
+              <div class="actions">
+                ${p.estado !== 'aprobado' ? `<button data-paseador-id="${esc(p.id)}" data-accion="aprobar">Aprobar</button>` : ''}
+                ${p.estado !== 'rechazado' ? `<button class="danger" data-paseador-id="${esc(p.id)}" data-accion="rechazar">Rechazar</button>` : ''}
+              </div>
+            </article>`).join('')
+          : '<p>No hay solicitudes con ese filtro.</p>';
+        $('paseadorPagina').textContent = `Página ${datos.pagina} de ${datos.paginas} · ${datos.total} solicitudes`;
+        $('paseadorAnterior').disabled = datos.pagina <= 1;
+        $('paseadorSiguiente').disabled = datos.pagina >= datos.paginas;
+        paginasPaseador = datos.paginas;
+      }
+      function table(users){
+        if(!users.length){$('content').innerHTML='<div class="empty">No se encontraron registros.</div>';return}
+        $('content').innerHTML=`<table><thead><tr><th>Alta</th><th>Persona</th><th>Contacto</th><th>Ubicación</th><th>Estado</th><th>Actividad</th><th>Acciones</th></tr></thead><tbody>${users.map(u=>`<tr>
+          <td>${date(u.createdAt)}</td>
+          <td><strong>${esc(u.nombre)}</strong>${u.esAdmin ? ' <span class="badge">Admin</span>' : ''}<br><small>${esc(u.tipoUsuario||'')}</small></td>
+          <td>${esc(u.email)}<br><small>${esc(u.telefono||'Sin teléfono')}</small></td>
+          <td>${esc([u.ubicacionCiudad,u.ubicacionPais].filter(Boolean).join(', ')||'—')}</td>
+          <td><span class="badge ${u.isActive?'':'off'}">${u.isActive?'Activo':'Inactivo'}</span><br><small>${u.emailVerificado?'Email verificado':'Email pendiente'}</small></td>
+          <td>${u._count.mascotas} mascotas · ${u._count.eventosCreados} eventos · ${u._count.matches} matches</td>
+          <td><div class="actions">
+            <button class="${u.isActive ? 'danger' : 'secondary'}" data-user-id="${esc(u.id)}" data-user-active="${u.isActive ? '1' : '0'}" data-user-email="${esc(u.email)}">${u.isActive ? 'Desactivar' : 'Activar'}</button>
+            <button class="secondary" data-user-id="${esc(u.id)}" data-user-verified="${u.emailVerificado ? '1' : '0'}" data-user-email="${esc(u.email)}">${u.emailVerificado ? 'Quitar verificación' : 'Verificar email'}</button>
+            <button class="secondary" data-user-password-id="${esc(u.id)}" data-user-email="${esc(u.email)}">Restablecer contraseña</button>
+          </div></td>
+        </tr>`).join('')}</tbody></table>`
+      }
       let latestLoad = 0;
       async function load() {
         const request = ++latestLoad;
-        const {token, page, search} = state;
+        const {token, page, search, estado} = state;
         $('content').innerHTML = '<div class="empty">Cargando…</div>';
         try {
           const [stats, users] = await Promise.all([
             api('/stats', token),
-            api(`/usuarios?pagina=${page}&limite=25&buscar=${encodeURIComponent(search)}`, token),
+            api(`/usuarios?pagina=${page}&limite=25&buscar=${encodeURIComponent(search)}&estado=${encodeURIComponent(estado)}`, token),
           ]);
           if (request !== latestLoad || token !== state.token) return;
           sessionStorage.setItem(tokenKey, token);
@@ -191,7 +357,13 @@
           $('next').disabled = page >= state.pages;
           showDashboard();
           cargarMembresias().catch(errorMembresia);
-          if (location.hash === '#membresias') $('membresias').scrollIntoView();
+          cargarEventos().catch(error => { $('listaEventos').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
+          cargarLugares().catch(error => { $('listaLugares').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
+          cargarPaseadores().catch(error => { $('listaPaseadores').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
+          if (location.hash) {
+            const destino = document.querySelector(location.hash);
+            if (destino) destino.scrollIntoView();
+          }
         } catch (error) {
           if (request !== latestLoad || token !== state.token) return;
           if (error.status === 401 || error.status === 403 || $('dashboard').classList.contains('hidden')) {
@@ -228,8 +400,107 @@
           button.disabled = false;
         }
       });
-      $('searchForm').addEventListener('submit',e=>{e.preventDefault();state.search=$('search').value.trim();state.page=1;load()});
+      $('searchForm').addEventListener('submit',e=>{e.preventDefault();state.search=$('search').value.trim();state.estado=$('userEstado').value;state.page=1;load()});
+      $('userEstado').onchange=()=>{state.estado=$('userEstado').value;state.page=1;load()};
       $('prev').onclick=()=>{if(state.page>1){state.page--;load()}};$('next').onclick=()=>{if(state.page<state.pages){state.page++;load()}};
+
+      $('content').addEventListener('click', async event => {
+        const estadoBoton = event.target.closest('[data-user-active]');
+        const verificarBoton = event.target.closest('[data-user-verified]');
+        const passwordBoton = event.target.closest('[data-user-password-id]');
+        if (!estadoBoton && !verificarBoton && !passwordBoton) return;
+        const boton = estadoBoton || verificarBoton || passwordBoton;
+        boton.disabled = true;
+        try {
+          if (estadoBoton) {
+            const activo = estadoBoton.dataset.userActive === '1';
+            await api(`/usuarios/${encodeURIComponent(estadoBoton.dataset.userId)}/estado`, state.token, {
+              method: 'POST', body: JSON.stringify({ isActive: !activo }),
+            });
+            $('usuariosMensaje').textContent = `Cuenta ${!activo ? 'activada' : 'desactivada'}: ${estadoBoton.dataset.userEmail}`;
+            await load();
+          } else if (verificarBoton) {
+            const verificado = verificarBoton.dataset.userVerified === '1';
+            await api(`/usuarios/${encodeURIComponent(verificarBoton.dataset.userId)}/verificar`, state.token, {
+              method: 'POST', body: JSON.stringify({ emailVerificado: !verificado }),
+            });
+            $('usuariosMensaje').textContent = `Email ${!verificado ? 'verificado' : 'marcado como pendiente'}: ${verificarBoton.dataset.userEmail}`;
+            await load();
+          } else if (passwordBoton) {
+            if (!confirm(`¿Generar una contraseña temporal para ${passwordBoton.dataset.userEmail}?`)) return;
+            const datos = await api(`/usuarios/${encodeURIComponent(passwordBoton.dataset.userPasswordId)}/password`, state.token, {
+              method: 'POST', body: '{}',
+            });
+            $('usuariosMensaje').innerHTML = `Contraseña temporal para <strong>${esc(datos.email)}</strong>: <code>${esc(datos.passwordTemporal)}</code> <button class="secondary" id="copiarPassword">Copiar</button> — mostrala una sola vez.`;
+            $('copiarPassword').onclick = async () => {
+              try {
+                await navigator.clipboard.writeText(datos.passwordTemporal);
+                $('copiarPassword').textContent = 'Copiada';
+              } catch {
+                $('copiarPassword').textContent = 'Seleccioná y copiá manualmente';
+              }
+            };
+          }
+        } catch (error) {
+          $('usuariosMensaje').textContent = error.message;
+        } finally {
+          boton.disabled = false;
+        }
+      });
+
+      function errorEn(id, error) { $(id).innerHTML = `<div class="error">${esc(error.message)}</div>`; }
+
+      $('eventoFiltros').addEventListener('submit', e => { e.preventDefault(); paginaEvento = 1; cargarEventos().catch(error => errorEn('listaEventos', error)); });
+      $('eventoEstado').onchange = () => { paginaEvento = 1; cargarEventos().catch(error => errorEn('listaEventos', error)); };
+      $('eventoAnterior').onclick = () => { if (paginaEvento > 1) { paginaEvento--; cargarEventos().catch(error => errorEn('listaEventos', error)); } };
+      $('eventoSiguiente').onclick = () => { if (paginaEvento < paginasEvento) { paginaEvento++; cargarEventos().catch(error => errorEn('listaEventos', error)); } };
+      $('listaEventos').addEventListener('click', async event => {
+        const boton = event.target.closest('[data-evento-id]');
+        if (!boton) return;
+        boton.disabled = true;
+        try {
+          const activo = boton.dataset.activo === '1';
+          await api(`/eventos/${encodeURIComponent(boton.dataset.eventoId)}/estado`, state.token, {
+            method: 'POST', body: JSON.stringify({ isActive: !activo }),
+          });
+          await cargarEventos();
+        } catch (error) { errorEn('listaEventos', error); }
+      });
+
+      $('lugarFiltros').addEventListener('submit', e => { e.preventDefault(); paginaLugar = 1; cargarLugares().catch(error => errorEn('listaLugares', error)); });
+      $('lugarEstado').onchange = () => { paginaLugar = 1; cargarLugares().catch(error => errorEn('listaLugares', error)); };
+      $('lugarAnterior').onclick = () => { if (paginaLugar > 1) { paginaLugar--; cargarLugares().catch(error => errorEn('listaLugares', error)); } };
+      $('lugarSiguiente').onclick = () => { if (paginaLugar < paginasLugar) { paginaLugar++; cargarLugares().catch(error => errorEn('listaLugares', error)); } };
+      $('listaLugares').addEventListener('click', async event => {
+        const boton = event.target.closest('[data-lugar-id]');
+        if (!boton) return;
+        boton.disabled = true;
+        try {
+          await api(`/lugares/${encodeURIComponent(boton.dataset.lugarId)}`, state.token, {
+            method: 'POST', body: JSON.stringify({ [boton.dataset.campo]: boton.dataset.valor === '1' }),
+          });
+          await cargarLugares();
+        } catch (error) { errorEn('listaLugares', error); }
+      });
+
+      $('paseadorFiltros').addEventListener('submit', e => { e.preventDefault(); paginaPaseador = 1; cargarPaseadores().catch(error => errorEn('listaPaseadores', error)); });
+      $('paseadorEstado').onchange = () => { paginaPaseador = 1; cargarPaseadores().catch(error => errorEn('listaPaseadores', error)); };
+      $('paseadorAnterior').onclick = () => { if (paginaPaseador > 1) { paginaPaseador--; cargarPaseadores().catch(error => errorEn('listaPaseadores', error)); } };
+      $('paseadorSiguiente').onclick = () => { if (paginaPaseador < paginasPaseador) { paginaPaseador++; cargarPaseadores().catch(error => errorEn('listaPaseadores', error)); } };
+      $('listaPaseadores').addEventListener('click', async event => {
+        const boton = event.target.closest('[data-paseador-id]');
+        if (!boton) return;
+        boton.disabled = true;
+        try {
+          const accion = boton.dataset.accion;
+          const motivo = accion === 'rechazar' ? (prompt('Motivo del rechazo (opcional):') || '') : '';
+          await api(`/paseadores/${encodeURIComponent(boton.dataset.paseadorId)}/${accion}`, state.token, {
+            method: 'POST', body: JSON.stringify({ motivo }),
+          });
+          $('paseadorMensaje').textContent = accion === 'aprobar' ? 'Paseador aprobado.' : 'Solicitud rechazada.';
+          await cargarPaseadores();
+        } catch (error) { errorEn('listaPaseadores', error); }
+      });
       $('logout').onclick=()=>{
         clearSession();
         location.reload();

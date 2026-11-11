@@ -112,6 +112,7 @@ export default function PantallaLogin(): JSX.Element {
           intereses: u.intereses || [],
           avatar: u.avatar || null,
           esPremium: u.esPremium,
+          esAdmin: u.esAdmin || false,
           tipoUsuario: u.tipoUsuario || null,
           onboardingCompletado: u.onboardingCompletado || false,
         });

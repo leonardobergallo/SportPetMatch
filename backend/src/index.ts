@@ -19,6 +19,7 @@ import rutasMensajes from './rutas/mensajes';
 import rutasLugares from './rutas/lugares';
 import rutasAdmin from './rutas/admin';
 import rutasMembresia from './rutas/membresia';
+import rutasPaseadores from './rutas/paseadores';
 
 // Importar middleware personalizado
 // import { middlewareAutenticacion } from './middleware/autenticacion';
@@ -165,7 +166,8 @@ app.get('/api', (req: Request, res: Response) => {
       eventos: '/api/eventos',
       matches: '/api/matches',
       mensajes: '/api/mensajes',
-      lugares: '/api/lugares'
+      lugares: '/api/lugares',
+      paseadores: '/api/paseadores'
     }
   });
 });
@@ -180,6 +182,7 @@ app.use('/api/mensajes', rutasMensajes);
 app.use('/api/lugares', rutasLugares);
 app.use('/api/admin', rutasAdmin);
 app.use('/api/membresia', rutasMembresia);
+app.use('/api/paseadores', rutasPaseadores);
 
 // Middleware para rutas de API no encontradas (404).
 // Mantenerlo limitado a /api permite que un servidor externo sirva la web estatica.
