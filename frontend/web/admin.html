@@ -324,9 +324,10 @@
           `${datos.activo ? 'envío diario activo' : 'envío diario desactivado'} · ` +
           `${String(datos.hora).padStart(2, '0')}:00 (Argentina) · ${datos.destinatario}`;
         $('listaReportes').innerHTML = datos.historial.length
-          ? `<table><thead><tr><th>Fecha</th><th>Enviado</th><th>Estado</th><th>Detalle</th></tr></thead><tbody>${datos.historial.map(r => `
+          ? `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Enviado</th><th>Estado</th><th>Detalle</th></tr></thead><tbody>${datos.historial.map(r => `
               <tr>
                 <td>${esc(r.fecha)}</td>
+                <td>${r.tipo === 'manual' ? 'Manual' : 'Automático'}</td>
                 <td>${date(r.enviadoEn)}</td>
                 <td><span class="badge ${r.ok ? 'approved' : 'rejected'}">${r.ok ? 'Enviado' : 'Falló'}</span></td>
                 <td>${esc(r.detalle || '—')}</td>

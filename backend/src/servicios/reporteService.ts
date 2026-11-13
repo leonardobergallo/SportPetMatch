@@ -30,6 +30,17 @@ export function horaArgentina(fecha = new Date()): number {
   return Number.parseInt(hora, 10);
 }
 
+export function fechaHoraArgentina(fecha = new Date()): string {
+  const hora = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(fecha);
+  return `${fechaArgentina(fecha)} ${hora}`;
+}
+
 export interface DatosReporteDiario {
   generadoEn: Date;
   fecha: string;
@@ -240,7 +251,9 @@ export function generarTextoReporte(datos: DatosReporteDiario): string {
   ].join('\n');
 }
 
-export async function enviarReporteDiario(): Promise<{
+export async function enviarReporteDiario(
+  opciones: { manual?: boolean } = {}
+): Promise<{
   ok: boolean;
   enviado: boolean;
   motivo?: string;
@@ -265,7 +278,9 @@ export async function enviarReporteDiario(): Promise<{
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': `indio-reporte/diario/${datos.fecha}`,
+        'Idempotency-Key': opciones.manual
+          ? `indio-reporte/manual/${Date.now()}`
+          : `indio-reporte/diario/${datos.fecha}`,
       },
       body: JSON.stringify({
         from,

@@ -3,6 +3,7 @@ import express from 'express';
 import prisma from '../utilidades/prisma';
 import {
   enviarReporteDiario,
+  fechaHoraArgentina,
   generarDatosReporte,
   generarHtmlReporte,
   generarTextoReporte,
@@ -15,7 +16,7 @@ const router = express.Router();
 router.get('/', async (_req, res, next) => {
   try {
     const historial = await prisma.reporteEnvio.findMany({
-      where: { tipo: 'diario' },
+      where: { tipo: { in: ['diario', 'manual'] } },
       orderBy: [{ enviadoEn: 'desc' }],
       take: 20,
     });
@@ -51,23 +52,19 @@ router.get('/vista-previa', async (_req, res, next) => {
 // POST /api/admin/reportes/enviar — envía el reporte ahora mismo
 router.post('/enviar', async (_req, res, next) => {
   try {
-    const resultado = await enviarReporteDiario();
+    const resultado = await enviarReporteDiario({ manual: true });
     const fecha = resultado.fecha;
-    if (resultado.enviado || resultado.motivo) {
-      await prisma.reporteEnvio.upsert({
-        where: { tipo_fecha: { tipo: 'diario', fecha } },
-        create: {
-          tipo: 'diario',
-          fecha,
+    try {
+      await prisma.reporteEnvio.create({
+        data: {
+          tipo: 'manual',
+          fecha: fechaHoraArgentina(),
           ok: resultado.ok,
           detalle: resultado.motivo ?? null,
-        },
-        update: {
-          ok: resultado.ok,
-          detalle: resultado.motivo ?? null,
-          enviadoEn: new Date(),
         },
       });
+    } catch {
+      // Si no se puede registrar el envío manual, igual informamos el resultado.
     }
     if (!resultado.ok) {
       res.status(502).json({
