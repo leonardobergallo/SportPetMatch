@@ -69,6 +69,11 @@ export default function Header({
     navigation.navigate('Paseadores');
   };
 
+  const irAPaseos = () => {
+    setMostrarMenu(false);
+    navigation.navigate('Paseos');
+  };
+
   const abrirAdmin = () => {
     setMostrarMenu(false);
     const url = 'https://indio.com.ar/admin.html';
@@ -157,6 +162,11 @@ export default function Header({
               onPress={irALugares}
               title="Lugares pet friendly" 
               leadingIcon="map-marker"
+            />
+            <Menu.Item 
+              onPress={irAPaseos}
+              title="Paseos" 
+              leadingIcon="directions-walk"
             />
             <Menu.Item 
               onPress={irAPaseadores}

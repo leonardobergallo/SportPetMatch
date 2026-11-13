@@ -31,6 +31,9 @@ import PantallaConfiguracion from '../pantallas/PantallaConfiguracion';
 import PantallaFuncionalidades from '../pantallas/PantallaFuncionalidades';
 import PantallaSuscripcion from '../pantallas/PantallaSuscripcion';
 import PantallaPaseadores from '../pantallas/PantallaPaseadores';
+import PantallaPaseos from '../pantallas/PantallaPaseos';
+import PantallaSolicitarPaseo from '../pantallas/PantallaSolicitarPaseo';
+import PantallaDetallePaseo from '../pantallas/PantallaDetallePaseo';
 
 // Importar tema y contexto de autenticación
 import { temaApp } from '../constantes/tema';
@@ -58,6 +61,9 @@ export type RootStackParamList = {
   Funcionalidades: undefined;
   Suscripcion: undefined;
   Paseadores: undefined;
+  Paseos: undefined;
+  SolicitarPaseo: undefined;
+  DetallePaseo: { paseoId: string };
   EditarPerfil: undefined;
   AgregarMascota: undefined;
   EditarMascota: { mascotaId: string };
@@ -344,6 +350,24 @@ function NavegadorPrincipal(): JSX.Element {
             name="Paseadores"
             component={PantallaPaseadores}
             options={{ title: 'Quiero ser paseador' }}
+          />
+
+          <Stack.Screen
+            name="Paseos"
+            component={PantallaPaseos}
+            options={{ title: 'Paseos' }}
+          />
+
+          <Stack.Screen
+            name="SolicitarPaseo"
+            component={PantallaSolicitarPaseo}
+            options={{ title: 'Solicitar paseo' }}
+          />
+
+          <Stack.Screen
+            name="DetallePaseo"
+            component={PantallaDetallePaseo}
+            options={{ title: 'Detalle del paseo' }}
           />
 
           <Stack.Screen 

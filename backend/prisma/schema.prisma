@@ -49,6 +49,7 @@ model Usuario {
   compras           Compra[]
   suscripciones     Suscripcion[]
   paseador          Paseador?
+  paseosComoDueno   Paseo[] @relation("PaseoDueno")
   reportesEnviados  Reporte[] @relation("ReporteEnviado")
   reportesRecibidos Reporte[] @relation("ReporteRecibido")
 
@@ -81,6 +82,7 @@ model Mascota {
   // Relaciones - Una mascota pertenece a un usuario
   usuarioId       String // ID del usuario propietario
   usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  paseos          Paseo[]
 
   @@map("mascotas") // Mapea a la tabla 'mascotas' en la base de datos
 }
@@ -404,9 +406,54 @@ model Paseador {
   updatedAt       DateTime  @updatedAt
 
   usuario         Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  paseos          Paseo[]
 
   @@index([estado, createdAt])
   @@map("paseadores")
+}
+
+// Modelo de Paseos - Solicitudes y sesiones de paseo con seguimiento
+model Paseo {
+  id               String    @id @default(cuid())
+  duenoId          String
+  paseadorId       String?
+  mascotaId        String
+  estado           String    @default("pendiente") // pendiente, aceptado, en_curso, finalizado, rechazado, cancelado
+  fechaProgramada  DateTime
+  duracionMin      Int       @default(30)
+  direccion        String?
+  notas            String?
+  precioHora       Int?
+  inicioEn         DateTime?
+  finEn            DateTime?
+  distanciaKm      Float?
+  duracionRealMin  Int?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  dueno            Usuario   @relation("PaseoDueno", fields: [duenoId], references: [id], onDelete: Cascade)
+  paseador         Paseador? @relation(fields: [paseadorId], references: [id], onDelete: SetNull)
+  mascota          Mascota   @relation(fields: [mascotaId], references: [id], onDelete: Cascade)
+  puntos           PaseoPunto[]
+
+  @@index([duenoId, estado, fechaProgramada])
+  @@index([paseadorId, estado, fechaProgramada])
+  @@map("paseos")
+}
+
+// Puntos de ubicación enviados por el paseador durante un paseo
+model PaseoPunto {
+  id         String   @id @default(cuid())
+  paseoId    String
+  latitud    Float
+  longitud   Float
+  precision  Float?
+  createdAt  DateTime @default(now())
+
+  paseo      Paseo    @relation(fields: [paseoId], references: [id], onDelete: Cascade)
+
+  @@index([paseoId, createdAt])
+  @@map("paseo_puntos")
 }
 
 // Modelo de Reportes - Reportes de usuarios o contenido

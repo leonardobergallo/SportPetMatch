@@ -34,6 +34,7 @@
         <a href="#eventos">Eventos</a>
         <a href="#lugares">Lugares</a>
         <a href="#paseadores">Paseadores</a>
+        <a href="#paseos">Paseos</a>
         <a href="#membresias">Membresías</a>
       </nav>
       <div class="panel" id="usuarios">
@@ -96,6 +97,29 @@
         <div id="listaPaseadores" class="membership-list"></div>
         <div class="pager"><button id="paseadorAnterior" class="secondary" disabled>Anterior</button><span id="paseadorPagina"></span><button id="paseadorSiguiente" class="secondary" disabled>Siguiente</button></div>
       </section>
+
+      <section class="panel" id="paseos">
+        <div class="tools">
+          <h1>Paseos</h1>
+          <form id="paseoFiltros">
+            <input id="paseoBuscar" type="search" placeholder="Buscar dueño, paseador o mascota" />
+            <select id="paseoEstado">
+              <option value="todos">Todos</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="aceptado">Aceptados</option>
+              <option value="en_curso">En curso</option>
+              <option value="finalizado">Finalizados</option>
+              <option value="rechazado">Rechazados</option>
+              <option value="cancelado">Cancelados</option>
+            </select>
+            <button class="secondary">Filtrar</button>
+          </form>
+        </div>
+        <div id="resumenPaseos" class="stat-inline"></div>
+        <p id="paseoMensaje" role="status"></p>
+        <div id="listaPaseos" class="table-wrap"></div>
+        <div class="pager"><button id="paseoAnterior" class="secondary" disabled>Anterior</button><span id="paseoPagina"></span><button id="paseoSiguiente" class="secondary" disabled>Siguiente</button></div>
+      </section>
       <section class="panel" id="membresias">
         <div class="tools">
           <h1>Membresías</h1>
@@ -157,8 +181,11 @@
         $('listaEventos').replaceChildren();
         $('listaLugares').replaceChildren();
         $('listaPaseadores').replaceChildren();
+        $('listaPaseos').replaceChildren();
         $('resumenLugares').replaceChildren();
         $('resumenPaseadores').replaceChildren();
+        $('resumenPaseos').replaceChildren();
+        $('paseoMensaje').textContent = '';
         $('listaRenovaciones').replaceChildren();
         $('listaPruebas').replaceChildren();
         $('dashboard').classList.add('hidden');
@@ -239,7 +266,37 @@
           if (boton) boton.disabled = false;
         }
       });
-      function cards(r){const items=[['Usuarios',r.totalUsuarios],['Altas últimos 7 días',r.usuariosUltimosSieteDias],['Usuarios activos',r.usuariosActivos],['Mascotas',r.totalMascotas],['Eventos',r.totalEventos],['Lugares',r.totalLugares],['Paseadores pendientes',r.paseadoresPendientes],['Matches',r.totalMatches],['Mensajes',r.totalMensajes]];$('cards').innerHTML=items.map(([l,v])=>`<div class="card"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}
+      let paginaPaseo = 1, paginasPaseo = 1;
+      async function cargarPaseos() {
+        const q = new URLSearchParams({
+          pagina: paginaPaseo,
+          estado: $('paseoEstado').value,
+          buscar: $('paseoBuscar').value.trim(),
+        });
+        const datos = await api('/paseos?' + q, state.token);
+        $('resumenPaseos').textContent = `${datos.resumen.activos} activos · ${datos.resumen.pendientes} pendientes · ${datos.resumen.finalizados} finalizados`;
+        $('listaPaseos').innerHTML = datos.paseos.length
+          ? `<table><thead><tr><th>Programado</th><th>Dueño</th><th>Paseador</th><th>Mascota</th><th>Estado</th><th>Recorrido</th><th>Acción</th></tr></thead><tbody>${datos.paseos.map(p => {
+              const estadoClase = p.estado === 'finalizado' || p.estado === 'aceptado' ? 'approved' : p.estado === 'rechazado' ? 'rejected' : p.estado === 'pendiente' || p.estado === 'en_curso' ? 'pending' : 'off';
+              const activo = ['pendiente', 'aceptado', 'en_curso'].includes(p.estado);
+              return `<tr>
+                <td>${date(p.fechaProgramada)}</td>
+                <td>${esc(p.dueno?.nombre || '—')}<br><small>${esc(p.dueno?.email || '')}</small></td>
+                <td>${esc(p.paseador?.usuario?.nombre || '—')}<br><small>${esc(p.paseador?.usuario?.email || '')}</small></td>
+                <td>${esc(p.mascota?.nombre || '—')}</td>
+                <td><span class="badge ${estadoClase}">${esc(p.estado)}</span></td>
+                <td>${p._count?.puntos || 0} puntos${p.distanciaKm != null ? '<br><small>' + esc(Number(p.distanciaKm).toFixed(2)) + ' km</small>' : ''}</td>
+                <td>${activo ? `<div class="actions"><button class="danger" data-paseo-id="${esc(p.id)}">Cancelar</button></div>` : '—'}</td>
+              </tr>`;
+            }).join('')}</tbody></table>`
+          : '<div class="empty">No hay paseos con ese filtro.</div>';
+        $('paseoPagina').textContent = `Página ${datos.pagina} de ${datos.paginas} · ${datos.total} paseos`;
+        $('paseoAnterior').disabled = datos.pagina <= 1;
+        $('paseoSiguiente').disabled = datos.pagina >= datos.paginas;
+        paginasPaseo = datos.paginas;
+      }
+
+      function cards(r){const items=[['Usuarios',r.totalUsuarios],['Altas últimos 7 días',r.usuariosUltimosSieteDias],['Usuarios activos',r.usuariosActivos],['Mascotas',r.totalMascotas],['Eventos',r.totalEventos],['Lugares',r.totalLugares],['Paseadores pendientes',r.paseadoresPendientes],['Paseos activos',r.paseosActivos],['Matches',r.totalMatches],['Mensajes',r.totalMensajes]];$('cards').innerHTML=items.map(([l,v])=>`<div class="card"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}
 
       let paginaEvento = 1, paginasEvento = 1;
       async function cargarEventos() {
@@ -360,6 +417,7 @@
           cargarEventos().catch(error => { $('listaEventos').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
           cargarLugares().catch(error => { $('listaLugares').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
           cargarPaseadores().catch(error => { $('listaPaseadores').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
+          cargarPaseos().catch(error => { $('listaPaseos').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
           if (location.hash) {
             const destino = document.querySelector(location.hash);
             if (destino) destino.scrollIntoView();
@@ -501,6 +559,25 @@
           await cargarPaseadores();
         } catch (error) { errorEn('listaPaseadores', error); }
       });
+
+      $('paseoFiltros').addEventListener('submit', e => { e.preventDefault(); paginaPaseo = 1; cargarPaseos().catch(error => errorEn('listaPaseos', error)); });
+      $('paseoEstado').onchange = () => { paginaPaseo = 1; cargarPaseos().catch(error => errorEn('listaPaseos', error)); };
+      $('paseoAnterior').onclick = () => { if (paginaPaseo > 1) { paginaPaseo--; cargarPaseos().catch(error => errorEn('listaPaseos', error)); } };
+      $('paseoSiguiente').onclick = () => { if (paginaPaseo < paginasPaseo) { paginaPaseo++; cargarPaseos().catch(error => errorEn('listaPaseos', error)); } };
+      $('listaPaseos').addEventListener('click', async event => {
+        const boton = event.target.closest('[data-paseo-id]');
+        if (!boton) return;
+        if (!confirm('¿Cancelar este paseo?')) return;
+        boton.disabled = true;
+        try {
+          await api(`/paseos/${encodeURIComponent(boton.dataset.paseoId)}/cancelar`, state.token, {
+            method: 'POST', body: '{}',
+          });
+          $('paseoMensaje').textContent = 'Paseo cancelado.';
+          await cargarPaseos();
+        } catch (error) { errorEn('listaPaseos', error); }
+      });
+
       $('logout').onclick=()=>{
         clearSession();
         location.reload();

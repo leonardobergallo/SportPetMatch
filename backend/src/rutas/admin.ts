@@ -8,6 +8,7 @@ import { esAdministrador } from '../utilidades/admin';
 import rutasAdminMembresia from './adminMembresia';
 import rutasAdminContenido from './adminContenido';
 import rutasAdminPaseadores from './adminPaseadores';
+import rutasAdminPaseos from './adminPaseos';
 
 const router = express.Router();
 
@@ -41,6 +42,7 @@ router.use(async (req, res, next) => {
 router.use('/membresias', rutasAdminMembresia);
 router.use('/', rutasAdminContenido);
 router.use('/paseadores', rutasAdminPaseadores);
+router.use('/paseos', rutasAdminPaseos);
 
 // GET /api/admin/stats — resumen general del CRM
 router.get('/stats', async (_req, res) => {
@@ -60,6 +62,7 @@ router.get('/stats', async (_req, res) => {
       totalMensajes,
       totalLugares,
       paseadoresPendientes,
+      paseosActivos,
       usuariosRecientes,
       eventosRecientes,
     ] = await Promise.all([
@@ -74,6 +77,7 @@ router.get('/stats', async (_req, res) => {
       prisma.mensaje.count(),
       prisma.lugarPetFriendly.count({ where: { isActive: true } }),
       prisma.paseador.count({ where: { estado: 'pendiente' } }),
+      prisma.paseo.count({ where: { estado: { in: ['aceptado', 'en_curso'] } } }),
       prisma.usuario.findMany({
         orderBy: { createdAt: 'desc' },
         take: 20,
@@ -122,6 +126,7 @@ router.get('/stats', async (_req, res) => {
         totalMensajes,
         totalLugares,
         paseadoresPendientes,
+        paseosActivos,
       },
       usuariosRecientes,
       eventosRecientes,

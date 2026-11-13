@@ -20,6 +20,7 @@ import rutasLugares from './rutas/lugares';
 import rutasAdmin from './rutas/admin';
 import rutasMembresia from './rutas/membresia';
 import rutasPaseadores from './rutas/paseadores';
+import rutasPaseos from './rutas/paseos';
 
 // Importar middleware personalizado
 // import { middlewareAutenticacion } from './middleware/autenticacion';
@@ -115,13 +116,14 @@ if (process.env.NODE_ENV === 'development') {
 // el polling de la app mientras estamos probando flujos.
 const rateLimitMax =
   process.env.NODE_ENV === 'development'
-    ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS_DEV || process.env.RATE_LIMIT_MAX || '1000')
-    : parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || process.env.RATE_LIMIT_MAX || '1000');
+    ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS_DEV || process.env.RATE_LIMIT_MAX || '3000')
+    : parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || process.env.RATE_LIMIT_MAX || '3000');
 
 // Rate limiting para prevenir abuso de la API
 const limitador = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutos
   max: rateLimitMax,
+  skip: (req) => req.originalUrl.startsWith('/api/paseos'),
   message: {
     error: 'Demasiadas solicitudes desde esta IP, intenta de nuevo más tarde.',
     codigo: 'RATE_LIMIT_EXCEDIDO'
@@ -167,7 +169,8 @@ app.get('/api', (req: Request, res: Response) => {
       matches: '/api/matches',
       mensajes: '/api/mensajes',
       lugares: '/api/lugares',
-      paseadores: '/api/paseadores'
+      paseadores: '/api/paseadores',
+      paseos: '/api/paseos'
     }
   });
 });
@@ -183,6 +186,7 @@ app.use('/api/lugares', rutasLugares);
 app.use('/api/admin', rutasAdmin);
 app.use('/api/membresia', rutasMembresia);
 app.use('/api/paseadores', rutasPaseadores);
+app.use('/api/paseos', rutasPaseos);
 
 // Middleware para rutas de API no encontradas (404).
 // Mantenerlo limitado a /api permite que un servidor externo sirva la web estatica.

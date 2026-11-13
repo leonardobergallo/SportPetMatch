@@ -98,12 +98,8 @@ export default function PantallaFuncionalidades(): JSX.Element {
       icono: 'navigation',
       titulo: 'Paseos con GPS',
       descripcion: 'Solicitá un paseo, seguí el recorrido y recibí el resumen al finalizar.',
-      estado: 'proximamente',
-      accion: () =>
-        mostrarAlerta(
-          'Paseos con GPS',
-          'Estamos preparando los paseos con seguimiento GPS. Muy pronto vas a poder probarlo.'
-        ),
+      estado: 'disponible',
+      accion: () => navigation.navigate('Paseos'),
     },
     {
       icono: 'support-agent',
