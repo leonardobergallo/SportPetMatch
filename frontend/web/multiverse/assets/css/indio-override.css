@@ -1093,6 +1093,12 @@ textarea {
 	font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
+/* El chatbot de IA usa la esquina inferior derecha: subimos WhatsApp para que
+   no queden superpuestos cuando el asistente está activo. */
+body:has(#crmit360-chatbot) .indio-wa-widget {
+	bottom: 6rem;
+}
+
 .indio-wa-fab {
 	position: relative;
 	width: 4.25rem;
