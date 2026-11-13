@@ -414,27 +414,6 @@
 
 			</div>
 
-		<!-- Asistente WhatsApp (avatar + panel) -->
-			<div class="indio-wa-widget" id="indio-wa-widget">
-				<div class="indio-wa-panel" id="indio-wa-panel" hidden>
-					<button type="button" class="indio-wa-close" id="indio-wa-close" aria-label="Cerrar">&times;</button>
-					<div class="indio-wa-panel-head">
-						<img class="indio-wa-panel-avatar" src="/multiverse/images/indio-logo.png" width="48" height="48" alt="" decoding="async" />
-						<div>
-							<strong class="indio-wa-panel-name">Indio</strong>
-							<span class="indio-wa-panel-status">Soporte por WhatsApp</span>
-						</div>
-					</div>
-					<p class="indio-wa-panel-msg">¡Hola! ¿Consultas sobre la app, registro o el APK? Escribinos y te respondemos.</p>
-					<a class="indio-wa-panel-cta" href="https://wa.me/5493425089906?text=Hola%2C%20escribo%20desde%20la%20web%20de%20Indio." target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a>
-				</div>
-				<button type="button" class="indio-wa-fab" id="indio-wa-fab" aria-expanded="false" aria-controls="indio-wa-panel" aria-label="Abrir asistente de WhatsApp">
-					<span class="indio-wa-fab-ring" aria-hidden="true"></span>
-					<img class="indio-wa-fab-avatar" src="/multiverse/images/indio-logo.png" width="56" height="56" alt="" decoding="async" />
-					<span class="indio-wa-fab-badge" aria-hidden="true"></span>
-				</button>
-			</div>
-
 		<!-- Scripts -->
 			<script src="/multiverse/assets/js/jquery.min.js"></script>
 			<script src="/multiverse/assets/js/jquery.poptrox.min.js"></script>
@@ -672,56 +651,11 @@
 					if (mc) mc.addEventListener('click', openAppRoot);
 					var ec = document.getElementById('indio-extra-cta');
 					if (ec) ec.addEventListener('click', openAppRoot);
-					/* Widget WhatsApp */
-					(function () {
-						var fab = document.getElementById('indio-wa-fab');
-						var panel = document.getElementById('indio-wa-panel');
-						var closeBtn = document.getElementById('indio-wa-close');
-						if (!fab || !panel) return;
-						function setOpen(open) {
-							panel.hidden = !open;
-							fab.setAttribute('aria-expanded', open ? 'true' : 'false');
-						}
-						fab.addEventListener('click', function () {
-							setOpen(panel.hidden);
-						});
-						if (closeBtn) closeBtn.addEventListener('click', function () { setOpen(false); });
-						document.addEventListener('keydown', function (e) {
-							if (e.key === 'Escape') setOpen(false);
-						});
-					})();
 				})();
 			</script>
 
 		<!-- Chat inteligente Indio -->
 		<script src="https://crmit-360.vercel.app/chatbot-widget.js" data-negocio="indio" async></script>
-		<script>
-			/* Si el asistente está activo, subimos el botón de WhatsApp para que
-			   no quede tapado. Esperamos un momento para no moverlo cuando el
-			   widget se retira porque el asistente todavía no está activo. */
-			(function () {
-				var timer = null;
-				function revisar() {
-					var host = document.getElementById('crmit360-chatbot');
-					var activo = !!(host && host.shadowRoot && host.shadowRoot.querySelector('.crm-toggle'));
-					if (!activo) {
-						if (timer) { clearTimeout(timer); timer = null; }
-						document.body.classList.remove('indio-chatbot-activo');
-						return;
-					}
-					if (document.body.classList.contains('indio-chatbot-activo') || timer) return;
-					timer = setTimeout(function () {
-						var actual = document.getElementById('crmit360-chatbot');
-						if (actual && actual.shadowRoot && actual.shadowRoot.querySelector('.crm-toggle')) {
-							document.body.classList.add('indio-chatbot-activo');
-						}
-						timer = null;
-					}, 2000);
-				}
-				new MutationObserver(revisar).observe(document.body, { childList: true });
-				revisar();
-			})();
-		</script>
 
 	</body>
 </html>
