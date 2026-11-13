@@ -78,4 +78,12 @@ app.get('*', (req, res) => {
 
 app.listen(port, host, () => {
   console.log(`SportPetMatch VPS escuchando en http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`);
+  try {
+    const { iniciarSchedulerReportes } = require(
+      path.join(backendDir, 'dist', 'src', 'servicios', 'reporteScheduler.js')
+    );
+    iniciarSchedulerReportes();
+  } catch (error) {
+    console.error('No se pudo iniciar el scheduler de reportes:', error.message);
+  }
 });
