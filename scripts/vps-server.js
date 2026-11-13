@@ -69,6 +69,12 @@ app.use((req, res, next) => {
 app.use(express.static(publicDir, {
   extensions: ['html'],
   maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+  setHeaders: (res, filePath) => {
+    // El HTML cambia con cada deploy: evitar que quede cacheado una hora.
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  },
 }));
 
 app.get('*', (req, res) => {
