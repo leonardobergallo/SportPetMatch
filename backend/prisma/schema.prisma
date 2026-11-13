@@ -456,6 +456,19 @@ model PaseoPunto {
   @@map("paseo_puntos")
 }
 
+// Registro de envíos de reportes por email (para evitar duplicados diarios)
+model ReporteEnvio {
+  id        String   @id @default(cuid())
+  tipo      String   // diario, semanal, etc.
+  fecha     String   // YYYY-MM-DD en zona Argentina
+  enviadoEn DateTime @default(now())
+  ok        Boolean  @default(true)
+  detalle   String?
+
+  @@unique([tipo, fecha])
+  @@map("reporte_envios")
+}
+
 // Modelo de Reportes - Reportes de usuarios o contenido
 model Reporte {
   id              String    @id @default(cuid()) // ID único del reporte

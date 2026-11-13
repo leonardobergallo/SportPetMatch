@@ -15,7 +15,7 @@ const express = require(path.join(backendDir, 'node_modules', 'express'));
 function aplicarMigraciones() {
   const prismaCli = path.join(backendDir, 'node_modules', 'prisma', 'build', 'index.js');
   const schema = path.join(backendDir, 'prisma', 'schema.prisma');
-  const migraciones = ['paseadores-indio.sql', 'paseos-gps.sql'];
+  const migraciones = ['paseadores-indio.sql', 'paseos-gps.sql', 'reportes-indio.sql'];
   if (!fs.existsSync(prismaCli) || !fs.existsSync(schema)) return;
 
   for (const archivo of migraciones) {

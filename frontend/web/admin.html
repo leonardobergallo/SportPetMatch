@@ -36,6 +36,7 @@
         <a href="#paseadores">Paseadores</a>
         <a href="#paseos">Paseos</a>
         <a href="#membresias">Membresías</a>
+        <a href="#reportes">Reportes</a>
       </nav>
       <div class="panel" id="usuarios">
         <div class="tools"><h1>Personas registradas</h1><form id="searchForm"><input id="search" type="search" placeholder="Buscar nombre, email, teléfono o ciudad" /><select id="userEstado"><option value="todos">Todos</option><option value="activos">Activos</option><option value="inactivos">Inactivos</option></select><button>Buscar</button></form></div>
@@ -141,6 +142,21 @@
         <h2>Pruebas recientes</h2>
         <ul id="listaPruebas"></ul>
       </section>
+      <section class="panel" id="reportes">
+        <div class="tools">
+          <h1>Reportes por email</h1>
+          <button id="actualizarReportes" class="secondary">Actualizar</button>
+        </div>
+        <p id="reporteEstado" class="stat-inline"></p>
+        <p id="reporteMensaje" role="status"></p>
+        <div class="actions">
+          <button id="vistaPreviaReporte" class="secondary">Vista previa</button>
+          <button id="enviarReporte">Enviar reporte ahora</button>
+        </div>
+        <div id="vistaPreviaContenedor" class="table-wrap hidden"></div>
+        <h2>Últimos envíos</h2>
+        <div id="listaReportes" class="table-wrap"></div>
+      </section>
     </section>
   </main>
   <script>
@@ -186,6 +202,11 @@
         $('resumenPaseadores').replaceChildren();
         $('resumenPaseos').replaceChildren();
         $('paseoMensaje').textContent = '';
+        $('reporteEstado').textContent = '';
+        $('reporteMensaje').textContent = '';
+        $('listaReportes').replaceChildren();
+        $('vistaPreviaContenedor').replaceChildren();
+        $('vistaPreviaContenedor').classList.add('hidden');
         $('listaRenovaciones').replaceChildren();
         $('listaPruebas').replaceChildren();
         $('dashboard').classList.add('hidden');
@@ -294,6 +315,23 @@
         $('paseoAnterior').disabled = datos.pagina <= 1;
         $('paseoSiguiente').disabled = datos.pagina >= datos.paginas;
         paginasPaseo = datos.paginas;
+      }
+
+      async function cargarReportes() {
+        const datos = await api('/reportes', state.token);
+        $('reporteEstado').textContent =
+          `${datos.configurado ? 'Resend configurado' : 'Resend sin configurar'} · ` +
+          `${datos.activo ? 'envío diario activo' : 'envío diario desactivado'} · ` +
+          `${String(datos.hora).padStart(2, '0')}:00 (Argentina) · ${datos.destinatario}`;
+        $('listaReportes').innerHTML = datos.historial.length
+          ? `<table><thead><tr><th>Fecha</th><th>Enviado</th><th>Estado</th><th>Detalle</th></tr></thead><tbody>${datos.historial.map(r => `
+              <tr>
+                <td>${esc(r.fecha)}</td>
+                <td>${date(r.enviadoEn)}</td>
+                <td><span class="badge ${r.ok ? 'approved' : 'rejected'}">${r.ok ? 'Enviado' : 'Falló'}</span></td>
+                <td>${esc(r.detalle || '—')}</td>
+              </tr>`).join('')}</tbody></table>`
+          : '<div class="empty">Todavía no se enviaron reportes.</div>';
       }
 
       function cards(r){const items=[['Usuarios',r.totalUsuarios],['Altas últimos 7 días',r.usuariosUltimosSieteDias],['Usuarios activos',r.usuariosActivos],['Mascotas',r.totalMascotas],['Eventos',r.totalEventos],['Lugares',r.totalLugares],['Paseadores pendientes',r.paseadoresPendientes],['Paseos activos',r.paseosActivos],['Matches',r.totalMatches],['Mensajes',r.totalMensajes]];$('cards').innerHTML=items.map(([l,v])=>`<div class="card"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}
@@ -418,6 +456,7 @@
           cargarLugares().catch(error => { $('listaLugares').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
           cargarPaseadores().catch(error => { $('listaPaseadores').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
           cargarPaseos().catch(error => { $('listaPaseos').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
+          cargarReportes().catch(error => { $('listaReportes').innerHTML = `<div class="error">${esc(error.message)}</div>`; });
           if (location.hash) {
             const destino = document.querySelector(location.hash);
             if (destino) destino.scrollIntoView();
@@ -577,6 +616,43 @@
           await cargarPaseos();
         } catch (error) { errorEn('listaPaseos', error); }
       });
+
+      $('actualizarReportes').onclick = () => {
+        cargarReportes().catch(error => errorEn('listaReportes', error));
+      };
+      $('vistaPreviaReporte').onclick = async () => {
+        const boton = $('vistaPreviaReporte');
+        boton.disabled = true;
+        $('reporteMensaje').textContent = 'Generando vista previa...';
+        try {
+          const datos = await api('/reportes/vista-previa', state.token);
+          const contenedor = $('vistaPreviaContenedor');
+          contenedor.classList.remove('hidden');
+          contenedor.innerHTML = `<iframe title="Vista previa del reporte" style="width:100%;height:900px;border:0;border-radius:12px" srcdoc="${esc(datos.html)}"></iframe>`;
+          $('reporteMensaje').textContent = 'Vista previa generada.';
+          contenedor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (error) {
+          $('reporteMensaje').textContent = error.message;
+        } finally {
+          boton.disabled = false;
+        }
+      };
+      $('enviarReporte').onclick = async () => {
+        if (!confirm('¿Enviar el reporte de Indio a IT360 ahora?')) return;
+        const boton = $('enviarReporte');
+        boton.disabled = true;
+        $('reporteMensaje').textContent = 'Enviando reporte...';
+        try {
+          const resultado = await api('/reportes/enviar', state.token, { method: 'POST', body: '{}' });
+          $('reporteMensaje').textContent = resultado.mensaje || 'Reporte enviado.';
+          await cargarReportes();
+        } catch (error) {
+          $('reporteMensaje').textContent = error.message;
+          cargarReportes().catch(() => {});
+        } finally {
+          boton.disabled = false;
+        }
+      };
 
       $('logout').onclick=()=>{
         clearSession();

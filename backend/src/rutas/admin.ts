@@ -9,6 +9,7 @@ import rutasAdminMembresia from './adminMembresia';
 import rutasAdminContenido from './adminContenido';
 import rutasAdminPaseadores from './adminPaseadores';
 import rutasAdminPaseos from './adminPaseos';
+import rutasAdminReportes from './adminReportes';
 
 const router = express.Router();
 
@@ -43,6 +44,7 @@ router.use('/membresias', rutasAdminMembresia);
 router.use('/', rutasAdminContenido);
 router.use('/paseadores', rutasAdminPaseadores);
 router.use('/paseos', rutasAdminPaseos);
+router.use('/reportes', rutasAdminReportes);
 
 // GET /api/admin/stats — resumen general del CRM
 router.get('/stats', async (_req, res) => {
