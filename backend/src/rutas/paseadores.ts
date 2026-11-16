@@ -1,6 +1,8 @@
 // Registro y consulta de paseadores.
 import express from 'express';
+import { Prisma } from '@prisma/client';
 import { middlewareAutenticacion } from '../middleware/autenticacion';
+import { membresiaIndioVigente, PRECIO_MEMBRESIA } from '../servicios/membresiaService';
 import prisma from '../utilidades/prisma';
 
 const router = express.Router();
@@ -20,11 +22,14 @@ const seleccion = {
   updatedAt: true,
 };
 
-// Listado público de paseadores aprobados (para futuras solicitudes de paseo).
+// Listado público de paseadores habilitados para recibir nuevas solicitudes.
 router.get('/', async (_req, res, next) => {
   try {
     const paseadores = await prisma.paseador.findMany({
-      where: { estado: 'aprobado', usuario: { isActive: true } },
+      where: {
+        estado: 'aprobado',
+        usuario: { isActive: true, suscripciones: { some: membresiaIndioVigente() } },
+      },
       orderBy: [{ createdAt: 'asc' }],
       select: {
         ...seleccion,
@@ -39,11 +44,15 @@ router.get('/', async (_req, res, next) => {
 
 router.get('/mi', middlewareAutenticacion, async (req, res, next) => {
   try {
-    const paseador = await prisma.paseador.findUnique({
-      where: { usuarioId: req.usuario!.usuarioId },
-      select: seleccion,
-    });
-    res.json({ paseador });
+    const usuarioId = req.usuario!.usuarioId;
+    const [paseador, membresia] = await Promise.all([
+      prisma.paseador.findUnique({ where: { usuarioId }, select: seleccion }),
+      prisma.suscripcion.findFirst({
+        where: { usuarioId, ...membresiaIndioVigente() },
+        select: { id: true },
+      }),
+    ]);
+    res.json({ paseador, membresiaActiva: Boolean(membresia), precioMembresia: PRECIO_MEMBRESIA });
   } catch (error) {
     next(error);
   }
@@ -58,10 +67,14 @@ router.post('/', middlewareAutenticacion, async (req, res, next) => {
       return;
     }
 
-    const precioHoraNumero = Number.parseInt(String(req.body?.precioHora ?? ''), 10);
-    const precioHora = Number.isFinite(precioHoraNumero) && precioHoraNumero > 0
-      ? Math.min(precioHoraNumero, 1000000)
-      : null;
+    const tarifa = String(req.body?.precioHora ?? '').trim();
+    const precioHora = tarifa ? Number(tarifa.replace(/\./g, '')) : null;
+    if (precioHora !== null && (
+      !/^(\d+|\d{1,3}(\.\d{3})+)$/.test(tarifa) || precioHora < 1 || precioHora > 1000000
+    )) {
+      res.status(400).json({ error: 'Ingresá una tarifa por hora entre $1 y $1.000.000, o dejala vacía para acordarla.' });
+      return;
+    }
     const datos = {
       telefono: telefono.slice(0, 60),
       ciudad: ciudad.slice(0, 120),
@@ -76,27 +89,29 @@ router.post('/', middlewareAutenticacion, async (req, res, next) => {
       where: { usuarioId: req.usuario!.usuarioId },
       select: { estado: true },
     });
-    if (existente?.estado === 'aprobado') {
-      res.status(409).json({ error: 'Tu perfil de paseador ya está aprobado' });
+    const paseador = existente
+      ? await prisma.paseador.update({
+        where: { usuarioId: req.usuario!.usuarioId, estado: existente.estado },
+        data: existente.estado === 'aprobado'
+          ? datos
+          : { ...datos, estado: 'pendiente', motivoRechazo: null },
+        select: seleccion,
+      })
+      : await prisma.paseador.upsert({
+        where: { usuarioId: req.usuario!.usuarioId },
+        create: { usuarioId: req.usuario!.usuarioId, ...datos },
+        update: datos,
+        select: seleccion,
+      });
+    const message = paseador.estado === 'aprobado'
+      ? 'Perfil actualizado.'
+      : 'Solicitud enviada. Te avisamos cuando esté revisada.';
+    res.json({ paseador, message });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      res.status(409).json({ error: 'El estado de tu perfil cambió. Volvé a cargarlo.' });
       return;
     }
-
-    const paseador = await prisma.paseador.upsert({
-      where: { usuarioId: req.usuario!.usuarioId },
-      create: {
-        usuarioId: req.usuario!.usuarioId,
-        ...datos,
-      },
-      update: {
-        ...datos,
-        estado: 'pendiente',
-        motivoRechazo: null,
-      },
-      select: seleccion,
-    });
-
-    res.json({ paseador, message: 'Solicitud enviada. Te avisamos cuando esté revisada.' });
-  } catch (error) {
     next(error);
   }
 });

@@ -1,5 +1,5 @@
 // Pantalla para que una persona se postule como paseador de mascotas.
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Button, Card, Text, TextInput } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import { useAuth } from '../contextos/ContextoAuth';
@@ -18,7 +18,7 @@ import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import {
   Paseador,
   enviarSolicitudPaseador,
-  obtenerMiPaseador,
+  obtenerEstadoPerfilPaseador,
 } from '../servicios/servicioPaseadores';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Paseadores'>;
@@ -36,6 +36,8 @@ export default function PantallaPaseadores(): JSX.Element {
   const [cargando, setCargando] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [paseador, setPaseador] = useState<Paseador | null>(null);
+  const [membresiaActiva, setMembresiaActiva] = useState(false);
+  const [precioMembresia, setPrecioMembresia] = useState<number | null>(null);
   const [telefono, setTelefono] = useState('');
   const [ciudad, setCiudad] = useState('');
   const [zona, setZona] = useState('');
@@ -47,8 +49,11 @@ export default function PantallaPaseadores(): JSX.Element {
   const cargar = useCallback(async () => {
     try {
       setCargando(true);
-      const actual = await obtenerMiPaseador();
+      const { paseador: actual, membresiaActiva: activa, precioMembresia: precio } =
+        await obtenerEstadoPerfilPaseador();
       setPaseador(actual);
+      setMembresiaActiva(activa);
+      setPrecioMembresia(precio);
       if (actual) {
         setTelefono(actual.telefono || '');
         setCiudad(actual.ciudad || '');
@@ -65,13 +70,13 @@ export default function PantallaPaseadores(): JSX.Element {
     }
   }, []);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     if (!estaAutenticado) {
       navigation.navigate('Login');
       return;
     }
     cargar();
-  }, [estaAutenticado, cargar, navigation]);
+  }, [estaAutenticado, cargar, navigation]));
 
   const enviar = async () => {
     if (enviando) return;
@@ -96,7 +101,7 @@ export default function PantallaPaseadores(): JSX.Element {
       });
       setPaseador(resultado.paseador);
       mostrarAlerta(
-        'Solicitud enviada',
+        resultado.paseador.estado === 'aprobado' ? 'Perfil actualizado' : 'Solicitud enviada',
         resultado.message || 'Te vamos a contactar cuando tu perfil esté revisado.'
       );
     } catch (error: any) {
@@ -131,9 +136,16 @@ export default function PantallaPaseadores(): JSX.Element {
             </View>
           </View>
           <Text style={estilos.descripcion}>
-            Completá tus datos y tu experiencia. El equipo de Indio revisa cada solicitud antes de
-            publicar el perfil. Por ahora el registro es gratis.
+            Postulate gratis. Vos elegís dónde paseás, cuánto cobrás y cómo te paga el dueño.
+            Indio revisa tu solicitud antes de habilitar el perfil.
           </Text>
+          {precioMembresia !== null && (
+            <Text style={estilos.descripcion}>
+              Para aparecer en el catálogo y recibir nuevas solicitudes, necesitás la Membresía
+              Indio. El primer mes es gratis si todavía no usaste la prueba. Después son
+              {' '}ARS ${new Intl.NumberFormat('es-AR').format(precioMembresia)} por mes.
+            </Text>
+          )}
         </Card.Content>
       </Card>
 
@@ -146,93 +158,97 @@ export default function PantallaPaseadores(): JSX.Element {
           {paseador?.estado === 'rechazado' && paseador.motivoRechazo ? (
             <Text style={estilos.motivo}>Motivo: {paseador.motivoRechazo}</Text>
           ) : null}
-          {paseador?.estado === 'aprobado' ? (
-            <Text style={estilos.motivo}>
-              Tu perfil ya está visible para la comunidad. Consultá las solicitudes en la
-              pestaña “Soy paseador” de la pantalla Paseos.
-            </Text>
-          ) : null}
+          {aprobado && (
+            <>
+              <Text style={estilos.motivo}>
+                {membresiaActiva
+                  ? 'Tu perfil está visible. Consultá las solicitudes en Paseos → Soy paseador.'
+                  : 'Activá o renová tu membresía para publicar tu perfil y recibir nuevas solicitudes.'}
+              </Text>
+              <Button mode="outlined" onPress={() => navigation.navigate('Suscripcion')} style={estilos.boton}>
+                Mi suscripción
+              </Button>
+            </>
+          )}
         </Card.Content>
       </Card>
 
-      {!aprobado && (
-        <Card style={estilos.cardFormulario}>
-          <Card.Content>
-            <Text style={estilos.seccion}>Datos de contacto</Text>
-            <TextInput
-              label="Teléfono / WhatsApp *"
-              value={telefono}
-              onChangeText={setTelefono}
-              mode="outlined"
-              keyboardType="phone-pad"
-              style={estilos.input}
-            />
-            <TextInput
-              label="Ciudad *"
-              value={ciudad}
-              onChangeText={setCiudad}
-              mode="outlined"
-              style={estilos.input}
-            />
-            <TextInput
-              label="Zona o barrios donde paseás"
-              value={zona}
-              onChangeText={setZona}
-              mode="outlined"
-              style={estilos.input}
-            />
+      <Card style={estilos.cardFormulario}>
+        <Card.Content>
+          <Text style={estilos.seccion}>Datos de contacto</Text>
+          <TextInput
+            label="Teléfono / WhatsApp *"
+            value={telefono}
+            onChangeText={setTelefono}
+            mode="outlined"
+            keyboardType="phone-pad"
+            style={estilos.input}
+          />
+          <TextInput
+            label="Ciudad *"
+            value={ciudad}
+            onChangeText={setCiudad}
+            mode="outlined"
+            style={estilos.input}
+          />
+          <TextInput
+            label="Zona o barrios donde paseás"
+            value={zona}
+            onChangeText={setZona}
+            mode="outlined"
+            style={estilos.input}
+          />
 
-            <Text style={estilos.seccion}>Experiencia y disponibilidad</Text>
-            <TextInput
-              label="Contanos tu experiencia con mascotas"
-              value={experiencia}
-              onChangeText={setExperiencia}
-              mode="outlined"
-              multiline
-              numberOfLines={4}
-              style={estilos.input}
-            />
-            <TextInput
-              label="Precio por hora (ARS, opcional)"
-              value={precioHora}
-              onChangeText={setPrecioHora}
-              mode="outlined"
-              keyboardType="numeric"
-              style={estilos.input}
-            />
-            <TextInput
-              label="Disponibilidad (días y horarios)"
-              value={disponibilidad}
-              onChangeText={setDisponibilidad}
-              mode="outlined"
-              style={estilos.input}
-            />
-            <TextInput
-              label="Mensaje adicional (opcional)"
-              value={mensaje}
-              onChangeText={setMensaje}
-              mode="outlined"
-              multiline
-              numberOfLines={3}
-              style={estilos.input}
-            />
+          <Text style={estilos.seccion}>Experiencia y disponibilidad</Text>
+          <TextInput
+            label="Contanos tu experiencia con mascotas"
+            value={experiencia}
+            onChangeText={setExperiencia}
+            mode="outlined"
+            multiline
+            numberOfLines={4}
+            style={estilos.input}
+          />
+          <TextInput
+            label="Precio por hora (ARS, opcional)"
+            value={precioHora}
+            onChangeText={setPrecioHora}
+            mode="outlined"
+            keyboardType="numeric"
+            style={estilos.input}
+          />
+          <TextInput
+            label="Disponibilidad (días y horarios)"
+            value={disponibilidad}
+            onChangeText={setDisponibilidad}
+            mode="outlined"
+            style={estilos.input}
+          />
+          <TextInput
+            label="Mensaje adicional (opcional)"
+            value={mensaje}
+            onChangeText={setMensaje}
+            mode="outlined"
+            multiline
+            numberOfLines={3}
+            style={estilos.input}
+          />
 
-            <Button
-              mode="contained"
-              onPress={enviar}
-              loading={enviando}
-              disabled={enviando}
-              style={estilos.boton}
-              contentStyle={estilos.botonContenido}
-            >
-              {paseador ? 'Actualizar solicitud' : 'Enviar solicitud'}
-            </Button>
-            <Text style={estilos.aviso}>
-              Al enviar, aceptás que Indio revise tus datos y te contacte por WhatsApp o email.
-            </Text>
-          </Card.Content>
-        </Card>
-      )}
+          <Button
+            mode="contained"
+            onPress={enviar}
+            loading={enviando}
+            disabled={enviando}
+            style={estilos.boton}
+            contentStyle={estilos.botonContenido}
+          >
+            {aprobado ? 'Guardar perfil' : paseador ? 'Actualizar solicitud' : 'Enviar solicitud'}
+          </Button>
+          <Text style={estilos.aviso}>
+            Al enviar, aceptás que Indio revise tus datos y te contacte por WhatsApp o email.
+          </Text>
+        </Card.Content>
+      </Card>
     </ScrollView>
   );
 }

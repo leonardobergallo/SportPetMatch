@@ -28,9 +28,19 @@ export interface DatosPaseador {
   mensaje?: string;
 }
 
+export interface EstadoPerfilPaseador {
+  paseador: Paseador | null;
+  membresiaActiva: boolean;
+  precioMembresia: number;
+}
+
+export async function obtenerEstadoPerfilPaseador(): Promise<EstadoPerfilPaseador> {
+  const response = await apiClient.get<EstadoPerfilPaseador>('/paseadores/mi');
+  return response.data;
+}
+
 export async function obtenerMiPaseador(): Promise<Paseador | null> {
-  const response = await apiClient.get<{ paseador: Paseador | null }>('/paseadores/mi');
-  return response.data.paseador;
+  return (await obtenerEstadoPerfilPaseador()).paseador;
 }
 
 export async function enviarSolicitudPaseador(

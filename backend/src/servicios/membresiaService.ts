@@ -5,6 +5,15 @@ export const PRUEBA_INDIO = 'indio_prueba';
 export const MENSUAL_INDIO = 'indio_mensual';
 export const COMPRA_INDIO = 'indio_renovacion';
 
+export function membresiaIndioVigente(ahora = new Date()): Prisma.SuscripcionWhereInput {
+  return {
+    tipo: { in: [PRUEBA_INDIO, MENSUAL_INDIO] },
+    estado: 'activa',
+    fechaInicio: { lte: ahora },
+    fechaFin: { gt: ahora },
+  };
+}
+
 export function sumarMes(fecha: Date): Date {
   const resultado = new Date(fecha);
   const dia = resultado.getUTCDate();

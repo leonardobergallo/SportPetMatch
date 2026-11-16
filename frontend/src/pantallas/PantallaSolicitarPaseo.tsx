@@ -152,8 +152,8 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
         <Card.Content>
           <Text style={estilos.titulo}>Solicitar un paseo</Text>
           <Text style={estilos.descripcion}>
-            Elegí un paseador aprobado, tu mascota y el horario. El paseador recibe la solicitud y
-            puede aceptarla o rechazarla.
+            Compará zonas, horarios y tarifas. Elegí un paseador y enviá tu solicitud.
+            El paseador puede aceptarla o rechazarla.
           </Text>
         </Card.Content>
       </Card>
@@ -170,9 +170,9 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
       ) : paseadores.length === 0 ? (
         <Card style={estilos.avisoCard}>
           <Card.Content>
-            <Text style={estilos.avisoTitulo}>Todavía no hay paseadores aprobados</Text>
+            <Text style={estilos.avisoTitulo}>Todavía no hay paseadores disponibles</Text>
             <Text style={estilos.avisoTexto}>
-              Cuando el equipo de Indio apruebe paseadores, van a aparecer acá.
+              Los paseadores aparecen acá cuando su perfil está aprobado y su membresía está activa.
             </Text>
             <Button
               mode="outlined"
@@ -229,7 +229,7 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
                       </View>
                       {paseador.precioHora ? (
                         <Text style={estilos.precio}>${paseador.precioHora}/h</Text>
-                      ) : null}
+                      ) : <Text style={estilos.detallePaseador}>Tarifa a convenir</Text>}
                     </View>
                   </Card.Content>
                 </Card>
@@ -309,7 +309,7 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
             Enviar solicitud
           </Button>
           <Text style={estilos.ayuda}>
-            El pago del paseo se coordina directamente con el paseador por ahora.
+            Cada paseador fija su tarifa. Acordá el precio final y pagale directamente.
           </Text>
         </>
       )}

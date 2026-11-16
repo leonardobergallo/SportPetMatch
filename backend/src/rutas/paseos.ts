@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { middlewareAutenticacion } from '../middleware/autenticacion';
 import prisma from '../utilidades/prisma';
 import { esAdministrador } from '../utilidades/admin';
+import { membresiaIndioVigente } from '../servicios/membresiaService';
 import {
   calcularResumen,
   cargarPaseo,
@@ -95,16 +96,20 @@ router.post('/', async (req, res, next) => {
     }
 
     const [paseador, mascota] = await Promise.all([
-      prisma.paseador.findUnique({
-        where: { id: paseadorId },
-        select: { id: true, usuarioId: true, estado: true, precioHora: true },
+      prisma.paseador.findFirst({
+        where: {
+          id: paseadorId,
+          estado: 'aprobado',
+          usuario: { isActive: true, suscripciones: { some: membresiaIndioVigente() } },
+        },
+        select: { usuarioId: true, precioHora: true },
       }),
       prisma.mascota.findFirst({
         where: { id: mascotaId, usuarioId: duenoId },
         select: { id: true },
       }),
     ]);
-    if (!paseador || paseador.estado !== 'aprobado') {
+    if (!paseador) {
       res.status(404).json({ error: 'El paseador no está disponible' });
       return;
     }
