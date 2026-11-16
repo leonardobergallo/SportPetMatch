@@ -92,4 +92,12 @@ app.listen(port, host, () => {
   } catch (error) {
     console.error('No se pudo iniciar el scheduler de reportes:', error.message);
   }
+  try {
+    const { iniciarLimpiezaGps } = require(
+      path.join(backendDir, 'dist', 'src', 'servicios', 'paseoService.js')
+    );
+    iniciarLimpiezaGps();
+  } catch (error) {
+    console.error('No se pudo iniciar la limpieza de puntos GPS:', error.message);
+  }
 });
