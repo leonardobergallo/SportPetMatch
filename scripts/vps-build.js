@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const rootDir = path.join(__dirname, '..');
+const dependenciasInstaladas = process.argv.includes('--skip-install');
 
 function run(command, cwd) {
   execSync(command, { cwd, stdio: 'inherit' });
@@ -27,14 +28,18 @@ function copyDir(source, target) {
 try {
   console.log('Build VPS SportPetMatch...');
 
-  console.log('Instalando backend...');
-  run('npm install', path.join(rootDir, 'backend'));
+  if (!dependenciasInstaladas) {
+    console.log('Instalando backend...');
+    run('npm install', path.join(rootDir, 'backend'));
+  }
 
   console.log('Compilando backend...');
   run('npm run build', path.join(rootDir, 'backend'));
 
-  console.log('Instalando frontend...');
-  run('npm install', path.join(rootDir, 'frontend'));
+  if (!dependenciasInstaladas) {
+    console.log('Instalando frontend...');
+    run('npm install', path.join(rootDir, 'frontend'));
+  }
 
   console.log('Exportando frontend web...');
   run('npm run build', path.join(rootDir, 'frontend'));

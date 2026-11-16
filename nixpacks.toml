@@ -9,7 +9,7 @@ cmds = [
 ]
 
 [phases.build]
-cmds = ["npm run vps-build"]
+cmds = ["npm run vps-build -- --skip-install"]
 
 [start]
 cmd = "npm run vps-start"
