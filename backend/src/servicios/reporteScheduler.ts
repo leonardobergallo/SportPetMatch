@@ -17,10 +17,10 @@ export function iniciarSchedulerReportes(): void {
     return;
   }
 
-  const horaObjetivo = Math.min(
-    23,
-    Math.max(0, Number.parseInt(process.env.REPORTE_HORA || '8', 10) || 8)
-  );
+  const horaConfigurada = Number.parseInt(process.env.REPORTE_HORA ?? '8', 10);
+  const horaObjetivo = Number.isFinite(horaConfigurada)
+    ? Math.min(23, Math.max(0, horaConfigurada))
+    : 8;
   let ejecutando = false;
 
   const revisar = async () => {

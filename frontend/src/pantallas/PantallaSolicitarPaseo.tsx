@@ -58,6 +58,7 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
   const navigation = useNavigation<Nav>();
   const { estaAutenticado } = useAuth();
   const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [paseadores, setPaseadores] = useState<PaseadorPaseo[]>([]);
   const [mascotas, setMascotas] = useState<Mascota[]>([]);
@@ -69,6 +70,8 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
   const [notas, setNotas] = useState('');
 
   const cargar = useCallback(async () => {
+    setCargando(true);
+    setErrorCarga(false);
     try {
       const [disponibles, misMascotas] = await Promise.all([
         obtenerPaseadoresDisponibles(),
@@ -78,6 +81,7 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
       setMascotas(misMascotas);
       if (misMascotas.length > 0) setMascotaId(misMascotas[0].id);
     } catch (error: any) {
+      setErrorCarga(true);
       mostrarAlerta('Paseos', error?.message || 'No se pudieron cargar los datos.');
     } finally {
       setCargando(false);
@@ -154,7 +158,32 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
         </Card.Content>
       </Card>
 
-      {mascotas.length === 0 ? (
+      {errorCarga ? (
+        <Card style={estilos.avisoCard}>
+          <Card.Content>
+            <Text style={estilos.avisoTitulo}>No se pudo cargar la información</Text>
+            <Button mode="outlined" onPress={cargar} style={estilos.boton}>
+              Reintentar
+            </Button>
+          </Card.Content>
+        </Card>
+      ) : paseadores.length === 0 ? (
+        <Card style={estilos.avisoCard}>
+          <Card.Content>
+            <Text style={estilos.avisoTitulo}>Todavía no hay paseadores aprobados</Text>
+            <Text style={estilos.avisoTexto}>
+              Cuando el equipo de Indio apruebe paseadores, van a aparecer acá.
+            </Text>
+            <Button
+              mode="outlined"
+              onPress={() => navigation.navigate('Paseadores')}
+              style={estilos.boton}
+            >
+              Quiero ser paseador
+            </Button>
+          </Card.Content>
+        </Card>
+      ) : mascotas.length === 0 ? (
         <Card style={estilos.avisoCard}>
           <Card.Content>
             <Text style={estilos.avisoTitulo}>Primero cargá una mascota</Text>
@@ -168,15 +197,6 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
             >
               Agregar mascota
             </Button>
-          </Card.Content>
-        </Card>
-      ) : paseadores.length === 0 ? (
-        <Card style={estilos.avisoCard}>
-          <Card.Content>
-            <Text style={estilos.avisoTitulo}>Todavía no hay paseadores aprobados</Text>
-            <Text style={estilos.avisoTexto}>
-              Cuando el equipo de Indio apruebe paseadores, van a aparecer acá.
-            </Text>
           </Card.Content>
         </Card>
       ) : (

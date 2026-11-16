@@ -148,8 +148,8 @@ export default function PantallaPaseadores(): JSX.Element {
           ) : null}
           {paseador?.estado === 'aprobado' ? (
             <Text style={estilos.motivo}>
-              Tu perfil ya está visible para la comunidad. Próximamente vas a poder recibir
-              solicitudes de paseo desde la app.
+              Tu perfil ya está visible para la comunidad. Consultá las solicitudes en la
+              pestaña “Soy paseador” de la pantalla Paseos.
             </Text>
           ) : null}
         </Card.Content>

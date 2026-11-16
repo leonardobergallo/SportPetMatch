@@ -22,6 +22,7 @@ import rutasMembresia from './rutas/membresia';
 import rutasPaseadores from './rutas/paseadores';
 import rutasPaseos from './rutas/paseos';
 import { iniciarSchedulerReportes } from './servicios/reporteScheduler';
+import { iniciarLimpiezaGps } from './servicios/paseoService';
 
 // Importar middleware personalizado
 // import { middlewareAutenticacion } from './middleware/autenticacion';
@@ -264,6 +265,7 @@ const iniciarServidor = async () => {
       }
       console.log('🐕‍🦺 ¡Listo para conectar personas y mascotas!');
       iniciarSchedulerReportes();
+      iniciarLimpiezaGps();
     });
   } catch (error) {
     console.error('❌ Error al iniciar el servidor:', error);

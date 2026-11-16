@@ -1,6 +1,29 @@
 // Utilidades compartidas para paseos y seguimiento GPS.
 import prisma from '../utilidades/prisma';
 
+export const RETENCION_GPS_DIAS = 30;
+const INTERVALO_LIMPIEZA_GPS_MS = 60 * 60 * 1000;
+
+export function limiteRetencionGps(ahora = new Date()): Date {
+  return new Date(ahora.getTime() - RETENCION_GPS_DIAS * 24 * 60 * 60 * 1000);
+}
+
+export function eliminarPuntosGpsVencidos(ahora = new Date()) {
+  return prisma.paseoPunto.deleteMany({
+    where: { createdAt: { lt: limiteRetencionGps(ahora) } },
+  });
+}
+
+export function iniciarLimpiezaGps(): void {
+  const limpiar = () => {
+    eliminarPuntosGpsVencidos().catch((error: unknown) => {
+      console.error('[paseos] No se pudieron eliminar los puntos GPS vencidos:', error);
+    });
+  };
+  limpiar();
+  setInterval(limpiar, INTERVALO_LIMPIEZA_GPS_MS).unref();
+}
+
 export const usuarioMini = {
   select: {
     id: true,

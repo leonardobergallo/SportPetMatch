@@ -1,5 +1,6 @@
 // Administración de paseos y seguimiento.
 import express from 'express';
+import { Prisma } from '@prisma/client';
 import prisma from '../utilidades/prisma';
 import { cargarPaseo, paseoInclude } from '../servicios/paseoService';
 
@@ -65,12 +66,16 @@ router.post('/:id/cancelar', async (req, res, next) => {
       return;
     }
     const actualizado = await prisma.paseo.update({
-      where: { id: paseo.id },
+      where: { id: paseo.id, estado: paseo.estado },
       data: { estado: 'cancelado' },
       include: paseoInclude,
     });
     res.json({ paseo: actualizado });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      res.status(409).json({ error: 'El estado del paseo cambió. Actualizá la pantalla.' });
+      return;
+    }
     next(error);
   }
 });

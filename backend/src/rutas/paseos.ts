@@ -1,6 +1,7 @@
 // Rutas de paseos con seguimiento GPS.
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import { Prisma } from '@prisma/client';
 import { middlewareAutenticacion } from '../middleware/autenticacion';
 import prisma from '../utilidades/prisma';
 import { esAdministrador } from '../utilidades/admin';
@@ -8,6 +9,7 @@ import {
   calcularResumen,
   cargarPaseo,
   distanciaKm,
+  limiteRetencionGps,
   paseoInclude,
 } from '../servicios/paseoService';
 
@@ -41,6 +43,27 @@ async function rolEnPaseo(req: express.Request, paseo: any): Promise<'dueno' | '
   if (paseo.paseador?.usuarioId === userId) return 'paseador';
   if (esAdmin(req)) return 'admin';
   return null;
+}
+
+async function actualizarEstado(
+  paseo: NonNullable<Awaited<ReturnType<typeof cargarPaseo>>>,
+  data: Prisma.PaseoUpdateInput,
+  res: express.Response
+) {
+  try {
+    const actualizado = await prisma.paseo.update({
+      where: { id: paseo.id, estado: paseo.estado },
+      data,
+      include: paseoInclude,
+    });
+    res.json({ paseo: actualizado });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      res.status(409).json({ error: 'El estado del paseo cambió. Actualizá la pantalla.' });
+      return;
+    }
+    throw error;
+  }
 }
 
 router.post('/', async (req, res, next) => {
@@ -158,7 +181,7 @@ router.get('/:id/recorrido', async (req, res, next) => {
     }
 
     const puntos = await prisma.paseoPunto.findMany({
-      where: { paseoId: paseo.id },
+      where: { paseoId: paseo.id, createdAt: { gte: limiteRetencionGps() } },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
       select: { id: true, latitud: true, longitud: true, precision: true, createdAt: true },
     });
@@ -209,12 +232,7 @@ router.post('/:id/aceptar', async (req, res, next) => {
       res.status(409).json({ error: 'El paseo ya no está pendiente' });
       return;
     }
-    const actualizado = await prisma.paseo.update({
-      where: { id: paseo.id },
-      data: { estado: 'aceptado' },
-      include: paseoInclude,
-    });
-    res.json({ paseo: actualizado });
+    await actualizarEstado(paseo, { estado: 'aceptado' }, res);
   } catch (error) {
     next(error);
   }
@@ -235,12 +253,7 @@ router.post('/:id/rechazar', async (req, res, next) => {
       res.status(409).json({ error: 'El paseo ya no está pendiente' });
       return;
     }
-    const actualizado = await prisma.paseo.update({
-      where: { id: paseo.id },
-      data: { estado: 'rechazado' },
-      include: paseoInclude,
-    });
-    res.json({ paseo: actualizado });
+    await actualizarEstado(paseo, { estado: 'rechazado' }, res);
   } catch (error) {
     next(error);
   }
@@ -261,12 +274,7 @@ router.post('/:id/iniciar', async (req, res, next) => {
       res.status(409).json({ error: 'El paseo no está listo para iniciar' });
       return;
     }
-    const actualizado = await prisma.paseo.update({
-      where: { id: paseo.id },
-      data: { estado: 'en_curso', inicioEn: new Date() },
-      include: paseoInclude,
-    });
-    res.json({ paseo: actualizado });
+    await actualizarEstado(paseo, { estado: 'en_curso', inicioEn: new Date() }, res);
   } catch (error) {
     next(error);
   }
@@ -349,17 +357,12 @@ router.post('/:id/finalizar', async (req, res, next) => {
       );
     }
     const inicio = paseo.inicioEn || ahora;
-    const actualizado = await prisma.paseo.update({
-      where: { id: paseo.id },
-      data: {
-        estado: 'finalizado',
-        finEn: ahora,
-        distanciaKm: Number(distancia.toFixed(3)),
-        duracionRealMin: Math.max(0, Math.round((ahora.getTime() - inicio.getTime()) / 60000)),
-      },
-      include: paseoInclude,
-    });
-    res.json({ paseo: actualizado });
+    await actualizarEstado(paseo, {
+      estado: 'finalizado',
+      finEn: ahora,
+      distanciaKm: Number(distancia.toFixed(3)),
+      duracionRealMin: Math.max(0, Math.round((ahora.getTime() - inicio.getTime()) / 60000)),
+    }, res);
   } catch (error) {
     next(error);
   }
@@ -389,12 +392,7 @@ router.post('/:id/cancelar', async (req, res, next) => {
       res.status(409).json({ error: 'El paseo ya está cerrado' });
       return;
     }
-    const actualizado = await prisma.paseo.update({
-      where: { id: paseo.id },
-      data: { estado: 'cancelado' },
-      include: paseoInclude,
-    });
-    res.json({ paseo: actualizado });
+    await actualizarEstado(paseo, { estado: 'cancelado' }, res);
   } catch (error) {
     next(error);
   }
