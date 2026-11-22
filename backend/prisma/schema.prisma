@@ -379,6 +379,8 @@ model Suscripcion {
   moneda          String    @default("ARS") // Moneda
   pruebaIndioUsuarioId String? @unique
   avisoPruebaEn   DateTime?
+  avisoVencimientoEn DateTime? // Recordatorio enviado 7 días antes del vencimiento
+  avisoUltimoDiaEn DateTime? // Recordatorio enviado el último día
   createdAt       DateTime @default(now()) // Fecha de creación
   updatedAt       DateTime @updatedAt // Fecha de última actualización
 

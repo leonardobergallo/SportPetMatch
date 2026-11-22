@@ -15,7 +15,13 @@ const express = require(path.join(backendDir, 'node_modules', 'express'));
 function aplicarMigraciones() {
   const prismaCli = path.join(backendDir, 'node_modules', 'prisma', 'build', 'index.js');
   const schema = path.join(backendDir, 'prisma', 'schema.prisma');
-  const migraciones = ['paseadores-indio.sql', 'paseos-gps.sql', 'reportes-indio.sql'];
+  const migraciones = [
+    'paseadores-indio.sql',
+    'paseos-gps.sql',
+    'reportes-indio.sql',
+    'membresia-indio.sql',
+    'membresia-recordatorios.sql',
+  ];
   if (!fs.existsSync(prismaCli) || !fs.existsSync(schema)) return;
 
   for (const archivo of migraciones) {
@@ -91,6 +97,14 @@ app.listen(port, host, () => {
     iniciarSchedulerReportes();
   } catch (error) {
     console.error('No se pudo iniciar el scheduler de reportes:', error.message);
+  }
+  try {
+    const { iniciarRecordatoriosMembresia } = require(
+      path.join(backendDir, 'dist', 'src', 'servicios', 'membresiaScheduler.js')
+    );
+    iniciarRecordatoriosMembresia();
+  } catch (error) {
+    console.error('No se pudieron iniciar los recordatorios de membresía:', error.message);
   }
   try {
     const { iniciarLimpiezaGps } = require(

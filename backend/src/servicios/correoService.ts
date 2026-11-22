@@ -1,8 +1,14 @@
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 const EMAIL_ADMIN_POR_DEFECTO = 'it360tecnologia@gmail.com';
 
+type TipoCorreoMembresia =
+  | 'prueba'
+  | 'renovacion'
+  | 'recordatorio_7d'
+  | 'recordatorio_1d';
+
 export async function enviarCorreoMembresia(
-  tipo: 'prueba' | 'renovacion',
+  tipo: TipoCorreoMembresia,
   id: string,
   destinatario: string,
   asunto: string,
@@ -16,13 +22,19 @@ export async function enviarCorreoMembresia(
     : destinatario;
   if (!apiKey || !from) return false;
 
+  // Los recordatorios incluyen la fecha en la clave para permitir reintentos
+  // en días distintos sin que Resend los descarte como duplicados.
+  const clave = tipo.startsWith('recordatorio_')
+    ? `indio-membresia/${tipo}/${id}/${new Date().toISOString().slice(0, 10)}`
+    : `indio-membresia/${tipo}/${id}`;
+
   try {
     const response = await fetch(RESEND_ENDPOINT, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': `indio-membresia/${tipo}/${id}`,
+        'Idempotency-Key': clave,
       },
       body: JSON.stringify({ from, to: [to], subject: asunto, text: texto }),
       signal: AbortSignal.timeout(5000),

@@ -101,6 +101,9 @@ export default function PantallaSuscripcion(): JSX.Element {
   const vencida = !!periodo && !vigente;
   const pendiente = (datos?.renovaciones || []).some((item) => item.estado === 'pendiente');
   const puedeRenovar = !!periodo && !pendiente && new Date(periodo.fechaInicio) <= new Date();
+  const diasRestantes = vigente
+    ? Math.max(1, Math.ceil((new Date(periodo!.fechaFin).getTime() - Date.now()) / 86400000))
+    : 0;
 
   return (
     <ScrollView style={estilos.contenedor} contentContainerStyle={estilos.contenido}>
@@ -127,12 +130,33 @@ export default function PantallaSuscripcion(): JSX.Element {
             </Text>
           </View>
 
+          {vigente && (
+            <View style={[estilos.avisoDias, diasRestantes <= 5 && estilos.avisoDiasUrgente]}>
+              <MaterialIcons
+                name="hourglass-bottom"
+                size={18}
+                color={diasRestantes <= 5 ? '#A33B1F' : '#237B31'}
+              />
+              <Text
+                style={[
+                  estilos.avisoDiasTexto,
+                  diasRestantes <= 5 && estilos.avisoDiasTextoUrgente,
+                ]}
+              >
+                {diasRestantes === 1
+                  ? 'Último día de tu membresía.'
+                  : `Te quedan ${diasRestantes} días de membresía.`}
+              </Text>
+            </View>
+          )}
+
           <Text style={estilos.precio}>
             {importe(datos?.precio || 15900)} <Text style={estilos.precioPeriodo}>/ mes</Text>
           </Text>
           <Text style={estilos.descripcion}>
             Después del primer mes, la renovación se paga por Mercado Pago. El enlace y el estado
-            aparecen acá y también te los enviamos por correo.
+            aparecen acá y también te los enviamos por correo. Te avisamos 7 días antes y el
+            último día.
           </Text>
 
           {datos?.puedeActivarPrueba && (
@@ -309,6 +333,27 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
     color: temaApp.colors.primary,
     marginTop: 2,
+  },
+  avisoDias: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espaciado.sm,
+    backgroundColor: '#E8F4EC',
+    borderRadius: 12,
+    padding: espaciado.sm,
+    marginBottom: espaciado.md,
+  },
+  avisoDiasUrgente: {
+    backgroundColor: '#FFF1EC',
+  },
+  avisoDiasTexto: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#237B31',
+  },
+  avisoDiasTextoUrgente: {
+    color: '#A33B1F',
   },
   precio: {
     fontSize: 28,

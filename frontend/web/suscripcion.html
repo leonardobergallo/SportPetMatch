@@ -18,6 +18,8 @@
     a { color: #173f41; }
     li { margin-bottom: .85rem; } li:last-child { margin-bottom: 0; }
     #mensaje { color: #89341d; } [hidden] { display: none !important; }
+    .dias { font-weight: 700; color: #237b31; }
+    .dias.urgente { color: #a33b1f; }
   </style>
 </head>
 <body>
@@ -40,6 +42,7 @@
       <section>
         <h2>Membresía Indio</h2>
         <p id="estado"></p>
+        <p id="dias" class="dias" hidden></p>
         <p id="precio"></p>
         <button id="prueba" hidden>Activar mi mes gratis</button>
         <button id="renovar" hidden>Solicitar enlace de pago</button>
@@ -88,7 +91,17 @@
           ? `Membresía vigente hasta el ${fecha(periodo.fechaFin)}.`
           : `Tu último período venció el ${fecha(periodo.fechaFin)}.`
         : 'Tu mes gratis está disponible.';
-      el('precio').textContent = `Primer mes gratis. Luego, ${importe(precio)} por mes.`;
+      const diasRestantes = vigente
+        ? Math.max(1, Math.ceil((new Date(periodo.fechaFin) - ahora) / 86400000))
+        : 0;
+      el('dias').hidden = !vigente;
+      el('dias').textContent = vigente
+        ? diasRestantes === 1
+          ? 'Último día de tu membresía.'
+          : `Te quedan ${diasRestantes} días de membresía.`
+        : '';
+      el('dias').classList.toggle('urgente', vigente && diasRestantes <= 5);
+      el('precio').textContent = `Primer mes gratis. Luego, ${importe(precio)} por mes. Te avisamos por correo 7 días antes y el último día.`;
       const pendiente = renovaciones.some(item => item.estado === 'pendiente');
       el('prueba').hidden = !puedeActivarPrueba;
       el('renovar').hidden = !periodo || pendiente || new Date(periodo.fechaInicio) > ahora;

@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE "suscripciones"
+  ADD COLUMN IF NOT EXISTS "avisoVencimientoEn" TIMESTAMP(3),
+  ADD COLUMN IF NOT EXISTS "avisoUltimoDiaEn" TIMESTAMP(3);
+
+COMMIT;
