@@ -1,6 +1,6 @@
 {
   "name": "sportpetmatch-movil",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Aplicación móvil SportPetMatch - Conecta personas y mascotas en eventos deportivos",
   "main": "index.js",
   "scripts": {

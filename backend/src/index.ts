@@ -19,6 +19,7 @@ import rutasMensajes from './rutas/mensajes';
 import rutasLugares from './rutas/lugares';
 import rutasAdmin from './rutas/admin';
 import rutasMembresia from './rutas/membresia';
+import rutasAppVersion from './rutas/appVersion';
 import rutasPaseadores from './rutas/paseadores';
 import rutasPaseos from './rutas/paseos';
 import { iniciarSchedulerReportes } from './servicios/reporteScheduler';
@@ -173,7 +174,8 @@ app.get('/api', (req: Request, res: Response) => {
       mensajes: '/api/mensajes',
       lugares: '/api/lugares',
       paseadores: '/api/paseadores',
-      paseos: '/api/paseos'
+      paseos: '/api/paseos',
+      versionApp: '/api/app/version'
     }
   });
 });
@@ -188,6 +190,7 @@ app.use('/api/mensajes', rutasMensajes);
 app.use('/api/lugares', rutasLugares);
 app.use('/api/admin', rutasAdmin);
 app.use('/api/membresia', rutasMembresia);
+app.use('/api/app', rutasAppVersion);
 app.use('/api/paseadores', rutasPaseadores);
 app.use('/api/paseos', rutasPaseos);
 
