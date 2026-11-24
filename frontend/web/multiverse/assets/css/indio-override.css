@@ -793,6 +793,26 @@ textarea {
 	text-align: center;
 }
 
+.indio-install-primary {
+	display: inline-block !important;
+	background: #173f41 !important;
+	color: #ffffff !important;
+	padding: 0.85rem 1.5rem !important;
+	border-radius: 12px !important;
+	font-weight: 800 !important;
+	font-size: 0.95rem !important;
+	text-decoration: none !important;
+	border: none !important;
+	box-shadow: 0 4px 14px rgba(23, 63, 65, 0.28) !important;
+	line-height: 1.3 !important;
+}
+
+.indio-install-primary:hover {
+	background: #275750 !important;
+	color: #ffffff !important;
+	filter: brightness(1.04);
+}
+
 #acceso-panel.indio-native a.indio-install-apk {
 	display: inline-block !important;
 	background: #6200ea !important;

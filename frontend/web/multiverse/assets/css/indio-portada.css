@@ -51,6 +51,16 @@ body {
 	background: #e8f1e7;
 }
 
+#header #indio-nav a.indio-nav-app {
+	background: #ac3d23;
+	color: #ffffff;
+}
+
+#header #indio-nav a.indio-nav-app:hover {
+	background: #8f321d;
+	color: #ffffff !important;
+}
+
 #header #indio-nav a:hover {
 	color: #173f41 !important;
 	background: #ece4da;
