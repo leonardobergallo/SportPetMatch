@@ -40,7 +40,8 @@ Variables:
 ```env
 ANDROID_MIN_VERSION_CODE=6
 ANDROID_LATEST_VERSION_CODE=7
-ANDROID_UPDATE_URL=https://play.google.com/store/apps/details?id=com.it360.indio
+# En prueba cerrada, la ficha pública devuelve 404: usar el enlace de verificación.
+ANDROID_UPDATE_URL=https://play.google.com/apps/testing/com.it360.indio
 ANDROID_UPDATE_MESSAGE=Actualizá Indio para seguir usando la app.
 ```
 

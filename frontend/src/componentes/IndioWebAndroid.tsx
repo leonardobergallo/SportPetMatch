@@ -11,7 +11,9 @@ const AndroidWebView = WebView as unknown as React.ComponentType<AndroidWebViewP
 
 const INDIO_URL = 'https://indio.com.ar/app.html?app=1';
 const INDIO_HOST = /^https:\/\/(?:www\.)?indio\.com\.ar(?:[/:?#]|$)/i;
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.it360.indio';
+// La ficha pública todavía devuelve 404 porque la app sigue en prueba cerrada.
+// Este es el mismo enlace de respaldo que devuelve /api/app/version.
+const PLAY_STORE_URL = 'https://play.google.com/apps/testing/com.it360.indio';
 const VERSION_TIMEOUT_MS = 8000;
 const FORCE_APP_MODE = `
   (function () {

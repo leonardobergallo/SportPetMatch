@@ -4,7 +4,11 @@ import express from 'express';
 
 const router = express.Router();
 
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.it360.indio';
+// Mientras Indio esté en prueba cerrada, la ficha pública devuelve 404:
+// el único enlace válido para instalarla o actualizarla es el de verificación.
+// Al aprobarse producción, cambiar el valor por el de details?id=... o definirlo
+// en ANDROID_UPDATE_URL.
+const PLAY_STORE_TESTING_URL = 'https://play.google.com/apps/testing/com.it360.indio';
 const WEB_APP_URL = 'https://indio.com.ar/app.html?app=1';
 const MENSAJE_POR_DEFECTO = 'Actualizá Indio para seguir usando la app.';
 
@@ -29,7 +33,7 @@ router.get('/version', (req, res) => {
     android: {
       minVersionCode,
       latestVersionCode,
-      updateUrl: process.env.ANDROID_UPDATE_URL?.trim() || PLAY_STORE_URL,
+      updateUrl: process.env.ANDROID_UPDATE_URL?.trim() || PLAY_STORE_TESTING_URL,
       webUrl: process.env.ANDROID_WEB_URL?.trim() || WEB_APP_URL,
       message: process.env.ANDROID_UPDATE_MESSAGE?.trim() || MENSAJE_POR_DEFECTO,
       debeActualizar: versionCode > 0 && versionCode < minVersionCode,
