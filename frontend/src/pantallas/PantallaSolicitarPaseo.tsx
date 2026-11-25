@@ -1,5 +1,5 @@
 // Pantalla para solicitar un paseo a un paseador aprobado.
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -16,6 +16,8 @@ import { useAuth } from '../contextos/ContextoAuth';
 import { mostrarAlerta } from '../utilidades/alerta';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
+import SelectorCampo from '../componentes/SelectorCampo';
+import { PASEADORES_DEMO_FALLBACK } from '../constantes/paseadoresDemoFallback';
 import { Mascota, obtenerMisMascotas } from '../servicios/servicioMascotas';
 import {
   PaseadorPaseo,
@@ -64,6 +66,8 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
   const [mascotas, setMascotas] = useState<Mascota[]>([]);
   const [paseadorId, setPaseadorId] = useState('');
   const [mascotaId, setMascotaId] = useState('');
+  const [ciudadFiltro, setCiudadFiltro] = useState('todas');
+  const [zonaFiltro, setZonaFiltro] = useState('todas');
   const [fechaTexto, setFechaTexto] = useState(fechaPorDefecto());
   const [duracionMin, setDuracionMin] = useState(60);
   const [direccion, setDireccion] = useState('');
@@ -77,7 +81,7 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
         obtenerPaseadoresDisponibles(),
         obtenerMisMascotas(),
       ]);
-      setPaseadores(disponibles);
+      setPaseadores(disponibles.length > 0 ? disponibles : PASEADORES_DEMO_FALLBACK);
       setMascotas(misMascotas);
       if (misMascotas.length > 0) setMascotaId(misMascotas[0].id);
     } catch (error: any) {
@@ -96,11 +100,65 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
     cargar();
   }, [estaAutenticado, cargar, navigation]);
 
+  const ciudadesDisponibles = useMemo(
+    () =>
+      Array.from(new Set(paseadores.map((paseador) => paseador.ciudad).filter(Boolean))).sort(
+        (a, b) => a.localeCompare(b)
+      ),
+    [paseadores]
+  );
+
+  const zonasDisponibles = useMemo(() => {
+    const base =
+      ciudadFiltro === 'todas'
+        ? paseadores
+        : paseadores.filter((paseador) => paseador.ciudad === ciudadFiltro);
+    const zonas = new Set<string>();
+
+    base.forEach((paseador) => {
+      (paseador.zona || '')
+        .split(',')
+        .map((zona) => zona.trim())
+        .filter(Boolean)
+        .forEach((zona) => zonas.add(zona));
+    });
+
+    return Array.from(zonas).sort((a, b) => a.localeCompare(b));
+  }, [paseadores, ciudadFiltro]);
+
+  const paseadoresFiltrados = useMemo(
+    () =>
+      paseadores.filter((paseador) => {
+        if (ciudadFiltro !== 'todas' && paseador.ciudad !== ciudadFiltro) return false;
+        if (zonaFiltro !== 'todas') {
+          const zonas = (paseador.zona || '')
+            .split(',')
+            .map((zona) => zona.trim().toLowerCase());
+          if (!zonas.includes(zonaFiltro.toLowerCase())) return false;
+        }
+        return true;
+      }),
+    [paseadores, ciudadFiltro, zonaFiltro]
+  );
+
+  useEffect(() => {
+    if (paseadorId && !paseadoresFiltrados.some((paseador) => paseador.id === paseadorId)) {
+      setPaseadorId('');
+    }
+  }, [paseadorId, paseadoresFiltrados]);
+
   const paseadorSeleccionado = paseadores.find((p) => p.id === paseadorId);
   const totalEstimado = precioEstimado(paseadorSeleccionado, duracionMin);
 
   const enviar = async () => {
     if (enviando) return;
+    if (paseadorSeleccionado?.esDemo) {
+      mostrarAlerta(
+        'Paseador de ejemplo',
+        'Estos perfiles sirven para ver cómo funciona el flujo. Para enviar una solicitud real, un paseador tiene que registrarse y quedar aprobado. Si ya cargaste los paseadores demo en la base, recargá esta pantalla.'
+      );
+      return;
+    }
     if (!paseadorId) {
       mostrarAlerta('Falta el paseador', 'Elegí un paseador aprobado.');
       return;
@@ -202,115 +260,201 @@ export default function PantallaSolicitarPaseo(): JSX.Element {
       ) : (
         <>
           <Text style={estilos.seccion}>Elegí tu paseador</Text>
-          {paseadores.map((paseador) => {
-            const seleccionado = paseador.id === paseadorId;
-            return (
-              <TouchableOpacity
-                key={paseador.id}
-                onPress={() => setPaseadorId(paseador.id)}
-                activeOpacity={0.85}
-              >
-                <Card style={[estilos.cardPaseador, seleccionado && estilos.cardSeleccionada]}>
-                  <Card.Content>
-                    <View style={estilos.filaPaseador}>
-                      <View style={estilos.avatar}>
-                        <MaterialIcons name="pets" size={24} color="#FFFFFF" />
-                      </View>
-                      <View style={estilos.textoPaseador}>
-                        <Text style={estilos.nombrePaseador}>
-                          {paseador.usuario?.nombre || 'Paseador'}
-                        </Text>
-                        <Text style={estilos.detallePaseador}>
-                          {[paseador.ciudad, paseador.zona].filter(Boolean).join(' · ')}
-                        </Text>
-                        <Text style={estilos.detallePaseador}>
-                          {paseador.disponibilidad || 'Disponibilidad a convenir'}
-                        </Text>
-                      </View>
-                      {paseador.precioHora ? (
-                        <Text style={estilos.precio}>${paseador.precioHora}/h</Text>
-                      ) : <Text style={estilos.detallePaseador}>Tarifa a convenir</Text>}
-                    </View>
-                  </Card.Content>
-                </Card>
-              </TouchableOpacity>
-            );
-          })}
 
-          <Text style={estilos.seccion}>Tu mascota</Text>
-          <View style={estilos.chips}>
-            {mascotas.map((mascota) => (
-              <Chip
-                key={mascota.id}
-                selected={mascota.id === mascotaId}
-                onPress={() => setMascotaId(mascota.id)}
-                style={estilos.chip}
-              >
-                {mascota.nombre}
-              </Chip>
-            ))}
+          {paseadores.some((paseador) => paseador.esDemo) && (
+            <Card style={estilos.demoCard}>
+              <Card.Content>
+                <View style={estilos.demoFila}>
+                  <MaterialIcons name="info-outline" size={18} color={temaApp.colors.secondary} />
+                  <Text style={estilos.demoTexto}>
+                    Estos son paseadores de ejemplo para que veas el flujo y los filtros. Cuando
+                    haya paseadores reales aprobados, aparecen automáticamente en su lugar.
+                  </Text>
+                </View>
+              </Card.Content>
+            </Card>
+          )}
+
+          <View style={estilos.filtros}>
+            <SelectorCampo
+              etiqueta="Ciudad"
+              valor={ciudadFiltro}
+              opciones={[
+                { valor: 'todas', etiqueta: 'Todas las ciudades' },
+                ...ciudadesDisponibles.map((opcion) => ({ valor: opcion, etiqueta: opcion })),
+              ]}
+              onChange={(valor) => {
+                setCiudadFiltro(valor);
+                setZonaFiltro('todas');
+              }}
+              icono="location-city"
+              style={estilos.filtro}
+            />
+            <SelectorCampo
+              etiqueta="Zona"
+              valor={zonaFiltro}
+              opciones={[
+                { valor: 'todas', etiqueta: 'Todas las zonas' },
+                ...zonasDisponibles.map((opcion) => ({ valor: opcion, etiqueta: opcion })),
+              ]}
+              onChange={setZonaFiltro}
+              icono="place"
+              disabled={zonasDisponibles.length === 0}
+              style={estilos.filtro}
+            />
           </View>
 
-          <Text style={estilos.seccion}>Fecha y hora</Text>
-          <TextInput
-            label="DD/MM/AAAA HH:mm"
-            value={fechaTexto}
-            onChangeText={setFechaTexto}
-            mode="outlined"
-            style={estilos.input}
-          />
-          <Text style={estilos.ayuda}>Ejemplo: 15/11/2026 18:30</Text>
-
-          <Text style={estilos.seccion}>Duración</Text>
-          <View style={estilos.chips}>
-            {[30, 45, 60, 90].map((minutos) => (
-              <Chip
-                key={minutos}
-                selected={duracionMin === minutos}
-                onPress={() => setDuracionMin(minutos)}
-                style={estilos.chip}
-              >
-                {minutos} min
-              </Chip>
-            ))}
-          </View>
-
-          <TextInput
-            label="Dirección o punto de encuentro"
-            value={direccion}
-            onChangeText={setDireccion}
-            mode="outlined"
-            style={estilos.input}
-          />
-          <TextInput
-            label="Notas para el paseador"
-            value={notas}
-            onChangeText={setNotas}
-            mode="outlined"
-            multiline
-            numberOfLines={3}
-            style={estilos.input}
-          />
-
-          {totalEstimado ? (
-            <Text style={estilos.total}>
-              Estimado: ${totalEstimado} por {duracionMin} min
-            </Text>
-          ) : null}
-
-          <Button
-            mode="contained"
-            onPress={enviar}
-            loading={enviando}
-            disabled={enviando}
-            style={estilos.boton}
-            contentStyle={estilos.botonContenido}
-          >
-            Enviar solicitud
-          </Button>
-          <Text style={estilos.ayuda}>
-            Cada paseador fija su tarifa. Acordá el precio final y pagale directamente.
+          <Text style={estilos.contadorPaseadores}>
+            {paseadoresFiltrados.length}{' '}
+            {paseadoresFiltrados.length === 1 ? 'paseador disponible' : 'paseadores disponibles'}
           </Text>
+
+          {paseadoresFiltrados.length === 0 ? (
+            <Card style={estilos.avisoCard}>
+              <Card.Content>
+                <Text style={estilos.avisoTitulo}>No hay paseadores en esa zona</Text>
+                <Text style={estilos.avisoTexto}>
+                  Probá con otra ciudad o zona, o quitá los filtros para ver todos los paseadores
+                  disponibles.
+                </Text>
+                <Button
+                  mode="outlined"
+                  onPress={() => {
+                    setCiudadFiltro('todas');
+                    setZonaFiltro('todas');
+                  }}
+                  style={estilos.boton}
+                >
+                  Ver todos
+                </Button>
+              </Card.Content>
+            </Card>
+          ) : (
+            <>
+              {paseadoresFiltrados.map((paseador) => {
+                const seleccionado = paseador.id === paseadorId;
+                return (
+                  <TouchableOpacity
+                    key={paseador.id}
+                    onPress={() => setPaseadorId(paseador.id)}
+                    activeOpacity={0.85}
+                  >
+                    <Card style={[estilos.cardPaseador, seleccionado && estilos.cardSeleccionada]}>
+                      <Card.Content>
+                        <View style={estilos.filaPaseador}>
+                          <View style={estilos.avatar}>
+                            <MaterialIcons name="pets" size={24} color="#FFFFFF" />
+                          </View>
+                          <View style={estilos.textoPaseador}>
+                            <View style={estilos.filaNombrePaseador}>
+                              <Text style={estilos.nombrePaseador}>
+                                {paseador.usuario?.nombre || 'Paseador'}
+                              </Text>
+                              {paseador.esDemo && (
+                                <Chip
+                                  compact
+                                  style={estilos.chipDemo}
+                                  textStyle={estilos.textoChipDemo}
+                                >
+                                  Ejemplo
+                                </Chip>
+                              )}
+                            </View>
+                            <Text style={estilos.detallePaseador}>
+                              {[paseador.ciudad, paseador.zona].filter(Boolean).join(' · ')}
+                            </Text>
+                            <Text style={estilos.detallePaseador}>
+                              {paseador.disponibilidad || 'Disponibilidad a convenir'}
+                            </Text>
+                          </View>
+                          {paseador.precioHora ? (
+                            <Text style={estilos.precio}>${paseador.precioHora}/h</Text>
+                          ) : <Text style={estilos.detallePaseador}>Tarifa a convenir</Text>}
+                        </View>
+                      </Card.Content>
+                    </Card>
+                  </TouchableOpacity>
+                );
+              })}
+
+              <Text style={estilos.seccion}>Tu mascota</Text>
+              <View style={estilos.chips}>
+                {mascotas.map((mascota) => (
+                  <Chip
+                    key={mascota.id}
+                    selected={mascota.id === mascotaId}
+                    onPress={() => setMascotaId(mascota.id)}
+                    style={estilos.chip}
+                  >
+                    {mascota.nombre}
+                  </Chip>
+                ))}
+              </View>
+
+              <Text style={estilos.seccion}>Fecha y hora</Text>
+              <TextInput
+                label="DD/MM/AAAA HH:mm"
+                value={fechaTexto}
+                onChangeText={setFechaTexto}
+                mode="outlined"
+                style={estilos.input}
+              />
+              <Text style={estilos.ayuda}>Ejemplo: 15/11/2026 18:30</Text>
+
+              <Text style={estilos.seccion}>Duración</Text>
+              <View style={estilos.chips}>
+                {[30, 45, 60, 90].map((minutos) => (
+                  <Chip
+                    key={minutos}
+                    selected={duracionMin === minutos}
+                    onPress={() => setDuracionMin(minutos)}
+                    style={estilos.chip}
+                  >
+                    {minutos} min
+                  </Chip>
+                ))}
+              </View>
+
+              <TextInput
+                label="Dirección o punto de encuentro"
+                value={direccion}
+                onChangeText={setDireccion}
+                mode="outlined"
+                placeholder="Ej: Parque Federal, Av. Alem"
+                style={estilos.input}
+              />
+              <TextInput
+                label="Notas para el paseador"
+                value={notas}
+                onChangeText={setNotas}
+                mode="outlined"
+                multiline
+                numberOfLines={3}
+                placeholder="Ej: Mi perro es sociable y pasea con correa."
+                style={estilos.input}
+              />
+
+              {totalEstimado ? (
+                <Text style={estilos.total}>
+                  Estimado: ${totalEstimado} por {duracionMin} min
+                </Text>
+              ) : null}
+
+              <Button
+                mode="contained"
+                onPress={enviar}
+                loading={enviando}
+                disabled={enviando}
+                style={estilos.boton}
+                contentStyle={estilos.botonContenido}
+              >
+                Enviar solicitud
+              </Button>
+              <Text style={estilos.ayuda}>
+                Cada paseador fija su tarifa. Acordá el precio final y pagale directamente.
+              </Text>
+            </>
+          )}
         </>
       )}
     </ScrollView>
@@ -343,8 +487,51 @@ const estilos = StyleSheet.create({
     marginTop: espaciado.md,
     marginBottom: espaciado.sm,
   },
+  filtros: {
+    flexDirection: 'row',
+    gap: espaciado.sm,
+  },
+  filtro: {
+    flex: 1,
+    minWidth: 0,
+  },
+  contadorPaseadores: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: temaApp.colors.onSurfaceVariant,
+    marginBottom: espaciado.sm,
+  },
   cardPaseador: { borderRadius: 16, marginBottom: espaciado.sm, ...sombras.media },
   cardSeleccionada: { borderWidth: 2, borderColor: temaApp.colors.primary },
+  demoCard: {
+    borderRadius: 14,
+    marginBottom: espaciado.sm,
+    backgroundColor: '#FFF8E1',
+    borderWidth: 1,
+    borderColor: '#FFE082',
+    ...sombras.pequena,
+  },
+  demoFila: { flexDirection: 'row', alignItems: 'flex-start', gap: espaciado.sm },
+  demoTexto: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 18,
+    color: temaApp.colors.onSurfaceVariant,
+  },
+  filaNombrePaseador: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  chipDemo: {
+    backgroundColor: '#FFF3E0',
+  },
+  textoChipDemo: {
+    fontSize: 10,
+    color: '#E65100',
+    fontWeight: '700',
+  },
   filaPaseador: { flexDirection: 'row', alignItems: 'center', gap: espaciado.sm },
   avatar: {
     width: 46,
@@ -355,7 +542,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   textoPaseador: { flex: 1 },
-  nombrePaseador: { fontSize: 16, fontWeight: '800', color: temaApp.colors.onSurface },
+  nombrePaseador: { fontSize: 16, fontWeight: '800', color: temaApp.colors.onSurface, flexShrink: 1 },
   detallePaseador: { fontSize: 13, color: temaApp.colors.onSurfaceVariant, marginTop: 2 },
   precio: { fontSize: 15, fontWeight: '800', color: temaApp.colors.primary },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

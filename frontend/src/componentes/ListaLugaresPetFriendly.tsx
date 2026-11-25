@@ -30,6 +30,10 @@ import { useAuth } from '../contextos/ContextoAuth';
 import { mostrarAlerta } from '../utilidades/alerta';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import {
+  LUGARES_PET_FRIENDLY_FALLBACK,
+  calcularDistanciaKm,
+} from '../constantes/lugaresPetFriendlyFallback';
+import {
   CategoriaLugar,
   LugarPetFriendly,
   ZonaLugar,
@@ -187,8 +191,44 @@ export default function ListaLugaresPetFriendly({
 
         if (!activo) return;
 
-        setLugares(respuesta.lugares);
-        setZonas(respuesta.zonas || []);
+        if (respuesta.lugares.length > 0) {
+          setLugares(respuesta.lugares);
+          setZonas(respuesta.zonas || []);
+          return;
+        }
+
+        // Base sin lugares cargados: mostramos los lugares de referencia para
+        // que la pantalla no quede vacía.
+        const fallbackFiltrado = LUGARES_PET_FRIENDLY_FALLBACK.filter((lugar) => {
+          if (categoria !== 'todos' && lugar.categoria !== categoria) return false;
+          if (zonaSeleccionada) {
+            return (
+              lugar.provincia === zonaSeleccionada.provincia &&
+              lugar.ciudad === zonaSeleccionada.ciudad
+            );
+          }
+          return true;
+        }).map((lugar) => ({
+          ...lugar,
+          distanciaKm: Number(
+            calcularDistanciaKm(
+              coordenadas.latitud,
+              coordenadas.longitud,
+              lugar.latitud,
+              lugar.longitud
+            ).toFixed(2)
+          ),
+        }));
+
+        setLugares(fallbackFiltrado);
+        setZonas(
+          respuesta.zonas && respuesta.zonas.length > 0
+            ? respuesta.zonas
+            : LUGARES_PET_FRIENDLY_FALLBACK.map((lugar) => ({
+                provincia: lugar.provincia,
+                ciudad: lugar.ciudad,
+              }))
+        );
       } catch (err: any) {
         if (activo) {
           setError(err?.message || 'No se pudieron cargar los lugares.');

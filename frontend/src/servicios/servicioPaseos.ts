@@ -28,6 +28,8 @@ export interface PaseadorPaseo {
   disponibilidad?: string | null;
   estado: string;
   usuario: UsuarioPaseo;
+  /** Los paseadores de ejemplo se muestran cuando la base todavía no tiene datos reales. */
+  esDemo?: boolean;
 }
 
 export interface MascotaPaseo {

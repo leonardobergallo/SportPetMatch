@@ -96,7 +96,7 @@ export default function PantallaAgregarMascota(): JSX.Element {
   /**
    * Seleccionar imagen
    */
-  const seleccionarImagen = async () => {
+  const seleccionarImagen = async (reemplazarPerfil = false) => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images', // Nueva API sin deprecación
@@ -108,6 +108,10 @@ export default function PantallaAgregarMascota(): JSX.Element {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const nuevasFotos = result.assets.map((asset) => asset.uri).filter(Boolean);
+        if (reemplazarPerfil && nuevasFotos.length > 0) {
+          setFotos([nuevasFotos[0], ...fotos.slice(1)]);
+          return;
+        }
         setFotos([...fotos, ...nuevasFotos]);
       }
     } catch (error) {
@@ -453,27 +457,53 @@ export default function PantallaAgregarMascota(): JSX.Element {
             </View>
           </View>
 
-          {/* Fotos */}
-          <Text style={estilos.seccionTitulo}>Fotos</Text>
-          <View style={estilos.fotosContainer}>
-            {fotos.map((foto, index) => (
-              <View key={foto} style={estilos.fotoContainer}>
-                <Image source={{ uri: foto }} style={estilos.foto} />
-                <TouchableOpacity
-                  style={estilos.fotoEliminar}
-                  onPress={() => eliminarFoto(index)}
-                >
-                  <MaterialIcons name="close" size={20} color="#FFFFFF" />
-                </TouchableOpacity>
+          {/* Foto de perfil */}
+          <Text style={estilos.seccionTitulo}>Foto de perfil</Text>
+          <View style={estilos.fotoPerfilWrapper}>
+            <TouchableOpacity onPress={() => seleccionarImagen(true)} activeOpacity={0.85}>
+              {fotos.length > 0 ? (
+                <Image source={{ uri: fotos[0] }} style={estilos.fotoPerfil} />
+              ) : (
+                <View style={estilos.fotoPerfilVacia}>
+                  <MaterialIcons name="pets" size={44} color={temaApp.colors.primary} />
+                </View>
+              )}
+              <View style={estilos.fotoPerfilBadge}>
+                <MaterialIcons name="photo-camera" size={20} color="#FFFFFF" />
               </View>
-            ))}
-            {fotos.length < 5 && (
-              <TouchableOpacity style={estilos.fotoAgregar} onPress={seleccionarImagen}>
-                <MaterialIcons name="add" size={32} color={temaApp.colors.primary} />
-                <Text style={estilos.fotoAgregarTexto}>Agregar foto</Text>
-              </TouchableOpacity>
-            )}
+            </TouchableOpacity>
+            <Text style={estilos.fotoPerfilAyuda}>
+              {fotos.length > 0
+                ? 'Toca para cambiar la foto de perfil'
+                : 'Toca para subir la foto de perfil'}
+            </Text>
           </View>
+
+          {/* Otras fotos */}
+          {fotos.length > 0 && (
+            <>
+              <Text style={estilos.label}>Otras fotos</Text>
+              <View style={estilos.fotosContainer}>
+                {fotos.slice(1).map((foto, index) => (
+                  <View key={foto} style={estilos.fotoContainer}>
+                    <Image source={{ uri: foto }} style={estilos.foto} />
+                    <TouchableOpacity
+                      style={estilos.fotoEliminar}
+                      onPress={() => eliminarFoto(index + 1)}
+                    >
+                      <MaterialIcons name="close" size={20} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                {fotos.length < 5 && (
+                  <TouchableOpacity style={estilos.fotoAgregar} onPress={() => seleccionarImagen()}>
+                    <MaterialIcons name="add" size={28} color={temaApp.colors.primary} />
+                    <Text style={estilos.fotoAgregarTexto}>Más fotos</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </>
+          )}
 
           {/* Salud */}
           <Text style={estilos.seccionTitulo}>Salud</Text>
@@ -636,6 +666,49 @@ const estilos = StyleSheet.create({
     flexWrap: 'wrap',
     gap: espaciado.md,
     marginBottom: espaciado.lg,
+  },
+  fotoPerfilWrapper: {
+    alignItems: 'center',
+    marginBottom: espaciado.lg,
+  },
+  fotoPerfil: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    borderWidth: 4,
+    borderColor: temaApp.colors.surface,
+    backgroundColor: temaApp.colors.surfaceVariant || '#F5F5F5',
+    ...sombras.media,
+  },
+  fotoPerfilVacia: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    borderWidth: 2,
+    borderColor: temaApp.colors.primary,
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: temaApp.colors.surfaceVariant || '#F5F5F5',
+  },
+  fotoPerfilBadge: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: temaApp.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: temaApp.colors.surface,
+  },
+  fotoPerfilAyuda: {
+    marginTop: espaciado.sm,
+    fontSize: 12,
+    color: temaApp.colors.onSurfaceVariant,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   fotoContainer: {
     position: 'relative',

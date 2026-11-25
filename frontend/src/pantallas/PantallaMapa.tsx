@@ -24,6 +24,8 @@ import { useUbicacion } from '../contextos/ContextoUbicacion';
 import { temaApp, espaciado } from '../constantes/tema';
 import { obtenerEventos } from '../servicios/servicioEventos';
 import { obtenerRecomendaciones } from '../servicios/servicioMatches';
+import { obtenerLugares } from '../servicios/servicioLugares';
+import { LUGARES_PET_FRIENDLY_FALLBACK } from '../constantes/lugaresPetFriendlyFallback';
 import { calcularEdad } from '../utilidades/edad';
 
 // Coordenadas de Santa Fe Capital, Argentina (por defecto)
@@ -66,13 +68,25 @@ interface EventoMapa {
   maxParticipantes: number;
 }
 
+interface LugarMapa {
+  id: string;
+  nombre: string;
+  categoria: string;
+  direccion: string;
+  ciudad: string;
+  ubicacionLat: number;
+  ubicacionLng: number;
+}
+
 // Componente de Mapa con OpenStreetMap (sin API key requerida)
-const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNavigateToEvents }: {
+const VistaMapaSimple = ({ coordenadas, usuarios, eventos, lugares, onItemPress, onNavigateToEvents, onNavigateToPlaces }: {
   coordenadas: { latitud: number; longitud: number };
   usuarios: UsuarioMapa[];
   eventos: EventoMapa[];
-  onItemPress: (tipo: 'usuario' | 'evento', item: any) => void;
+  lugares: LugarMapa[];
+  onItemPress: (tipo: 'usuario' | 'evento' | 'lugar', item: any) => void;
   onNavigateToEvents: () => void;
+  onNavigateToPlaces: () => void;
 }) => {
   // URL de OpenStreetMap (gratis, sin API key)
   
@@ -81,8 +95,18 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
 
   if (Platform.OS === 'web') {
     // Calcular bounding box para incluir todos los puntos
-    const todasLasLatitudes = [coordenadas.latitud, ...usuarios.map(u => u.ubicacionLat), ...eventos.map(e => e.ubicacionLat)];
-    const todasLasLongitudes = [coordenadas.longitud, ...usuarios.map(u => u.ubicacionLng), ...eventos.map(e => e.ubicacionLng)];
+    const todasLasLatitudes = [
+      coordenadas.latitud,
+      ...usuarios.map(u => u.ubicacionLat),
+      ...eventos.map(e => e.ubicacionLat),
+      ...lugares.map(l => l.ubicacionLat),
+    ];
+    const todasLasLongitudes = [
+      coordenadas.longitud,
+      ...usuarios.map(u => u.ubicacionLng),
+      ...eventos.map(e => e.ubicacionLng),
+      ...lugares.map(l => l.ubicacionLng),
+    ];
     
     const minLat = Math.min(...todasLasLatitudes);
     const maxLat = Math.max(...todasLasLatitudes);
@@ -101,6 +125,7 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
       `${coordenadas.latitud},${coordenadas.longitud}`,
       ...usuarios.map(u => `${u.ubicacionLat},${u.ubicacionLng}`),
       ...eventos.map(e => `${e.ubicacionLat},${e.ubicacionLng}`),
+      ...lugares.map(l => `${l.ubicacionLat},${l.ubicacionLng}`),
     ];
     const googleMapsUrl = `https://www.google.com/maps/dir/${todosLosPuntos.join('/')}`;
     
@@ -179,6 +204,17 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
                   <MaterialIcons name="event" size={16} color="#FFFFFF" />
                 </TouchableOpacity>
               ))}
+
+              {/* Lugares pet friendly */}
+              {lugares.map((lugar) => (
+                <TouchableOpacity
+                  key={lugar.id}
+                  style={[styles.marcadorVisual, styles.marcadorVioleta, calcularPosicion(lugar.ubicacionLat, lugar.ubicacionLng)]}
+                  onPress={() => onItemPress('lugar', lugar)}
+                >
+                  <MaterialIcons name="pets" size={16} color="#FFFFFF" />
+                </TouchableOpacity>
+              ))}
             </View>
             <View style={styles.mapaOverlayWeb}>
               <MaterialIcons name="open-in-new" size={20} color="#FFFFFF" />
@@ -201,11 +237,16 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
             <View style={[styles.leyendaColor, { backgroundColor: '#F44336' }]} />
             <Text style={styles.leyendaTexto}>Eventos ({eventos.length})</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.leyendaItem} onPress={onNavigateToPlaces} activeOpacity={0.75}>
+            <View style={[styles.leyendaColor, { backgroundColor: '#8E24AA' }]} />
+            <Text style={styles.leyendaTexto}>Lugares ({lugares.length})</Text>
+          </TouchableOpacity>
         </View>
         <ScrollView style={styles.listaContainer}>
           <ListaUsuariosYEventos
             usuarios={usuarios}
             eventos={eventos}
+            lugares={lugares}
             coordenadas={coordenadas}
             onItemPress={onItemPress}
           />
@@ -249,11 +290,22 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
 
         <TouchableOpacity
           style={styles.contadorCard}
+          onPress={onNavigateToPlaces}
+          activeOpacity={0.75}
+        >
+          <View style={[styles.contadorPunto, { backgroundColor: '#8E24AA' }]} />
+          <Text style={styles.contadorNumero}>{lugares.length}</Text>
+          <Text style={styles.contadorLabel}>lugares</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.contadorCard}
           onPress={() => {
             const marcadoresUrl = [
               `${coordenadas.latitud},${coordenadas.longitud}`,
               ...usuarios.map((u: any) => `${u.ubicacionLat},${u.ubicacionLng}`),
               ...eventos.map((e: any) => `${e.ubicacionLat},${e.ubicacionLng}`),
+              ...lugares.map((l: any) => `${l.ubicacionLat},${l.ubicacionLng}`),
             ].join('/');
             Linking.openURL(`https://www.google.com/maps/dir/${marcadoresUrl}`).catch(() => {});
           }}
@@ -274,6 +326,7 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
         <ListaUsuariosYEventos
           usuarios={usuarios}
           eventos={eventos}
+          lugares={lugares}
           coordenadas={coordenadas}
           onItemPress={onItemPress}
         />
@@ -283,7 +336,7 @@ const VistaMapaSimple = ({ coordenadas, usuarios, eventos, onItemPress, onNaviga
 };
 
 // Componente para lista de usuarios y eventos
-const ListaUsuariosYEventos = ({ usuarios, eventos, coordenadas, onItemPress }: any) => {
+const ListaUsuariosYEventos = ({ usuarios, eventos, lugares, coordenadas, onItemPress }: any) => {
   const calcularDistancia = (item: any) => {
     const R = 6371;
     const dLat = (item.ubicacionLat - coordenadas.latitud) * Math.PI / 180;
@@ -347,6 +400,32 @@ const ListaUsuariosYEventos = ({ usuarios, eventos, coordenadas, onItemPress }: 
           />
         </TouchableOpacity>
       ))}
+
+      <Divider style={styles.divider} />
+
+      <Text variant="titleMedium" style={styles.seccionTitulo}>
+        🐾 Lugares pet friendly ({lugares.length})
+      </Text>
+
+      {lugares.map((lugar: LugarMapa) => (
+        <TouchableOpacity
+          key={lugar.id}
+          onPress={() => onItemPress('lugar', lugar)}
+        >
+          <List.Item
+            title={lugar.nombre}
+            description={`${lugar.categoria} · ${lugar.ciudad}`}
+            left={(props) => <List.Icon {...props} icon="pets" />}
+            right={() => (
+              <View style={styles.distanciaContainer}>
+                <Text variant="bodySmall">{calcularDistancia(lugar)}</Text>
+                <MaterialIcons name="place" size={16} color={temaApp.colors.onSurfaceVariant} />
+              </View>
+            )}
+            style={styles.listItem}
+          />
+        </TouchableOpacity>
+      ))}
     </>
   );
 };
@@ -379,12 +458,13 @@ export default function PantallaMapa() {
   // Estados para datos del mapa
   const [usuarios, setUsuarios] = useState<UsuarioMapa[]>([]);
   const [eventos, setEventos] = useState<EventoMapa[]>([]);
+  const [lugares, setLugares] = useState<LugarMapa[]>([]);
   const [cargando, setCargando] = useState(true);
   
   // Estados para dialogs
   const [dialogVisible, setDialogVisible] = useState(false);
   const [elementoSeleccionado, setElementoSeleccionado] = useState<any>(null);
-  const [tipoElemento, setTipoElemento] = useState<'usuario' | 'evento' | null>(null);
+  const [tipoElemento, setTipoElemento] = useState<'usuario' | 'evento' | 'lugar' | null>(null);
 
   // Cargar datos de usuarios y eventos cercanos
   useEffect(() => {
@@ -435,7 +515,7 @@ export default function PantallaMapa() {
         }
       ];
 
-      const [usuariosRecomendados, eventosApi] = await Promise.all([
+      const [usuariosRecomendados, eventosApi, lugaresApi] = await Promise.all([
         obtenerRecomendaciones().catch(() => []),
         obtenerEventos({
           fechaDesde: new Date().toISOString(),
@@ -456,6 +536,12 @@ export default function PantallaMapa() {
             });
           })
           .catch(() => []),
+        obtenerLugares({
+          lat: coordenadas.latitud,
+          lng: coordenadas.longitud,
+          radio: 150,
+          limit: 100,
+        }).catch(() => ({ lugares: [], total: 0, zonas: [] })),
       ]);
 
       const usuariosMapa = usuariosRecomendados.length > 0
@@ -489,6 +575,24 @@ export default function PantallaMapa() {
 
       setUsuarios(usuariosMapa);
       setEventos(eventosMapa);
+
+      // Lugares pet friendly: si la base todavía no tiene datos, usamos los
+      // lugares de referencia de Santa Fe para que el mapa no quede vacío.
+      const lugaresOrigen = lugaresApi.lugares.length > 0
+        ? lugaresApi.lugares
+        : LUGARES_PET_FRIENDLY_FALLBACK;
+
+      setLugares(
+        lugaresOrigen.slice(0, 30).map((lugar) => ({
+          id: lugar.id,
+          nombre: lugar.nombre,
+          categoria: lugar.categoria,
+          direccion: lugar.direccion || '',
+          ciudad: lugar.ciudad,
+          ubicacionLat: lugar.latitud,
+          ubicacionLng: lugar.longitud,
+        }))
+      );
       
     } catch (error) {
       console.error('Error cargando datos del mapa:', error);
@@ -497,13 +601,22 @@ export default function PantallaMapa() {
     }
   };
 
-  const manejarPresionMarcador = (tipo: 'usuario' | 'evento', elemento: any) => {
+  const manejarPresionMarcador = (tipo: 'usuario' | 'evento' | 'lugar', elemento: any) => {
     setTipoElemento(tipo);
     setElementoSeleccionado(elemento);
     setDialogVisible(true);
   };
 
-  const calcularDistanciaElemento = (elemento: UsuarioMapa | EventoMapa) => {
+  const abrirComoLlegar = (lugar: LugarMapa) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lugar.ubicacionLat},${lugar.ubicacionLng}`;
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    Linking.openURL(url).catch(() => {});
+  };
+
+  const calcularDistanciaElemento = (elemento: UsuarioMapa | EventoMapa | LugarMapa) => {
     if (!coordenadas || !elemento.ubicacionLat || !elemento.ubicacionLng) return 'N/A';
     
     const R = 6371;
@@ -589,8 +702,13 @@ export default function PantallaMapa() {
             coordenadas={coordenadas}
             usuarios={usuarios}
             eventos={eventos}
+            lugares={lugares}
             onItemPress={manejarPresionMarcador}
             onNavigateToEvents={() => navigation.navigate('Eventos')}
+            onNavigateToPlaces={() => {
+              setVista('lugares');
+              navigation.setParams({ vista: 'lugares' });
+            }}
           />
           
           {/* Controles flotantes */}
@@ -610,6 +728,17 @@ export default function PantallaMapa() {
             >
               {eventos.length} eventos
             </Chip>
+            <Chip 
+              icon="pets" 
+              mode="outlined"
+              style={styles.chip}
+              onPress={() => {
+                setVista('lugares');
+                navigation.setParams({ vista: 'lugares' });
+              }}
+            >
+              {lugares.length} lugares
+            </Chip>
           </View>
         </View>
       )}
@@ -618,7 +747,11 @@ export default function PantallaMapa() {
       <Portal>
         <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
           <Dialog.Title>
-            {tipoElemento === 'usuario' ? 'Usuario' : 'Evento'}
+            {tipoElemento === 'usuario'
+              ? 'Usuario'
+              : tipoElemento === 'evento'
+                ? 'Evento'
+                : 'Lugar pet friendly'}
           </Dialog.Title>
           <Dialog.Content>
             {elementoSeleccionado && (
@@ -643,7 +776,7 @@ export default function PantallaMapa() {
                         </View>
                       )}
                     </>
-                  ) : (
+                  ) : tipoElemento === 'evento' ? (
                     <>
                       <Text variant="headlineSmall">{elementoSeleccionado.titulo}</Text>
                       <Text variant="bodyMedium">Tipo: {elementoSeleccionado.tipo}</Text>
@@ -656,6 +789,22 @@ export default function PantallaMapa() {
                       <Text variant="bodySmall">
                         Distancia: {calcularDistanciaElemento(elementoSeleccionado)}
                       </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Text variant="headlineSmall">{elementoSeleccionado.nombre}</Text>
+                      <Text variant="bodyMedium">Categoría: {elementoSeleccionado.categoria}</Text>
+                      {!!elementoSeleccionado.direccion && (
+                        <Text variant="bodySmall">{elementoSeleccionado.direccion}</Text>
+                      )}
+                      <Text variant="bodySmall">
+                        {elementoSeleccionado.ciudad} · a {calcularDistanciaElemento(elementoSeleccionado)}
+                      </Text>
+                      <View style={styles.mascotasContainer}>
+                        <Chip compact icon="pets" style={styles.mascotaChip}>
+                          Pet friendly
+                        </Chip>
+                      </View>
                     </>
                   )}
                 </Card.Content>
@@ -670,6 +819,18 @@ export default function PantallaMapa() {
                 navigation.navigate('DetalleEvento', { eventoId: elementoSeleccionado.id });
               }}>
                 Ver evento
+              </Button>
+            )}
+            {tipoElemento === 'lugar' && (
+              <Button
+                mode="contained"
+                icon="directions"
+                onPress={() => {
+                  setDialogVisible(false);
+                  abrirComoLlegar(elementoSeleccionado);
+                }}
+              >
+                Cómo llegar
               </Button>
             )}
           </Dialog.Actions>
@@ -749,6 +910,11 @@ const styles = StyleSheet.create({
   },
   marcadorRojo: {
     backgroundColor: '#F44336',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  marcadorVioleta: {
+    backgroundColor: '#8E24AA',
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },

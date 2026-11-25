@@ -19,6 +19,8 @@
     "db:lugares:migrate": "prisma db execute --schema prisma/schema.prisma --file prisma/crear-lugares-pet-friendly.sql",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
+    "db:seed-lugares": "ts-node prisma/seed-lugares.ts",
+    "db:seed-paseadores": "ts-node prisma/seed-paseadores.ts",
     "db:listar-usuarios": "node scripts/listar-usuarios.js",
     "db:aceptar-matches": "node scripts/aceptar-matches-ejemplo.js"
   },

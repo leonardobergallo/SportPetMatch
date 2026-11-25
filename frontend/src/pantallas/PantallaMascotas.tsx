@@ -97,9 +97,9 @@ export default function PantallaMascotas(): JSX.Element {
    * Obtener imagen de la mascota
    */
   const obtenerImagenMascota = (mascota: Mascota): any => {
-    if (mascota.fotos && mascota.fotos.length > 0) {
-      // Si tiene fotos, intentar usarlas (por ahora placeholder)
-      return imagenesMascotas.default;
+    const fotoPerfil = mascota.fotos && mascota.fotos.length > 0 ? mascota.fotos[0] : null;
+    if (fotoPerfil) {
+      return { uri: fotoPerfil };
     }
     
     const tipoLower = mascota.tipo.toLowerCase();
@@ -318,8 +318,11 @@ const estilos = StyleSheet.create({
   imagenMascota: {
     width: 100,
     height: 100,
-    borderRadius: 12,
+    borderRadius: 50,
+    borderWidth: 3,
+    borderColor: temaApp.colors.surface,
     backgroundColor: temaApp.colors.muted || '#EDEDED',
+    ...sombras.pequena,
   },
   infoMascota: {
     flex: 1,

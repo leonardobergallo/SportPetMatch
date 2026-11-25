@@ -6,7 +6,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Button, Card, Text, TextInput } from 'react-native-paper';
+import { Button, Card, Chip, Text, TextInput } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -15,6 +15,7 @@ import { useAuth } from '../contextos/ContextoAuth';
 import { mostrarAlerta } from '../utilidades/alerta';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
+import SelectorCampo from '../componentes/SelectorCampo';
 import {
   Paseador,
   enviarSolicitudPaseador,
@@ -22,6 +23,79 @@ import {
 } from '../servicios/servicioPaseadores';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Paseadores'>;
+
+const CIUDADES = [
+  { valor: 'Santa Fe', etiqueta: 'Santa Fe' },
+  { valor: 'Paraná', etiqueta: 'Paraná' },
+  { valor: 'Rosario', etiqueta: 'Rosario' },
+  { valor: '__otra__', etiqueta: 'Otra ciudad…' },
+];
+
+const ZONAS_POR_CIUDAD: Record<string, string[]> = {
+  'Santa Fe': [
+    'Centro',
+    'Candioti',
+    'Costanera',
+    'Barranquitas',
+    'Guadalupe',
+    'Parque Sur',
+    'Universidad',
+    'Siete Jefes',
+    'Norte',
+  ],
+  Paraná: ['Centro', 'Villa Urquiza', 'Parque Urquiza', 'Bajada Grande', 'Barrio Norte'],
+  Rosario: ['Centro', 'Pichincha', 'Palermo', 'Abasto', 'Fischerton'],
+};
+
+const ZONAS_GENERICAS = ['Centro', 'Zona Norte', 'Zona Sur', 'Zona Este', 'Zona Oeste'];
+
+const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const FRANJAS_HORARIAS = ['Mañana (8-12 hs)', 'Tarde (12-18 hs)', 'Noche (18-22 hs)'];
+const PRECIOS_HORA = ['2500', '3000', '3500', '4000', '4500', '5000', '6000', '7000', '8000'];
+
+const precioEtiqueta = (valor: string) =>
+  `$${new Intl.NumberFormat('es-AR').format(Number(valor))}`;
+
+function parsearZonas(valor: string, ciudad: string) {
+  const conocidas = ZONAS_POR_CIUDAD[ciudad] || ZONAS_GENERICAS;
+  const partes = valor.split(',').map((parte) => parte.trim()).filter(Boolean);
+  const seleccionadas: string[] = [];
+  const extras: string[] = [];
+
+  partes.forEach((parte) => {
+    const coincidencia = conocidas.find((zona) => zona.toLowerCase() === parte.toLowerCase());
+    if (coincidencia) {
+      if (!seleccionadas.includes(coincidencia)) seleccionadas.push(coincidencia);
+    } else {
+      extras.push(parte);
+    }
+  });
+
+  return { seleccionadas, extra: extras.join(', ') };
+}
+
+function parsearDisponibilidad(valor: string) {
+  const partes = valor
+    .split('·')
+    .flatMap((bloque) => bloque.split(','))
+    .map((parte) => parte.trim())
+    .filter(Boolean);
+  const dias: string[] = [];
+  const franjas: string[] = [];
+  const detalle: string[] = [];
+
+  partes.forEach((parte) => {
+    if (DIAS_SEMANA.includes(parte)) {
+      if (!dias.includes(parte)) dias.push(parte);
+    } else if (FRANJAS_HORARIAS.includes(parte)) {
+      if (!franjas.includes(parte)) franjas.push(parte);
+    } else {
+      detalle.push(parte);
+    }
+  });
+
+  return { dias, franjas, detalle: detalle.join(' · ') };
+}
 
 const estadoTexto = (paseador: Paseador | null) => {
   if (!paseador) return 'Todavía no enviaste tu solicitud';
@@ -40,10 +114,15 @@ export default function PantallaPaseadores(): JSX.Element {
   const [precioMembresia, setPrecioMembresia] = useState<number | null>(null);
   const [telefono, setTelefono] = useState('');
   const [ciudad, setCiudad] = useState('');
-  const [zona, setZona] = useState('');
+  const [ciudadOtra, setCiudadOtra] = useState(false);
+  const [zonasSeleccionadas, setZonasSeleccionadas] = useState<string[]>([]);
+  const [zonaExtra, setZonaExtra] = useState('');
   const [experiencia, setExperiencia] = useState('');
   const [precioHora, setPrecioHora] = useState('');
-  const [disponibilidad, setDisponibilidad] = useState('');
+  const [precioPersonalizado, setPrecioPersonalizado] = useState(false);
+  const [diasDisponibles, setDiasDisponibles] = useState<string[]>([]);
+  const [franjasDisponibles, setFranjasDisponibles] = useState<string[]>([]);
+  const [detalleDisponibilidad, setDetalleDisponibilidad] = useState('');
   const [mensaje, setMensaje] = useState('');
 
   const cargar = useCallback(async () => {
@@ -57,10 +136,23 @@ export default function PantallaPaseadores(): JSX.Element {
       if (actual) {
         setTelefono(actual.telefono || '');
         setCiudad(actual.ciudad || '');
-        setZona(actual.zona || '');
+        setCiudadOtra(Boolean(actual.ciudad) && !CIUDADES.some((opcion) => opcion.valor === actual.ciudad));
+
+        const zonas = parsearZonas(actual.zona || '', actual.ciudad || '');
+        setZonasSeleccionadas(zonas.seleccionadas);
+        setZonaExtra(zonas.extra);
+
         setExperiencia(actual.experiencia || '');
-        setPrecioHora(actual.precioHora ? String(actual.precioHora) : '');
-        setDisponibilidad(actual.disponibilidad || '');
+
+        const precio = actual.precioHora ? String(actual.precioHora) : '';
+        setPrecioHora(precio);
+        setPrecioPersonalizado(Boolean(precio) && !PRECIOS_HORA.includes(precio));
+
+        const disponibilidad = parsearDisponibilidad(actual.disponibilidad || '');
+        setDiasDisponibles(disponibilidad.dias);
+        setFranjasDisponibles(disponibilidad.franjas);
+        setDetalleDisponibilidad(disponibilidad.detalle);
+
         setMensaje(actual.mensaje || '');
       }
     } catch (error: any) {
@@ -78,6 +170,68 @@ export default function PantallaPaseadores(): JSX.Element {
     cargar();
   }, [estaAutenticado, cargar, navigation]));
 
+  const zonasDisponibles = ZONAS_POR_CIUDAD[ciudad] || ZONAS_GENERICAS;
+  const zonaFinal = [...zonasSeleccionadas, zonaExtra.trim()].filter(Boolean).join(', ');
+  const disponibilidadFinal = [
+    diasDisponibles.join(', '),
+    franjasDisponibles.join(' · '),
+    detalleDisponibilidad.trim(),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const valorPrecio = precioPersonalizado
+    ? '__otro__'
+    : PRECIOS_HORA.includes(precioHora)
+      ? precioHora
+      : '';
+
+  const manejarCiudad = (valor: string) => {
+    if (valor === '__otra__') {
+      if (!ciudadOtra) {
+        setZonasSeleccionadas([]);
+        setZonaExtra('');
+      }
+      setCiudadOtra(true);
+      setCiudad('');
+      return;
+    }
+
+    if (valor !== ciudad) {
+      setZonasSeleccionadas([]);
+      setZonaExtra('');
+    }
+    setCiudadOtra(false);
+    setCiudad(valor);
+  };
+
+  const manejarPrecio = (valor: string) => {
+    if (valor === '__otro__') {
+      setPrecioPersonalizado(true);
+      setPrecioHora('');
+      return;
+    }
+    setPrecioPersonalizado(false);
+    setPrecioHora(valor);
+  };
+
+  const toggleZona = (valor: string) => {
+    setZonasSeleccionadas((actual) =>
+      actual.includes(valor) ? actual.filter((zona) => zona !== valor) : [...actual, valor]
+    );
+  };
+
+  const toggleDia = (valor: string) => {
+    setDiasDisponibles((actual) =>
+      actual.includes(valor) ? actual.filter((dia) => dia !== valor) : [...actual, valor]
+    );
+  };
+
+  const toggleFranja = (valor: string) => {
+    setFranjasDisponibles((actual) =>
+      actual.includes(valor) ? actual.filter((franja) => franja !== valor) : [...actual, valor]
+    );
+  };
+
   const enviar = async () => {
     if (enviando) return;
     if (telefono.trim().length < 6) {
@@ -88,15 +242,22 @@ export default function PantallaPaseadores(): JSX.Element {
       mostrarAlerta('Falta un dato', 'Ingresá tu ciudad.');
       return;
     }
+    if (precioPersonalizado && precioHora.trim()) {
+      const precio = Number(precioHora.replace(/\./g, ''));
+      if (!Number.isFinite(precio) || precio < 1 || precio > 1000000) {
+        mostrarAlerta('Precio inválido', 'Ingresá un monto por hora entre $1 y $1.000.000.');
+        return;
+      }
+    }
     try {
       setEnviando(true);
       const resultado = await enviarSolicitudPaseador({
         telefono: telefono.trim(),
         ciudad: ciudad.trim(),
-        zona: zona.trim(),
+        zona: zonaFinal,
         experiencia: experiencia.trim(),
         precioHora: precioHora.trim(),
-        disponibilidad: disponibilidad.trim(),
+        disponibilidad: disponibilidadFinal,
         mensaje: mensaje.trim(),
       });
       setPaseador(resultado.paseador);
@@ -182,20 +343,51 @@ export default function PantallaPaseadores(): JSX.Element {
             onChangeText={setTelefono}
             mode="outlined"
             keyboardType="phone-pad"
+            placeholder="Ej: +54 9 342 555-1234"
             style={estilos.input}
           />
-          <TextInput
-            label="Ciudad *"
-            value={ciudad}
-            onChangeText={setCiudad}
-            mode="outlined"
-            style={estilos.input}
+
+          <SelectorCampo
+            etiqueta="Ciudad *"
+            placeholder="Elegí tu ciudad"
+            valor={ciudadOtra ? '__otra__' : ciudad}
+            opciones={CIUDADES}
+            onChange={manejarCiudad}
+            icono="location-city"
           />
+          {ciudadOtra && (
+            <TextInput
+              label="Escribí tu ciudad *"
+              value={ciudad}
+              onChangeText={setCiudad}
+              mode="outlined"
+              style={estilos.input}
+            />
+          )}
+
+          <Text style={estilos.labelCampo}>Zonas donde paseás</Text>
+          <Text style={estilos.ayudaCampo}>
+            Elegí una o varias. Así los dueños te encuentran más fácil por zona.
+          </Text>
+          <View style={estilos.chips}>
+            {zonasDisponibles.map((opcion) => (
+              <Chip
+                key={opcion}
+                selected={zonasSeleccionadas.includes(opcion)}
+                onPress={() => toggleZona(opcion)}
+                style={estilos.chip}
+                icon={zonasSeleccionadas.includes(opcion) ? 'check' : undefined}
+              >
+                {opcion}
+              </Chip>
+            ))}
+          </View>
           <TextInput
-            label="Zona o barrios donde paseás"
-            value={zona}
-            onChangeText={setZona}
+            label="Otro barrio o zona (opcional)"
+            value={zonaExtra}
+            onChangeText={setZonaExtra}
             mode="outlined"
+            placeholder="Ej: Villa del Parque"
             style={estilos.input}
           />
 
@@ -207,23 +399,72 @@ export default function PantallaPaseadores(): JSX.Element {
             mode="outlined"
             multiline
             numberOfLines={4}
+            placeholder="Ej: 3 años paseando perros de vecinos, experiencia con razas grandes y perros rescatados."
             style={estilos.input}
           />
+
+          <SelectorCampo
+            etiqueta="Precio por hora"
+            placeholder="Elegí un monto o dejalo vacío para acordar"
+            valor={valorPrecio}
+            opciones={[
+              ...PRECIOS_HORA.map((valor) => ({
+                valor,
+                etiqueta: `${precioEtiqueta(valor)} por hora`,
+              })),
+              { valor: '__otro__', etiqueta: 'Otro monto…' },
+            ]}
+            onChange={manejarPrecio}
+            icono="payments"
+          />
+          {precioPersonalizado && (
+            <TextInput
+              label="Otro monto por hora (ARS)"
+              value={precioHora}
+              onChangeText={setPrecioHora}
+              mode="outlined"
+              keyboardType="numeric"
+              placeholder="Ej: 4200"
+              style={estilos.input}
+            />
+          )}
+
+          <Text style={estilos.labelCampo}>Días que paseás</Text>
+          <View style={estilos.chips}>
+            {DIAS_SEMANA.map((dia) => (
+              <Chip
+                key={dia}
+                selected={diasDisponibles.includes(dia)}
+                onPress={() => toggleDia(dia)}
+                style={estilos.chip}
+              >
+                {dia}
+              </Chip>
+            ))}
+          </View>
+
+          <Text style={estilos.labelCampo}>Franjas horarias</Text>
+          <View style={estilos.chips}>
+            {FRANJAS_HORARIAS.map((franja) => (
+              <Chip
+                key={franja}
+                selected={franjasDisponibles.includes(franja)}
+                onPress={() => toggleFranja(franja)}
+                style={estilos.chip}
+              >
+                {franja}
+              </Chip>
+            ))}
+          </View>
           <TextInput
-            label="Precio por hora (ARS, opcional)"
-            value={precioHora}
-            onChangeText={setPrecioHora}
+            label="Detalle adicional de disponibilidad (opcional)"
+            value={detalleDisponibilidad}
+            onChangeText={setDetalleDisponibilidad}
             mode="outlined"
-            keyboardType="numeric"
+            placeholder="Ej: solo perros sociables, paseos de 45 minutos"
             style={estilos.input}
           />
-          <TextInput
-            label="Disponibilidad (días y horarios)"
-            value={disponibilidad}
-            onChangeText={setDisponibilidad}
-            mode="outlined"
-            style={estilos.input}
-          />
+
           <TextInput
             label="Mensaje adicional (opcional)"
             value={mensaje}
@@ -231,6 +472,7 @@ export default function PantallaPaseadores(): JSX.Element {
             mode="outlined"
             multiline
             numberOfLines={3}
+            placeholder="Ej: Acepto perros grandes y puedo retirarlos por tu casa."
             style={estilos.input}
           />
 
@@ -307,6 +549,28 @@ const estilos = StyleSheet.create({
     marginBottom: espaciado.xs,
   },
   input: { marginBottom: espaciado.sm, backgroundColor: '#FFFFFF' },
+  labelCampo: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: temaApp.colors.onSurface,
+    marginTop: espaciado.xs,
+    marginBottom: espaciado.xs,
+  },
+  ayudaCampo: {
+    fontSize: 12,
+    color: temaApp.colors.onSurfaceVariant,
+    marginBottom: espaciado.sm,
+    lineHeight: 17,
+  },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: espaciado.sm,
+  },
+  chip: {
+    marginBottom: 2,
+  },
   boton: { marginTop: espaciado.md, borderRadius: 12 },
   botonContenido: { paddingVertical: 6 },
   aviso: {

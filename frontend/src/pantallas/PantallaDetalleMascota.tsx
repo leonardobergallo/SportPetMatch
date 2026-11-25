@@ -8,7 +8,6 @@ import {
   ScrollView,
   Image,
   RefreshControl,
-  TouchableOpacity,
 } from 'react-native';
 import {
   Text,
@@ -155,22 +154,29 @@ export default function PantallaDetalleMascota(): JSX.Element {
         />
       }
     >
-      {/* Fotos */}
-      {mascota.fotos && mascota.fotos.length > 0 ? (
+      {/* Foto de perfil */}
+      <View style={estilos.perfilContainer}>
+        {mascota.fotos && mascota.fotos.length > 0 ? (
+          <Image source={{ uri: mascota.fotos[0] }} style={estilos.fotoPerfil} />
+        ) : (
+          <View style={estilos.fotoPerfilPlaceholder}>
+            <MaterialIcons name="pets" size={56} color={temaApp.colors.onSurfaceVariant} />
+          </View>
+        )}
+      </View>
+
+      {/* Otras fotos */}
+      {mascota.fotos && mascota.fotos.length > 1 && (
         <ScrollView
           horizontal
-          pagingEnabled
           showsHorizontalScrollIndicator={false}
           style={estilos.fotosScroll}
+          contentContainerStyle={estilos.fotosScrollContent}
         >
-          {mascota.fotos.map((foto, index) => (
+          {mascota.fotos.slice(1).map((foto, index) => (
             <Image key={index} source={{ uri: foto }} style={estilos.foto} />
           ))}
         </ScrollView>
-      ) : (
-        <View style={estilos.fotoPlaceholder}>
-          <MaterialIcons name="pets" size={80} color={temaApp.colors.onSurfaceVariant} />
-        </View>
       )}
 
       {/* Información principal */}
@@ -340,18 +346,41 @@ const estilos = StyleSheet.create({
     marginTop: espaciado.md,
   },
   fotosScroll: {
-    height: 300,
+    height: 160,
+    marginTop: espaciado.sm,
   },
-  foto: {
-    width: 400,
-    height: 300,
-    resizeMode: 'cover',
+  fotosScrollContent: {
+    paddingHorizontal: espaciado.md,
+    gap: espaciado.sm,
   },
-  fotoPlaceholder: {
-    height: 300,
+  perfilContainer: {
+    alignItems: 'center',
+    marginTop: espaciado.lg,
+  },
+  fotoPerfil: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 4,
+    borderColor: temaApp.colors.surface,
+    backgroundColor: temaApp.colors.surfaceVariant || '#E0E0E0',
+    ...sombras.media,
+  },
+  fotoPerfilPlaceholder: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 2,
+    borderColor: temaApp.colors.border,
     backgroundColor: temaApp.colors.surfaceVariant || '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  foto: {
+    width: 200,
+    height: 150,
+    borderRadius: 14,
+    resizeMode: 'cover',
   },
   card: {
     margin: espaciado.md,
