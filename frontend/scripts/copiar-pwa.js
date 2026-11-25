@@ -5,6 +5,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const zlib = require('node:zlib');
 
 const webDir = path.join(__dirname, '../web');
 const distDir = path.join(__dirname, '../dist');
@@ -107,6 +108,19 @@ filesToCopy.forEach((file) => {
     skipped++;
   }
 });
+
+// La descarga directa se guarda comprimida en el repo para no versionar un
+// binario de más de 100 MB. Se descomprime al construir el sitio.
+const apkGz = path.join(webDir, 'indio-1.0.1.apk.gz');
+if (fs.existsSync(apkGz)) {
+  fs.writeFileSync(
+    path.join(distDir, 'indio-1.0.1.apk'),
+    zlib.gunzipSync(fs.readFileSync(apkGz))
+  );
+  console.log('✅ APK de descarga directa generado en dist/indio-1.0.1.apk');
+} else {
+  console.warn('⚠️  Falta web/indio-1.0.1.apk.gz: no se publicó la descarga directa');
+}
 
 console.log('');
 console.log(`✅ PWA: ${copied} archivos, ${skipped} omitidos`);

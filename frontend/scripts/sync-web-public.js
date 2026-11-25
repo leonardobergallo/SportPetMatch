@@ -6,6 +6,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const zlib = require('node:zlib');
 
 const root = path.join(__dirname, '..');
 const webDir = path.join(root, 'web');
@@ -44,5 +45,15 @@ for (const name of fs.readdirSync(webDir)) {
 ['manifest.json', 'sw.js', 'landing.html', 'admin.html', 'suscripcion.html'].forEach((f) => {
   copyIfExists(path.join(webDir, f), path.join(publicDir, f));
 });
+
+// APK de descarga directa: mismo descomprimido que genera el build de
+// producción, disponible también en desarrollo.
+const apkGz = path.join(webDir, 'indio-1.0.1.apk.gz');
+if (fs.existsSync(apkGz)) {
+  fs.writeFileSync(
+    path.join(publicDir, 'indio-1.0.1.apk'),
+    zlib.gunzipSync(fs.readFileSync(apkGz))
+  );
+}
 
 console.log('✅ Sincronizado web/ → public/ (Multiverse + index + PWA).');

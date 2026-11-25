@@ -45,6 +45,7 @@ coverage/
 *.pem
 *.key
 frontend/credentials.json
+frontend/credentials.json.bak
 frontend/android/keystores/
 frontend/indio-latest.apk
 frontend/*.apk
