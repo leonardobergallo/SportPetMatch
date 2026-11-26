@@ -77,6 +77,7 @@ export default function PantallaLogin(): JSX.Element {
   const [resetToken, setResetToken] = useState('');
   const [newPw, setNewPw] = useState('');
   const [resetMessage, setResetMessage] = useState('');
+  const [resetEnviado, setResetEnviado] = useState(false);
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') {
@@ -164,16 +165,25 @@ export default function PantallaLogin(): JSX.Element {
 
     setLoading(true);
     setResetMessage('');
+    setResetEnviado(false);
     try {
       const r = await solicitarResetPassword(correo);
       if (r.data?.resetToken) {
         setResetToken(r.data.resetToken);
-        setResetMessage('Usuario validado. Ingresá una nueva contraseña.');
+        setResetMessage('Email verificado. Creá tu nueva contraseña.');
       } else {
-        setResetMessage(r.message || 'Si el email existe, te enviamos un link de recuperacion.');
+        setResetEnviado(true);
+        setResetMessage(
+          r.message ||
+            'Si el email está registrado, te enviamos un link para crear una nueva contraseña.'
+        );
       }
     } catch (e: any) {
-      mostrarAlerta('No pudimos validar el usuario', e.message || 'Revisa el email ingresado');
+      const mensaje =
+        e.response?.data?.message ||
+        e.message ||
+        'No pudimos encontrar una cuenta con ese email.';
+      setResetMessage(mensaje);
     } finally {
       setLoading(false);
     }
@@ -193,7 +203,10 @@ export default function PantallaLogin(): JSX.Element {
       setPw('');
       setResetMessage('');
     } catch (e: any) {
-      mostrarAlerta('No pudimos actualizar la contraseña', e.message || 'Solicita un link nuevo e intenta otra vez');
+      mostrarAlerta(
+        'No pudimos actualizar la contraseña',
+        e.response?.data?.message || e.message || 'Solicitá un link nuevo e intentá otra vez'
+      );
     } finally {
       setLoading(false);
     }
@@ -217,7 +230,7 @@ export default function PantallaLogin(): JSX.Element {
               <View style={st.heroForm}>
                 <RNTextInput
                   style={st.heroInput}
-                  placeholder="Correo o usuario"
+                  placeholder={resetMode ? 'Email de tu cuenta' : 'Correo o usuario'}
                   placeholderTextColor="rgba(255,255,255,0.88)"
                   value={email}
                   onChangeText={setEmail}
@@ -226,39 +239,54 @@ export default function PantallaLogin(): JSX.Element {
                   autoComplete="email"
                   editable={!loading}
                 />
-                <RNTextInput
-                  style={st.heroInput}
-                  placeholder="Contraseña"
-                  placeholderTextColor="rgba(255,255,255,0.88)"
-                  value={pw}
-                  onChangeText={setPw}
-                  secureTextEntry
-                  autoComplete="password"
-                  editable={!loading}
-                />
-                <Pressable style={st.heroLoginBtn} onPress={handleLogin} disabled={loading}>
-                  {loading ? (
-                    <ActivityIndicator color="#6200ea" />
-                  ) : (
-                    <Text style={st.heroLoginBtnTxt}>Iniciar sesión</Text>
-                  )}
-                </Pressable>
+                {!resetMode && (
+                  <>
+                    <RNTextInput
+                      style={st.heroInput}
+                      placeholder="Contraseña"
+                      placeholderTextColor="rgba(255,255,255,0.88)"
+                      value={pw}
+                      onChangeText={setPw}
+                      secureTextEntry
+                      autoComplete="password"
+                      editable={!loading}
+                    />
+                    <Pressable style={st.heroLoginBtn} onPress={handleLogin} disabled={loading}>
+                      {loading ? (
+                        <ActivityIndicator color="#6200ea" />
+                      ) : (
+                        <Text style={st.heroLoginBtnTxt}>Iniciar sesión</Text>
+                      )}
+                    </Pressable>
+                  </>
+                )}
                 <Pressable
                   onPress={() => {
                     setResetMode(!resetMode);
                     setResetMessage('');
+                    setResetEnviado(false);
                   }}
                   style={st.heroLinkMore}
                   disabled={loading}
                 >
-                  <Text style={st.heroLinkMoreTxt}>
-                    {resetMode ? 'Volver al inicio de sesión' : 'Olvidé mi contraseña'}
-                  </Text>
+                  <View style={st.heroLinkMoreRow}>
+                    <MaterialIcons
+                      name={resetMode ? 'arrow-back' : 'lock-reset'}
+                      size={18}
+                      color="#ffffff"
+                    />
+                    <Text style={st.heroLinkMoreTxt}>
+                      {resetMode ? 'Volver al inicio de sesión' : '¿Olvidaste tu contraseña?'}
+                    </Text>
+                  </View>
                 </Pressable>
                 {resetMode && (
                   <View style={st.resetBox}>
                     {resetToken ? (
                       <>
+                        <Text style={st.resetAyuda}>
+                          Elegí una nueva contraseña para tu cuenta.
+                        </Text>
                         <RNTextInput
                           style={st.heroInput}
                           placeholder="Nueva contraseña"
@@ -273,12 +301,35 @@ export default function PantallaLogin(): JSX.Element {
                           {loading ? <ActivityIndicator color="#6200ea" /> : <Text style={st.heroLoginBtnTxt}>Guardar contraseña</Text>}
                         </Pressable>
                       </>
+                    ) : resetEnviado ? (
+                      <>
+                        <Text style={st.resetTitulo}>Revisá tu correo 📬</Text>
+                        <Text style={st.resetAyuda}>{resetMessage}</Text>
+                        {!!email.trim() && (
+                          <Text style={st.resetInfo}>{email.trim()}</Text>
+                        )}
+                        <Pressable
+                          style={st.heroCtaSecondary}
+                          onPress={() => {
+                            setResetEnviado(false);
+                            setResetMessage('');
+                          }}
+                          disabled={loading}
+                        >
+                          <Text style={st.heroCtaSecondaryTxt}>Usar otro email</Text>
+                        </Pressable>
+                      </>
                     ) : (
-                      <Pressable style={st.heroLoginBtn} onPress={handleSolicitarReset} disabled={loading}>
-                        {loading ? <ActivityIndicator color="#6200ea" /> : <Text style={st.heroLoginBtnTxt}>Validar usuario</Text>}
-                      </Pressable>
+                      <>
+                        <Text style={st.resetAyuda}>
+                          Escribí el email de tu cuenta y te enviamos un link para crear una nueva contraseña.
+                        </Text>
+                        <Pressable style={st.heroLoginBtn} onPress={handleSolicitarReset} disabled={loading}>
+                          {loading ? <ActivityIndicator color="#6200ea" /> : <Text style={st.heroLoginBtnTxt}>Enviar link de recuperación</Text>}
+                        </Pressable>
+                        {!!resetMessage && <Text style={st.resetInfo}>{resetMessage}</Text>}
+                      </>
                     )}
-                    {!!resetMessage && <Text style={st.resetInfo}>{resetMessage}</Text>}
                   </View>
                 )}
                 <Pressable style={st.heroCtaSecondary} onPress={goRegistro}>
@@ -501,10 +552,31 @@ const st = StyleSheet.create({
   },
   heroCtaSecondaryTxt: { color: '#fff', fontWeight: '700', fontSize: 20, ...(fontSans ? { fontFamily: fontSans } : {}) },
   heroLinkMore: { paddingVertical: 8, alignItems: 'center' },
-  heroLinkMoreTxt: { color: 'rgba(255,255,255,0.96)', fontSize: 18, fontWeight: '700', ...(fontSans ? { fontFamily: fontSans } : {}) },
+  heroLinkMoreRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  heroLinkMoreTxt: {
+    color: 'rgba(255,255,255,0.96)',
+    fontSize: 18,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
   resetBox: {
     gap: 10,
     paddingTop: 4,
+  },
+  resetTitulo: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '800',
+    textAlign: 'center',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  resetAyuda: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   resetInfo: {
     color: '#ffffff',

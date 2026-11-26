@@ -7,6 +7,52 @@ type TipoCorreoMembresia =
   | 'recordatorio_7d'
   | 'recordatorio_1d';
 
+/**
+ * Envía un email transaccional con Resend. Devuelve true si Resend lo aceptó.
+ * Se usa como alternativa a SMTP para recuperación de contraseña.
+ */
+export async function enviarEmailResend(
+  destinatario: string,
+  asunto: string,
+  texto: string,
+  html?: string,
+  idempotencyKey?: string
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const from = process.env.EMAIL_FROM?.trim() || process.env.SMTP_FROM?.trim();
+  if (!apiKey || !from) return false;
+
+  try {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    };
+    if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+
+    const response = await fetch(RESEND_ENDPOINT, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        from,
+        to: [destinatario],
+        subject: asunto,
+        text: texto,
+        ...(html ? { html } : {}),
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!response.ok) {
+      const detalle = await response.text().catch(() => '');
+      console.error('Resend rechazó el email de recuperación:', response.status, detalle);
+    }
+    return response.ok;
+  } catch (error) {
+    console.error('Error enviando email con Resend:', error);
+    return false;
+  }
+}
+
 export async function enviarCorreoMembresia(
   tipo: TipoCorreoMembresia,
   id: string,

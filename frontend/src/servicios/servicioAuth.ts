@@ -21,6 +21,7 @@ export interface RespuestaResetPassword {
   message: string;
   data?: {
     email?: string;
+    enviado?: boolean;
     resetToken?: string;
     resetUrl?: string;
   };

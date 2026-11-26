@@ -8,7 +8,7 @@ import nodemailer from 'nodemailer';
 import { OAuth2Client } from 'google-auth-library';
 import prisma from '../utilidades/prisma';
 import { generarTokens } from '../servicios/jwtService';
-import { notificarNuevoRegistro } from '../servicios/correoService';
+import { enviarEmailResend, notificarNuevoRegistro } from '../servicios/correoService';
 import { esAdministrador } from '../utilidades/admin';
 
 function normalizarEmail(email: unknown): string {
@@ -483,18 +483,41 @@ export const solicitarResetPassword = async (req: Request, res: Response): Promi
       { expiresIn: process.env.PASSWORD_RESET_EXPIRES_IN || '30m' } as jwt.SignOptions,
     );
     const resetUrl = `${obtenerBaseFrontend(req)}/?app=1&resetToken=${encodeURIComponent(resetToken)}`;
+    const asunto = 'Recuperar contraseña de Indio';
+    const texto = `Hola ${usuario.nombre}. Para crear una nueva contraseña entra a este link: ${resetUrl}\n\nEl link vence en 30 minutos. Si no pediste este cambio, ignorá este mensaje.`;
+    const html = `<p>Hola ${usuario.nombre},</p><p>Para crear una nueva contraseña en Indio, entrá a este link:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>El link vence en 30 minutos. Si no pediste este cambio, ignorá este mensaje.</p>`;
+
+    let enviado = false;
     const transporter = crearTransporterEmail();
 
     if (transporter) {
-      await transporter.sendMail({
-        from: process.env.SMTP_FROM || process.env.SMTP_USER,
-        to: usuario.email,
-        subject: 'Recuperar contraseña de Indio',
-        text: `Hola ${usuario.nombre}. Para crear una nueva contraseña entra a este link: ${resetUrl}`,
-        html: `<p>Hola ${usuario.nombre},</p><p>Para crear una nueva contraseña en Indio, entra a este link:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>El link vence en 30 minutos.</p>`,
-      });
-    } else {
-      console.warn('SMTP no configurado. Link de recuperación generado:', resetUrl);
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to: usuario.email,
+          subject: asunto,
+          text: texto,
+          html,
+        });
+        enviado = true;
+      } catch (error) {
+        console.error('Error enviando recuperación por SMTP:', error);
+      }
+    }
+
+    // Si no hay SMTP (o falló), usar Resend, que ya se usa para los reportes.
+    if (!enviado) {
+      enviado = await enviarEmailResend(
+        usuario.email,
+        asunto,
+        texto,
+        html,
+        `indio-reset/${usuario.id}/${Date.now()}`,
+      );
+    }
+
+    if (!enviado) {
+      console.warn('No se pudo enviar el email de recuperación. Link generado:', resetUrl);
     }
 
     const esHostLocal = ['localhost', '127.0.0.1', '::1'].includes(req.hostname);
@@ -502,13 +525,14 @@ export const solicitarResetPassword = async (req: Request, res: Response): Promi
 
     res.json({
       success: true,
-      message: transporter
-        ? 'Te enviamos un link para recuperar tu contraseña'
+      message: enviado
+        ? 'Te enviamos un link para recuperar tu contraseña. Revisá también la carpeta de spam.'
         : exponerTokenPrueba
-          ? 'SMTP no configurado. Usa el token de prueba para completar el reset.'
-          : 'No hay envío de email configurado. Contacta al administrador para recuperar tu contraseña.',
+          ? 'No se pudo enviar el email. Usá el token de prueba para completar el reset.'
+          : 'No pudimos enviar el email de recuperación. Contactá al soporte de Indio para recuperar tu cuenta.',
       data: {
         email: usuario.email,
+        enviado,
         resetToken: exponerTokenPrueba ? resetToken : undefined,
         resetUrl: exponerTokenPrueba ? resetUrl : undefined,
       },
