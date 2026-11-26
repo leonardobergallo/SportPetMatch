@@ -48,12 +48,16 @@ for (const name of fs.readdirSync(webDir)) {
 
 // APK de descarga directa: mismo descomprimido que genera el build de
 // producción, disponible también en desarrollo.
-const apkGz = path.join(webDir, 'indio-1.0.1.apk.gz');
-if (fs.existsSync(apkGz)) {
-  fs.writeFileSync(
-    path.join(publicDir, 'indio-1.0.1.apk'),
-    zlib.gunzipSync(fs.readFileSync(apkGz))
-  );
+const apks = [
+  { gz: 'indio-1.0.1-arm64.apk.gz', apk: 'indio-1.0.1-arm64.apk' },
+  { gz: 'indio-1.0.1.apk.gz', apk: 'indio-1.0.1.apk' },
+];
+
+for (const { gz, apk } of apks) {
+  const origen = path.join(webDir, gz);
+  if (fs.existsSync(origen)) {
+    fs.writeFileSync(path.join(publicDir, apk), zlib.gunzipSync(fs.readFileSync(origen)));
+  }
 }
 
 console.log('✅ Sincronizado web/ → public/ (Multiverse + index + PWA).');

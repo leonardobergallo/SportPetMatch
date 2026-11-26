@@ -109,17 +109,23 @@ filesToCopy.forEach((file) => {
   }
 });
 
-// La descarga directa se guarda comprimida en el repo para no versionar un
-// binario de más de 100 MB. Se descomprime al construir el sitio.
-const apkGz = path.join(webDir, 'indio-1.0.1.apk.gz');
-if (fs.existsSync(apkGz)) {
-  fs.writeFileSync(
-    path.join(distDir, 'indio-1.0.1.apk'),
-    zlib.gunzipSync(fs.readFileSync(apkGz))
-  );
-  console.log('✅ APK de descarga directa generado en dist/indio-1.0.1.apk');
-} else {
-  console.warn('⚠️  Falta web/indio-1.0.1.apk.gz: no se publicó la descarga directa');
+// Las descargas directas se guardan comprimidas en el repo para no versionar
+// binarios de más de 100 MB. Se descomprimen al construir el sitio.
+// - arm64: ~40 MB, para la mayoría de los celulares Android actuales.
+// - universal: ~109 MB, respaldo para equipos de 32 bits o emuladores.
+const apks = [
+  { gz: 'indio-1.0.1-arm64.apk.gz', apk: 'indio-1.0.1-arm64.apk' },
+  { gz: 'indio-1.0.1.apk.gz', apk: 'indio-1.0.1.apk' },
+];
+
+for (const { gz, apk } of apks) {
+  const origen = path.join(webDir, gz);
+  if (fs.existsSync(origen)) {
+    fs.writeFileSync(path.join(distDir, apk), zlib.gunzipSync(fs.readFileSync(origen)));
+    console.log(`✅ APK de descarga directa generado en dist/${apk}`);
+  } else {
+    console.warn(`⚠️  Falta web/${gz}: no se publicó ${apk}`);
+  }
 }
 
 console.log('');
