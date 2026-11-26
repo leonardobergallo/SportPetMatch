@@ -24,7 +24,7 @@ function obtenerGoogleClientIds(): string[] {
 }
 
 function normalizarTelefono(telefono: unknown): string {
-  return String(telefono || '').replace(/[\s\-\(\)]/g, '').trim();
+  return String(telefono || '').replace(/[\s\-\(\)\+]/g, '').trim();
 }
 
 function obtenerBaseFrontend(req: Request): string {

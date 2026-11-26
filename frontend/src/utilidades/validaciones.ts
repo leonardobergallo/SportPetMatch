@@ -8,7 +8,7 @@ export interface ResultadoValidacion {
 export const normalizarEmail = (email: string): string => email.trim().toLowerCase();
 
 export const normalizarTelefono = (telefono: string): string =>
-  telefono.replace(/[\s\-\(\)]/g, '').trim();
+  telefono.replace(/[\s\-\(\)\+]/g, '').trim();
 
 /**
  * Validar formato de email
