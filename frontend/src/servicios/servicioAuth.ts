@@ -31,6 +31,7 @@ export interface UsuarioAuth {
   email: string;
   nombre: string;
   avatar?: string | null;
+  fotos?: string[];
   esPremium: boolean;
   esAdmin?: boolean;
   onboardingCompletado?: boolean;

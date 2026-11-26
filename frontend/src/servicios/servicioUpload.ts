@@ -130,3 +130,66 @@ export const subirFotosMascota = async (
   }
 };
 
+/**
+ * Subir fotos de la galería del perfil del usuario autenticado.
+ * El backend conserva el orden y usa la primera como foto principal.
+ */
+export const subirFotosPerfil = async (
+  imageUris: string[]
+): Promise<{ fotos: string[]; avatar: string | null }> => {
+  try {
+    if (!imageUris || imageUris.length === 0) {
+      throw new Error('No se proporcionaron imágenes para subir');
+    }
+
+    const formData = new FormData();
+
+    for (let index = 0; index < imageUris.length; index++) {
+      const uri = imageUris[index];
+      const filename = uri.split('/').pop() || `perfil_${index}.jpg`;
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+      if (Platform.OS === 'web') {
+        try {
+          const response = await fetch(uri);
+          const blob = await response.blob();
+          const file = new File([blob], filename, { type: blob.type || type });
+          formData.append('images', file);
+        } catch (fetchError: any) {
+          console.error(`Error convirtiendo imagen ${index} para web:`, fetchError);
+          throw new Error(
+            `No se pudo procesar la imagen ${index + 1}: ${fetchError.message || 'Error desconocido'}`
+          );
+        }
+      } else {
+        formData.append('images', {
+          uri,
+          name: filename,
+          type,
+        } as any);
+      }
+    }
+
+    const response = await apiClient.post('/usuarios/mi-perfil/fotos', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    if (response.data.success && response.data.data.fotos) {
+      return {
+        fotos: response.data.data.fotos,
+        avatar: response.data.data.avatar ?? null,
+      };
+    }
+
+    throw new Error('No se recibieron las fotos del perfil');
+  } catch (error: any) {
+    console.error('Error subiendo fotos de perfil:', error);
+    const errorMessage =
+      error.response?.data?.message || error.message || 'Error al subir las fotos';
+    throw new Error(errorMessage);
+  }
+};
+

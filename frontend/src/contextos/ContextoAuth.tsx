@@ -24,6 +24,7 @@ export interface Usuario {
   telefono?: string | null;
   fechaNacimiento?: string | null;
   avatar?: string | null;
+  fotos?: string[];
   biografia?: string | null;
   ubicacionCiudad?: string | null;
   ubicacionPais?: string | null;
@@ -60,6 +61,7 @@ export function normalizarUsuario(datos: Partial<Usuario>): Usuario {
     telefono: datos.telefono ?? null,
     fechaNacimiento: datos.fechaNacimiento ?? null,
     avatar,
+    fotos: datos.fotos ?? (avatar ? [avatar] : []),
     biografia: datos.biografia ?? null,
     ubicacionCiudad,
     ubicacionPais,

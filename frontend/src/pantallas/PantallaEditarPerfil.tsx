@@ -32,7 +32,7 @@ import {
   DatosActualizacionUsuario,
   Usuario,
 } from '../servicios/servicioUsuarios';
-import { subirAvatar } from '../servicios/servicioUpload';
+import { subirFotosPerfil } from '../servicios/servicioUpload';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
 import { validarTelefono, mensajesError } from '../utilidades/validaciones';
@@ -84,6 +84,8 @@ export default function PantallaEditarPerfil(): JSX.Element {
   const [nivelDeporte, setNivelDeporte] = useState(3);
   const [intereses, setIntereses] = useState<string[]>([]);
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [fotos, setFotos] = useState<string[]>([]);
+  const [subiendoFotos, setSubiendoFotos] = useState(false);
 
   useEffect(() => {
     cargarPerfil();
@@ -102,7 +104,13 @@ export default function PantallaEditarPerfil(): JSX.Element {
       setBiografia(datosUsuario.biografia || '');
       setNivelDeporte(datosUsuario.nivelDeporte || 3);
       setIntereses(datosUsuario.intereses || []);
-      setAvatar(datosUsuario.avatar || null);
+      const fotosCargadas = datosUsuario.fotos?.length
+        ? datosUsuario.fotos
+        : datosUsuario.avatar
+          ? [datosUsuario.avatar]
+          : [];
+      setFotos(fotosCargadas);
+      setAvatar(fotosCargadas[0] || null);
     } catch (error: any) {
       console.error('Error cargando perfil:', error);
       mostrarAlerta('Error', 'No se pudo cargar el perfil');
@@ -112,38 +120,105 @@ export default function PantallaEditarPerfil(): JSX.Element {
     }
   };
 
+  const MAX_FOTOS_PERFIL = 6;
+
+  const aplicarFotos = (nuevasFotos: string[]) => {
+    setFotos(nuevasFotos);
+    setAvatar(nuevasFotos[0] || null);
+  };
+
   /**
-   * Seleccionar imagen de avatar
+   * Cambiar la foto principal (se sube y se mueve al primer lugar).
    */
-  const seleccionarImagen = async () => {
+  const cambiarFotoPrincipal = async () => {
+    if (fotos.length >= MAX_FOTOS_PERFIL) {
+      mostrarAlerta(
+        'Galería completa',
+        `Ya tenés ${MAX_FOTOS_PERFIL} fotos. Quitá una para poder cambiar la principal.`
+      );
+      return;
+    }
+
     try {
-      // Usar la API correcta - en expo-image-picker 17+ se usa MediaType
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'images', // Nueva API sin deprecación
+        mediaTypes: 'images',
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
 
-      if (!result.canceled && result.assets && result.assets[0]) {
-        const selectedImage = result.assets[0];
-        if (selectedImage.uri) {
-          try {
-            // Subir imagen al servidor
-            const imageUrl = await subirAvatar(selectedImage.uri);
-            setAvatar(imageUrl);
-            // Mostrar éxito silencioso (sin alert que bloquee)
-            console.log('✅ Imagen subida correctamente');
-          } catch (error: any) {
-            console.error('Error subiendo avatar:', error);
-            mostrarAlerta('Error', error.message || 'No se pudo subir la imagen');
-          }
-        }
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setSubiendoFotos(true);
+        const subidas = await subirFotosPerfil([result.assets[0].uri]);
+        const nueva = subidas.fotos[subidas.fotos.length - 1];
+        const resto = subidas.fotos.filter((foto) => foto !== nueva);
+        aplicarFotos([nueva, ...resto]);
+        actualizarUsuario({ avatar: nueva, fotos: [nueva, ...resto] });
       }
-    } catch (error) {
-      console.error('Error seleccionando imagen:', error);
-      mostrarAlerta('Error', 'No se pudo seleccionar la imagen');
+    } catch (error: any) {
+      console.error('Error cambiando foto principal:', error);
+      mostrarAlerta('Error', error.message || 'No se pudo subir la foto');
+    } finally {
+      setSubiendoFotos(false);
     }
+  };
+
+  /**
+   * Agregar fotos a la galería (hasta 6).
+   */
+  const agregarFotos = async () => {
+    if (fotos.length >= MAX_FOTOS_PERFIL) {
+      mostrarAlerta(
+        'Galería completa',
+        `Ya tenés ${MAX_FOTOS_PERFIL} fotos en tu perfil. Quitá una para agregar otra.`
+      );
+      return;
+    }
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        allowsMultipleSelection: true,
+        selectionLimit: MAX_FOTOS_PERFIL - fotos.length,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets?.length) {
+        const nuevas = result.assets.map((asset) => asset.uri).filter(Boolean);
+        if (nuevas.length === 0) return;
+
+        setSubiendoFotos(true);
+        const subidas = await subirFotosPerfil(nuevas);
+        aplicarFotos(subidas.fotos);
+        actualizarUsuario({ avatar: subidas.avatar, fotos: subidas.fotos });
+      }
+    } catch (error: any) {
+      console.error('Error agregando fotos:', error);
+      mostrarAlerta('Error', error.message || 'No se pudieron subir las fotos');
+    } finally {
+      setSubiendoFotos(false);
+    }
+  };
+
+  /**
+   * Quitar una foto de la galería (se guarda al tocar “Guardar cambios”).
+   */
+  const quitarFoto = (index: number) => {
+    if (fotos.length <= 1) {
+      mostrarAlerta('Foto principal', 'Tu perfil necesita al menos una foto.');
+      return;
+    }
+    aplicarFotos(fotos.filter((_, i) => i !== index));
+  };
+
+  /**
+   * Mover una foto al primer lugar (se guarda al tocar “Guardar cambios”).
+   */
+  const marcarPrincipal = (index: number) => {
+    if (index === 0) return;
+    const copia = [...fotos];
+    const [foto] = copia.splice(index, 1);
+    aplicarFotos([foto, ...copia]);
   };
 
   /**
@@ -180,7 +255,8 @@ export default function PantallaEditarPerfil(): JSX.Element {
         biografia: biografia.trim() || undefined,
         nivelDeporte,
         intereses,
-        avatar: avatar || undefined,
+        avatar: fotos[0] || undefined,
+        fotos,
       };
 
       const usuarioActualizado = await actualizarMiPerfil(datosActualizacion);
@@ -224,9 +300,9 @@ export default function PantallaEditarPerfil(): JSX.Element {
     >
       <Card style={estilos.card}>
         <Card.Content>
-          {/* Avatar */}
+          {/* Foto principal */}
           <View style={estilos.avatarContainer}>
-            <TouchableOpacity onPress={seleccionarImagen}>
+            <TouchableOpacity onPress={cambiarFotoPrincipal} disabled={subiendoFotos}>
               {avatar ? (
                 <Image source={{ uri: avatar }} style={estilos.avatar} />
               ) : (
@@ -237,10 +313,71 @@ export default function PantallaEditarPerfil(): JSX.Element {
                 />
               )}
               <View style={estilos.avatarEditBadge}>
-                <MaterialIcons name="camera-alt" size={20} color="#FFFFFF" />
+                {subiendoFotos ? (
+                  <ActivityIndicator size={16} color="#FFFFFF" />
+                ) : (
+                  <MaterialIcons name="camera-alt" size={20} color="#FFFFFF" />
+                )}
               </View>
             </TouchableOpacity>
-            <Text style={estilos.avatarLabel}>Toca para cambiar foto</Text>
+            <Text style={estilos.avatarLabel}>Foto principal · tocá para cambiarla</Text>
+          </View>
+
+          {/* Galería de fotos con la mascota */}
+          <View style={estilos.galeriaContainer}>
+            <View style={estilos.galeriaHeader}>
+              <Text style={estilos.label}>Galería con tu mascota 🐾</Text>
+              <Text style={estilos.galeriaContador}>
+                {fotos.length}/{MAX_FOTOS_PERFIL}
+              </Text>
+            </View>
+            <Text style={estilos.galeriaAyuda}>
+              Mostrá tus mejores momentos. La primera foto es la que más se ve.
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={estilos.galeriaScroll}
+            >
+              {fotos.map((foto, index) => (
+                <View key={`${foto}-${index}`} style={estilos.galeriaItem}>
+                  <Image source={{ uri: foto }} style={estilos.galeriaFoto} />
+                  {index === 0 && (
+                    <View style={estilos.galeriaPrincipalBadge}>
+                      <Text style={estilos.galeriaPrincipalTxt}>Principal</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    style={estilos.galeriaQuitar}
+                    onPress={() => quitarFoto(index)}
+                  >
+                    <MaterialIcons name="close" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                  {index > 0 && (
+                    <TouchableOpacity
+                      style={estilos.galeriaDestacar}
+                      onPress={() => marcarPrincipal(index)}
+                    >
+                      <MaterialIcons name="star" size={14} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))}
+              {fotos.length < MAX_FOTOS_PERFIL && (
+                <TouchableOpacity
+                  style={estilos.galeriaAgregar}
+                  onPress={agregarFotos}
+                  disabled={subiendoFotos}
+                >
+                  <MaterialIcons
+                    name="add-a-photo"
+                    size={24}
+                    color={temaApp.colors.primary}
+                  />
+                  <Text style={estilos.galeriaAgregarTxt}>Agregar</Text>
+                </TouchableOpacity>
+              )}
+            </ScrollView>
           </View>
 
           {/* Nombre */}
@@ -339,7 +476,7 @@ export default function PantallaEditarPerfil(): JSX.Element {
             <Button
               mode="contained"
               onPress={guardarCambios}
-              disabled={guardando || !nombre.trim()}
+              disabled={guardando || subiendoFotos || !nombre.trim()}
               loading={guardando}
               style={estilos.botonGuardar}
             >
@@ -417,6 +554,93 @@ const estilos = StyleSheet.create({
     marginTop: espaciado.sm,
     fontSize: 12,
     color: temaApp.colors.onSurfaceVariant,
+  },
+  galeriaContainer: {
+    marginBottom: espaciado.xl,
+  },
+  galeriaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  galeriaContador: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: temaApp.colors.primary,
+  },
+  galeriaAyuda: {
+    fontSize: 12,
+    color: temaApp.colors.onSurfaceVariant,
+    marginBottom: espaciado.sm,
+  },
+  galeriaScroll: {
+    gap: espaciado.sm,
+    paddingVertical: 4,
+  },
+  galeriaItem: {
+    width: 96,
+    height: 96,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: temaApp.colors.surfaceVariant || '#EDEDED',
+  },
+  galeriaFoto: {
+    width: '100%',
+    height: '100%',
+  },
+  galeriaPrincipalBadge: {
+    position: 'absolute',
+    left: 4,
+    bottom: 4,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  galeriaPrincipalTxt: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  galeriaQuitar: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  galeriaDestacar: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(23, 63, 65, 0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  galeriaAgregar: {
+    width: 96,
+    height: 96,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: temaApp.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: temaApp.colors.surface,
+  },
+  galeriaAgregarTxt: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: temaApp.colors.primary,
+    marginTop: 4,
   },
   campoContainer: {
     marginBottom: espaciado.lg,

@@ -29,6 +29,7 @@ export const obtenerMiPerfil = async (req: Request, res: Response): Promise<void
         fechaNacimiento: true,
         telefono: true,
         avatar: true,
+        fotos: true,
         biografia: true,
         ubicacionLat: true,
         ubicacionLng: true,
@@ -83,6 +84,7 @@ export const actualizarMiPerfil = async (req: Request, res: Response): Promise<v
       nombre,
       telefono,
       avatar,
+      fotos,
       biografia,
       ubicacionLat,
       ubicacionLng,
@@ -100,6 +102,17 @@ export const actualizarMiPerfil = async (req: Request, res: Response): Promise<v
     if (nombre) datosActualizacion.nombre = nombre;
     if (telefono !== undefined) datosActualizacion.telefono = telefono;
     if (avatar !== undefined) datosActualizacion.avatar = avatar;
+    if (fotos !== undefined) {
+      if (!Array.isArray(fotos) || fotos.length > 6 || !fotos.every((foto) => typeof foto === 'string')) {
+        res.status(400).json({
+          success: false,
+          message: 'Las fotos deben ser una lista de hasta 6 URLs',
+        });
+        return;
+      }
+      datosActualizacion.fotos = fotos;
+      datosActualizacion.avatar = fotos[0] || null;
+    }
     if (biografia !== undefined) datosActualizacion.biografia = biografia;
     if (ubicacionLat !== undefined) datosActualizacion.ubicacionLat = parseFloat(ubicacionLat);
     if (ubicacionLng !== undefined) datosActualizacion.ubicacionLng = parseFloat(ubicacionLng);
@@ -121,6 +134,7 @@ export const actualizarMiPerfil = async (req: Request, res: Response): Promise<v
         nombre: true,
         telefono: true,
         avatar: true,
+        fotos: true,
         biografia: true,
         ubicacionLat: true,
         ubicacionLng: true,
@@ -250,6 +264,7 @@ export const obtenerUsuario = async (req: Request, res: Response): Promise<void>
         id: true,
         nombre: true,
         avatar: true,
+        fotos: true,
         biografia: true,
         ubicacionCiudad: true,
         nivelDeporte: true,

@@ -21,6 +21,7 @@ function aplicarMigraciones() {
     'reportes-indio.sql',
     'membresia-indio.sql',
     'membresia-recordatorios.sql',
+    'usuarios-fotos.sql',
   ];
   if (!fs.existsSync(prismaCli) || !fs.existsSync(schema)) return;
 

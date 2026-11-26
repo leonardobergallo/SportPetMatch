@@ -9,8 +9,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  TouchableOpacity,
+  Image,
   TextInput as RNTextInput,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { mostrarAlerta } from '@/utilidades/alerta';
 import { Text, TextInput, ActivityIndicator } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -20,12 +23,15 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { registrarUsuario, DatosRegistro } from '@/servicios/servicioAuth';
+import { subirFotosPerfil } from '@/servicios/servicioUpload';
 import { normalizarUsuario, useAuth } from '@/contextos/ContextoAuth';
 import { temaApp, espaciado, sombras, MARCA } from '@/constantes/tema';
 import { RootStackParamList } from '@/navegacion/NavegacionPrincipal';
 import { normalizarEmail, normalizarTelefono, validarRegistro } from '@/utilidades/validaciones';
 
 type RegistroScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Registro'>;
+
+const MAX_FOTOS_PERFIL = 6;
 
 /** Tipografía web (Plus Jakarta / Outfit cargadas en web/index.html), misma familia que PantallaLogin */
 const fontSans = Platform.select({
@@ -48,6 +54,8 @@ export default function PantallaRegistro(): JSX.Element {
   const [telefono, setTelefono] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [cargando, setCargando] = useState(false);
+  const [fotos, setFotos] = useState<string[]>([]);
+  const [subiendoFotos, setSubiendoFotos] = useState(false);
 
   const validarFormulario = (): boolean => {
     const resultado = validarRegistro({
@@ -64,6 +72,40 @@ export default function PantallaRegistro(): JSX.Element {
     }
 
     return true;
+  };
+
+  const seleccionarFotos = async () => {
+    if (fotos.length >= MAX_FOTOS_PERFIL) return;
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        allowsMultipleSelection: true,
+        selectionLimit: MAX_FOTOS_PERFIL - fotos.length,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const nuevas = result.assets.map((asset) => asset.uri).filter(Boolean);
+        setFotos((actuales) => [...actuales, ...nuevas].slice(0, MAX_FOTOS_PERFIL));
+      }
+    } catch (error) {
+      console.error('Error seleccionando fotos:', error);
+      mostrarAlerta('Error', 'No se pudieron seleccionar las fotos');
+    }
+  };
+
+  const quitarFoto = (index: number) => {
+    setFotos((actuales) => actuales.filter((_, i) => i !== index));
+  };
+
+  const marcarFotoPrincipal = (index: number) => {
+    if (index === 0) return;
+    setFotos((actuales) => {
+      const copia = [...actuales];
+      const [foto] = copia.splice(index, 1);
+      return [foto, ...copia];
+    });
   };
 
   const manejarRegistro = async () => {
@@ -96,11 +138,31 @@ export default function PantallaRegistro(): JSX.Element {
 
         await iniciarSesion(usuario, respuesta.data.token);
 
-        mostrarAlerta(
-          'Bienvenido',
-          `Cuenta creada exitosamente. Bienvenido ${usuario.nombre}!`,
-          [{ text: 'Continuar' }]
-        );
+        let mensaje = `Cuenta creada exitosamente. ¡Bienvenido ${usuario.nombre}!`;
+
+        // Las fotos se suben después del registro porque el endpoint requiere
+        // sesión. Si falla la subida, la cuenta ya quedó creada.
+        if (fotos.length > 0) {
+          setSubiendoFotos(true);
+          try {
+            const subidas = await subirFotosPerfil(fotos);
+            await iniciarSesion(
+              normalizarUsuario({
+                ...usuario,
+                avatar: subidas.avatar,
+                fotos: subidas.fotos,
+              }),
+              respuesta.data.token
+            );
+          } catch (error: any) {
+            console.error('Error subiendo fotos de perfil:', error);
+            mensaje += ' No pudimos subir tus fotos; podés agregarlas desde Editar perfil.';
+          } finally {
+            setSubiendoFotos(false);
+          }
+        }
+
+        mostrarAlerta('Bienvenido', mensaje, [{ text: 'Continuar' }]);
       }
     } catch (error: any) {
       console.error('Error en registro:', error);
@@ -133,6 +195,46 @@ export default function PantallaRegistro(): JSX.Element {
             </View>
 
             <Text style={web.formTitle}>Crear cuenta</Text>
+
+            <View style={web.field}>
+              <Text style={web.label}>Fotos con tu mascota (hasta 6)</Text>
+              <Text style={web.help}>
+                Mostrá tus mejores momentos con tu perro. La primera foto va a ser tu foto principal.
+              </Text>
+              <View style={web.fotosGrid}>
+                {fotos.map((foto, index) => (
+                  <View key={`${foto}-${index}`} style={web.fotoItem}>
+                    <Image source={{ uri: foto }} style={web.foto} />
+                    {index === 0 && (
+                      <View style={web.fotoPrincipalBadge}>
+                        <Text style={web.fotoPrincipalTxt}>Principal</Text>
+                      </View>
+                    )}
+                    <Pressable style={web.fotoQuitar} onPress={() => quitarFoto(index)}>
+                      <MaterialIcons name="close" size={16} color="#ffffff" />
+                    </Pressable>
+                    {index > 0 && (
+                      <Pressable
+                        style={web.fotoDestacar}
+                        onPress={() => marcarFotoPrincipal(index)}
+                      >
+                        <MaterialIcons name="star" size={16} color="#ffffff" />
+                      </Pressable>
+                    )}
+                  </View>
+                ))}
+                {fotos.length < MAX_FOTOS_PERFIL && (
+                  <Pressable style={web.fotoAgregar} onPress={seleccionarFotos}>
+                    <MaterialIcons
+                      name="add-a-photo"
+                      size={24}
+                      color={temaApp.colors.primary}
+                    />
+                    <Text style={web.fotoAgregarTxt}>Agregar</Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
 
             <View style={web.field}>
               <Text style={web.label}>Nombre completo</Text>
@@ -222,11 +324,11 @@ export default function PantallaRegistro(): JSX.Element {
             </View>
 
             <Pressable
-              style={[web.button, cargando && web.buttonDisabled]}
+              style={[web.button, (cargando || subiendoFotos) && web.buttonDisabled]}
               onPress={manejarRegistro}
-              disabled={cargando}
+              disabled={cargando || subiendoFotos}
             >
-              {cargando ? (
+              {cargando || subiendoFotos ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={web.buttonTxt}>Crear cuenta</Text>
@@ -268,6 +370,53 @@ export default function PantallaRegistro(): JSX.Element {
         <Card style={estilos.card}>
           <CardContent>
             <Text style={estilos.tituloFormulario}>Crear Cuenta</Text>
+
+            <View style={estilos.fotosContainer}>
+              <Text style={estilos.labelFotos}>Fotos con tu mascota (hasta 6)</Text>
+              <Text style={estilos.ayudaFotos}>
+                Mostrá tus mejores momentos con tu perro. La primera foto va a ser tu foto principal.
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={estilos.fotosScroll}
+              >
+                {fotos.map((foto, index) => (
+                  <View key={`${foto}-${index}`} style={estilos.fotoItem}>
+                    <Image source={{ uri: foto }} style={estilos.foto} />
+                    {index === 0 && (
+                      <View style={estilos.fotoPrincipalBadge}>
+                        <Text style={estilos.fotoPrincipalTxt}>Principal</Text>
+                      </View>
+                    )}
+                    <TouchableOpacity
+                      style={estilos.fotoQuitar}
+                      onPress={() => quitarFoto(index)}
+                    >
+                      <MaterialIcons name="close" size={16} color="#ffffff" />
+                    </TouchableOpacity>
+                    {index > 0 && (
+                      <TouchableOpacity
+                        style={estilos.fotoDestacar}
+                        onPress={() => marcarFotoPrincipal(index)}
+                      >
+                        <MaterialIcons name="star" size={16} color="#ffffff" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ))}
+                {fotos.length < MAX_FOTOS_PERFIL && (
+                  <TouchableOpacity style={estilos.fotoAgregar} onPress={seleccionarFotos}>
+                    <MaterialIcons
+                      name="add-a-photo"
+                      size={26}
+                      color={temaApp.colors.primary}
+                    />
+                    <Text style={estilos.fotoAgregarTxt}>Agregar</Text>
+                  </TouchableOpacity>
+                )}
+              </ScrollView>
+            </View>
 
             <View style={estilos.campoContainer}>
               <MaterialIcons
@@ -370,10 +519,15 @@ export default function PantallaRegistro(): JSX.Element {
               variant="default"
               size="lg"
               onPress={manejarRegistro}
-              loading={cargando}
+              loading={cargando || subiendoFotos}
+              disabled={cargando || subiendoFotos}
               style={estilos.botonRegistro}
             >
-              {cargando ? 'Creando cuenta...' : 'Crear Cuenta'}
+              {subiendoFotos
+                ? 'Subiendo fotos...'
+                : cargando
+                  ? 'Creando cuenta...'
+                  : 'Crear Cuenta'}
             </Button>
           </CardContent>
         </Card>
@@ -445,6 +599,88 @@ const estilos = StyleSheet.create({
     fontWeight: 'bold',
     color: temaApp.colors.onSurface,
     marginBottom: espaciado.lg,
+  },
+  fotosContainer: {
+    marginBottom: espaciado.lg,
+  },
+  labelFotos: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: temaApp.colors.onSurface,
+    marginBottom: 4,
+  },
+  ayudaFotos: {
+    fontSize: 12,
+    color: temaApp.colors.onSurfaceVariant,
+    marginBottom: espaciado.sm,
+  },
+  fotosScroll: {
+    gap: espaciado.sm,
+    paddingVertical: 4,
+  },
+  fotoItem: {
+    width: 92,
+    height: 92,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: temaApp.colors.surfaceVariant || '#EDEDED',
+  },
+  foto: {
+    width: '100%',
+    height: '100%',
+  },
+  fotoPrincipalBadge: {
+    position: 'absolute',
+    left: 4,
+    bottom: 4,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  fotoPrincipalTxt: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  fotoQuitar: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fotoDestacar: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(23, 63, 65, 0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fotoAgregar: {
+    width: 92,
+    height: 92,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: temaApp.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: temaApp.colors.surface,
+  },
+  fotoAgregarTxt: {
+    fontSize: 11,
+    color: temaApp.colors.primary,
+    fontWeight: '600',
+    marginTop: 4,
   },
   campoContainer: {
     flexDirection: 'row',
@@ -532,6 +768,84 @@ const web = StyleSheet.create({
     fontWeight: '700',
     color: '#475569',
     marginBottom: 6,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  help: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 8,
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  fotosGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  fotoItem: {
+    width: 86,
+    height: 86,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#e2e8f0',
+    position: 'relative',
+  },
+  foto: {
+    width: '100%',
+    height: '100%',
+  },
+  fotoPrincipalBadge: {
+    position: 'absolute',
+    left: 4,
+    bottom: 4,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  fotoPrincipalTxt: {
+    color: '#ffffff',
+    fontSize: 9,
+    fontWeight: '700',
+    ...(fontSans ? { fontFamily: fontSans } : {}),
+  },
+  fotoQuitar: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fotoDestacar: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(23, 63, 65, 0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fotoAgregar: {
+    width: 86,
+    height: 86,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: temaApp.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  fotoAgregarTxt: {
+    fontSize: 10,
+    color: temaApp.colors.primary,
+    fontWeight: '700',
+    marginTop: 4,
     ...(fontSans ? { fontFamily: fontSans } : {}),
   },
   inputWrap: {

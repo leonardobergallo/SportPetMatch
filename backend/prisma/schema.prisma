@@ -19,7 +19,8 @@ model Usuario {
   nombre            String // Nombre completo del usuario
   fechaNacimiento   DateTime? // Fecha de nacimiento para validaciones
   telefono          String? // Teléfono de contacto
-  avatar            String? // URL de la imagen de perfil
+  avatar            String? // URL de la imagen de perfil (fotos[0])
+  fotos             String[] @default([]) // Galería de fotos del perfil
   biografia         String? // Descripción personal del usuario
   ubicacionLat      Float? // Latitud de ubicación actual
   ubicacionLng      Float? // Longitud de ubicación actual

@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  Image,
 } from 'react-native';
 import {
   Text,
@@ -23,6 +24,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 // Importar servicios y tema
 import { RootStackParamList } from '../navegacion/NavegacionPrincipal';
 import { obtenerMisMatches, Match } from '../servicios/servicioMatches';
+import { obtenerUsuario } from '../servicios/servicioUsuarios';
 import { temaApp, espaciado, sombras } from '../constantes/tema';
 import { useAuth } from '../contextos/ContextoAuth';
 import { mostrarAlerta } from '@/utilidades/alerta';
@@ -42,6 +44,7 @@ export default function PantallaDetalleMatch(): JSX.Element {
   const [match, setMatch] = useState<Match | null>(null);
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
+  const [fotosOtro, setFotosOtro] = useState<string[]>([]);
 
   useEffect(() => {
     cargarMatch();
@@ -63,6 +66,24 @@ export default function PantallaDetalleMatch(): JSX.Element {
       }
       
       setMatch(matchEncontrado);
+
+      const otro = matchEncontrado.usuarioId === usuario?.id
+        ? matchEncontrado.usuarioMatch
+        : matchEncontrado.usuario;
+
+      if (otro?.id) {
+        try {
+          const perfil = await obtenerUsuario(otro.id);
+          const fotos = perfil.fotos?.length
+            ? perfil.fotos
+            : perfil.avatar
+              ? [perfil.avatar]
+              : [];
+          setFotosOtro(fotos);
+        } catch {
+          setFotosOtro(otro.avatar ? [otro.avatar] : []);
+        }
+      }
     } catch (error: any) {
       console.error('Error cargando match:', error);
       mostrarAlerta('Error', 'No se pudo cargar la información del match');
@@ -192,7 +213,7 @@ export default function PantallaDetalleMatch(): JSX.Element {
                 <Avatar.Image
                   size={80}
                   source={{
-                    uri: otroUsuario.avatar || 'https://via.placeholder.com/80',
+                    uri: fotosOtro[0] || otroUsuario.avatar || 'https://via.placeholder.com/80',
                   }}
                 />
                 <View style={estilos.usuarioDetalles}>
@@ -214,6 +235,23 @@ export default function PantallaDetalleMatch(): JSX.Element {
                   )}
                 </View>
               </View>
+
+              {fotosOtro.length > 1 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={estilos.galeriaScroll}
+                  style={estilos.galeria}
+                >
+                  {fotosOtro.map((foto, index) => (
+                    <Image
+                      key={`${foto}-${index}`}
+                      source={{ uri: foto }}
+                      style={estilos.galeriaFoto}
+                    />
+                  ))}
+                </ScrollView>
+              )}
             </View>
           )}
 
@@ -377,6 +415,19 @@ const estilos = StyleSheet.create({
   distancia: {
     fontSize: 12,
     color: temaApp.colors.onSurfaceVariant,
+  },
+  galeria: {
+    marginTop: espaciado.md,
+  },
+  galeriaScroll: {
+    gap: espaciado.sm,
+    paddingVertical: 2,
+  },
+  galeriaFoto: {
+    width: 132,
+    height: 150,
+    borderRadius: 14,
+    backgroundColor: temaApp.colors.surfaceVariant || '#EDEDED',
   },
   mensajeContainer: {
     marginBottom: espaciado.lg,

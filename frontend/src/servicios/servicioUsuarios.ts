@@ -10,6 +10,7 @@ export interface Usuario {
   fechaNacimiento?: string | null;
   telefono?: string | null;
   avatar?: string | null;
+  fotos?: string[];
   biografia?: string | null;
   ubicacionLat?: number | null;
   ubicacionLng?: number | null;
@@ -28,6 +29,7 @@ export interface DatosActualizacionUsuario {
   nombre?: string;
   telefono?: string;
   avatar?: string;
+  fotos?: string[];
   biografia?: string;
   ubicacionLat?: number;
   ubicacionLng?: number;
