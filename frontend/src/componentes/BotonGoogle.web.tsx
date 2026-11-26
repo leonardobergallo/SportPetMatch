@@ -28,6 +28,11 @@ const clientId =
   process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
   '';
 
+// La app Android es un WebView: Google bloquea el OAuth dentro de WebViews,
+// así que el botón de Google solo se muestra en navegadores de verdad.
+const enWebView =
+  typeof window !== 'undefined' && !!(window as { ReactNativeWebView?: unknown }).ReactNativeWebView;
+
 export default function BotonGoogle({ onToken, onError, disabled, loading }: Props): JSX.Element {
   const onTokenRef = useRef(onToken);
   const onErrorRef = useRef(onError);
@@ -79,6 +84,18 @@ export default function BotonGoogle({ onToken, onError, disabled, loading }: Pro
     };
   }, []);
 
+  if (enWebView) {
+    return (
+      <View style={estilos.aviso}>
+        <Text style={estilos.avisoTitulo}>Google no está disponible dentro de la app</Text>
+        <Text style={estilos.avisoTexto}>
+          Iniciá sesión con tu email y contraseña. Si querés usar Google, abrí
+          indio.com.ar en Chrome.
+        </Text>
+      </View>
+    );
+  }
+
   if (!clientId || clientId.startsWith('tu_')) {
     return (
       <Pressable
@@ -100,15 +117,54 @@ export default function BotonGoogle({ onToken, onError, disabled, loading }: Pro
     );
   }
 
-  return <View nativeID="indio-google-button" style={estilos.contenedor} />;
+  return (
+    <View style={estilos.envoltorio}>
+      <View nativeID="indio-google-button" style={estilos.contenedor} />
+      <Text style={estilos.ayuda}>
+        Si el botón no abre, permití las ventanas emergentes para indio.com.ar.
+      </Text>
+    </View>
+  );
 }
 
 const estilos = StyleSheet.create({
+  aviso: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    padding: 14,
+    marginBottom: 10,
+  },
+  avisoTitulo: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  avisoTexto: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+  },
+  envoltorio: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   contenedor: {
     width: 320,
     minHeight: 44,
     alignSelf: 'center',
-    marginBottom: 10,
+  },
+  ayuda: {
+    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: 11,
+    lineHeight: 16,
+    textAlign: 'center',
+    marginTop: 6,
+    maxWidth: 320,
   },
   cargando: {
     height: 44,
